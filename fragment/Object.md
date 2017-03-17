@@ -21,7 +21,7 @@
    - `[[Writable]]`
     特性均被默认设置为true，而`name`属性的`value`特性被设置为指定的`mike`。
 
-修改属性的默认特性需要使用`Object.defineProperty()`方法。
+修改属性的默认特性需要使用`Object.defineProperty()`方法。  
 **IE8是第一个实现`Object.defineProperty()`方法的浏览器版本。**
 
     var person = {};
@@ -40,8 +40,8 @@
 访问器属性的四个特性：
  - `[[Configurable]]`  能否通过`delete`删除属性从而重新定义属性，能否修改属性的特性，能否把属性修改为数据属性，默认为true。
  - `[[Enumerable]]`    能否通过`for-in`循环返回属性，默认为true。
- - `[[Get]]`           在读取属性是调用的函数，默认为undefined。
- - `[[Set]]`           在写入属性是调用的函数，默认为undefined。
+ - `[[Get]]`           在读取属性时调用的函数，默认为undefined。
+ - `[[Set]]`           在写入属性时调用的函数，默认为undefined。
 
         var book = {
             _year:2017,//这里 year前加_，表示只通过对象方法访问year属性（book._year），不再走访问器属性的getter，setter
