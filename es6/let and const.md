@@ -56,8 +56,26 @@ for循环还有一个特别之处，就是循环语句部分是一个父作用�
 声明常量，一旦声明再更改就会报错。
 
     const PI = 3.1415;
-    PI = 3.14;//TypeError: Assignment to constant variable.
+    PI = 3.14;// TypeError: Assignment to constant variable.
 
 这也就意味着const声明一个常量的同时必须初始化它，因为之后无法更改。
 
+**const实际上保证的，并不是变量的值不得改动，而是变量指向的那个内存地址不得改动。** 因此，对于复合数据类型对象和数组等，内部的数据结构仍然是可变的。
+
+    const book = {};
+    book.year = 2017;//可执行
+**如果想锁住一个对象的话，应该使用`Object.freeze()`方法**。
+
+    const book = Object.freeze({});
+    book.year = 2017// 报错：Identifier 'book' has already been declared
+
 **与let一样，const声明的常量同样只在块作用域内有效**
+
+## 变量
+在ES5中，声明变量的方法有两种：`var`和`function`。
+
+在ES6中，变量有6种声明方式：`var`，`function`，`let`，`const`，`import`，`calss`。
+
+在ES5中，在全局作用域下使用`var`和`function`声明的变量都会变成顶层对象`window`的属性。
+
+而在ES6中，为了改变这一点，`var`和`function`声明变量仍然会挂在顶层对象的属性下，**但是`let`，`const`，`class`声明的全局变量不属于顶层对象的属性**。
