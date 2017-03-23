@@ -18,6 +18,6 @@
         git push -u origin master
         //注意这里的参数  -u: git就会把本地的master分支和github上的master分支关联起来，以后再push的时候就不需要这个参数了
 
-- **在github上看到别人的项目，觉得不错clone到本地来学习**
+- **在公司的电脑上把项目push到github上，回到家clone下来**
 
      1.
