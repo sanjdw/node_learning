@@ -1,5 +1,13 @@
-## Express和MongoDB
+## MongoDB
 MongoDB是一个开源的NoSQL数据库，同时也是一个对象数据库，没有了表，行等概念，所有数据以文档形式存储，数据格式就是JSON。
+
+在 mongodb 中，表与表之间是没有联系的，不像 sql 中一样，可以设定外键，可以进行表连接。mongodb 中，也无法支持事务。
+
+>MongoDB (from "humongous") is an open-source document database, and the leading NoSQL database. Written in C++
+
+在 sql 中，我们的数据层级是：数据库（db） -> 表（table） -> 记录（record）-> 字段；在 mongodb 中，数据的层级是：数据库 -> collection -> document -> 字段。
+
+`文档`两个字很容易误解。这个文档是`bson`的意思，json 的超集，比如 json 中没法储存二进制类型，而 bson 拓展了类型，提供了二进制支持。mongodb 中存储的一条条记录都可以用 bson 来表示。所以可以认为，mongodb 是个存 bson 数据的数据库，或是存哈希数据的数据库。
 
 ### Mongoose
 Mongoose是MongoDB的一个对象模型工具，封装了MongoDB对文档的一些增删改查的方法，使得操作MongoDB变得更简单。

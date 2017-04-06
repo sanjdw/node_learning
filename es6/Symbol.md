@@ -21,7 +21,7 @@ Symbol值通过`Symbol`函数生成，凡是属性名属于Symbol类型都是独
 	obj.mySymbol = "Hello!";
 	//第二种写法：
 	var obj = {
-		[mySymbol] = "Hello!"
+		[mySymbol] : "Hello!"
 		//要注意的是在对象内部用Symbol值定义属性的时候，必须将Symbol放在方括号之中。
 	}
 

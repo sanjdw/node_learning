@@ -133,7 +133,7 @@ constructor方法是类的默认方法，通过new命令生成对象实例时，
     function bar(baz) {
         return this.snaf = baz;
     }
-还有一种方法是利用Symbol值的唯一性，将私有方法的名字命名为一个Symbol值：
+还有一种方法是利用Symbol值的唯一性，将私有方法的名字命名为一个Symbol值：(感觉并没有什么卵用？)
 
     const bar = Symbol('bar');
     const snaf = Symbol('snaf');
@@ -166,3 +166,25 @@ constructor方法是类的默认方法，通过new命令生成对象实例时，
     const logger = new Logger();
     const { printName } = logger;
     printName(); // TypeError: Cannot read property 'print' of undefined
+将这个方法提取出来单独使用，this会指向该方法运行时所在的环境，因为找不到print方法而导致报错。
+
+**类和模块的内部，默认就是严格模式，所以不需要使用use strict指定运行模式。**
+
+## class的继承
+Class之间可以通过`extends`关键字实现继承，这比ES5的通过修改原型链实现继承，要清晰和方便很多。
+
+    class ColorPoint extends Point {
+        constructor(x, y, color) {
+            super(x, y); // 调用父类的constructor(x, y)
+            this.color = color;
+        }
+
+        toString() {
+            return this.color + ' ' + super.toString(); // 调用父类的toString()
+        }
+    }
+在constructor方法和toString方法中，都出现了super关键字，表示**父类的构造函数，用来新建父类的this对象**。
+
+**子类必须在constructor方法中调用super方法，否则新建实例时会报错。这是因为子类没有自己的this对象，而是继承父类的this对象，然后对其进行加工。** 如果不调用super方法，子类就得不到this对象。
+
+ES5的继承，实质是先创造子类的实例对象this，然后再将父类的方法添加到this上面（Parent.apply(this)）。**ES6的继承机制完全不同，实质是先创造父类的实例对象this（所以必须先调用super方法），然后再用子类的构造函数修改this。**
