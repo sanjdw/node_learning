@@ -1,0 +1,13 @@
+extends ../layout
+
+block content
+    .content.pure-u-1.pure-u-md-3-4
+        section.post
+            header.post-header
+                h1.post-title
+                    a(href="javascript:void(0)")  #{blog.title}
+                p.article-time 发布于：
+                    a.post-category.post-category-js(href="/")  #{blog.tag}
+                    time  #{moment(blog.meta.date_time).utcOffset(-8).format('YYYY年MM月DD日 HH时MM分')}
+            !{blog.content}
+            time.article-time 修改于：  #{moment(blog.meta.last_modified_time).utcOffset(-8).format('YYYY年MM月DD日 HH时MM分')}

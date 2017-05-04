@@ -1,0 +1,11 @@
+extends ../layout
+
+block content
+    .content.pure-u-1.pure-u-md-3-4
+        section.post
+            header.post-header
+                h2.post-title 该标签下目前共有#{num}篇文章
+            each item in blogs
+                .category-article-list
+                    a.post-category.category(href="/read/#{item.id}") #{item.title}
+                    time #{moment(item.meta.date_time).utcOffset(-8).format("YYYY/MM/DD")}

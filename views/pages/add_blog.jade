@@ -1,0 +1,23 @@
+extends ../admin_layout
+
+block content
+    .container
+        .row
+            form.form-horizontal(method='post',action='/admin/blog/new')
+                input(type='hidden',name='blog[_id]',value='#{blog._id}')
+                .form-group
+                    label.col-sm-2.control-label(for='inputTitle') 博客标题
+                    .col-sm-10
+                        input#inputTitle.form-control(type='text',name='blog[title]',value='#{blog.title}')
+                .form-group
+                    label.col-sm-2.control-label(for='inputTag') 分类标签
+                    .col-sm-10
+                        input#inputTag.form-control(type='text',name='blog[tag]',value='#{blog.tag}')
+                .form-group
+                    label.col-sm-2.control-label(for='inputContent') 文章内容
+                    .col-sm-10
+                        textarea#inputContent.form-control(type='text',name='blog[content]',rows=40,style="resize:none")
+                            !{blog.content}
+                .form-group
+                    .col-sm-10
+                    button.btn.btn-default(type='submit') 保存

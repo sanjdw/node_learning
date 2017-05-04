@@ -1,0 +1,39 @@
+html{
+    height: 100%;
+}
+body{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: cadetblue;
+    height: 90%;
+}
+div{
+    width: 30%;
+    height: 20%;
+    padding: 10px;
+}
+label{
+    display: inline-block;
+    width: 60px;
+    font-weight: 500;
+    user-select: none;
+    margin-right: 5px;
+}
+input{
+    border-radius: 5px;
+    padding: 10px;
+}
+button{
+    color: #fff;
+    background-color: transparent;
+    font-weight: 600;
+    line-height: 20px;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 6px;
+    padding: 0.75em 1.25em;
+    width: 250px;
+    outline: none;
+    margin-left: 15%;
+}
