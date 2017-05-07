@@ -51,11 +51,12 @@ Vuex使用**单一状态树**——一个对象包含全部的应用层级状态
 	const Counter = {
 		template:'<div>{{count}}</div>',
 		computed:{
-			count(){
-				return store.state.count
-			}
+            count(){
+		            return store.state.count
+		   }
 		}		
 	}
+	
 这种模式导致组件依赖的全局状态单例。
 
 Vuex通过`store`选项，提供了一种机制将状态从根组件`注入`到每一个子组件中：
@@ -65,9 +66,68 @@ Vuex通过`store`选项，提供了一种机制将状态从根组件`注入`到�
 		store,
 		components：{Counter},
 		template:`
-			<div class="app">
-				<counter></counter>
-			</div>
-		`
+                <div class="app">
+                    <counter></counter>
+                </div>
+		        `
 	})
 通过在根实例中注册`store`选项，该store实例会注入到根组件下的所有子组件中，且子组件能通过`this.$store`访问到。
+
+## Actions
+Action类似于mutation，不同的是：
+- Action提交的是mutation，而不是直接变更状态；
+- Action可以包含任意异步操作，而mutation必须是同步函数！
+
+
+    //Vue.use(Vuex)
+    const store = new Vuex.Store({
+        state:{
+            count:0
+        },
+        mutations:{
+            increment(state){
+                state.count++
+            }
+        }，
+        actions: {
+            increment (context) {
+                context.commit('increment')
+            }
+        }        
+    })
+
+##### 分发Action
+Action通过**store.dispatch()** 方法触发，
+
+    store.dispatch('increment')
+    
+不通过直接提交mutation去更改状态的原因是：mutation必须是同步执行的，而Action不受约束。因此我们可以在action内部执行异步操作：
+
+    actions:{
+        incrementAsync({commit}){
+            setTimoeout(() => {
+                commit('increment')
+            }, 1000)
+        }
+    }
+
+来看这个购物车的栗子，涉及到**调用异步API和分发多重mutations**：
+
+    actions :{
+        checkout({commit, state}, products){
+            //把当前购物车物品备份起来
+            const savedCartItems = [...state.cart.added]
+            //发出结账请求，然后清空购物车
+            commit(types.CHECKOUT_REQUEST)
+            //购物API接收一个成功回调和一个失败回调
+            shop.buyProducts(
+                products,
+                //成功操作
+                () => commit(types.CHECKOUT_SUCCESS)
+                //失败操作
+                () => commit(types.CHECKOUT_FAILURE, savedCartItems)
+            )
+        }
+    }
+
+## Module
