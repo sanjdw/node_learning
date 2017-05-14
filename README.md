@@ -16,4 +16,7 @@
 
         # apt-get install mongodb
         查看版本
-        # mongo -version
+        # mongo -version
+更新npm至最新版本
+
+        # npm install -g npm
