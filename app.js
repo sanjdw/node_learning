@@ -3,6 +3,7 @@ var port = process.env.PORT || 3000;
 var mongoose = require('mongoose');
 var _ = require('underscore');
 var Blog = require('./models/blog');
+var User = require('./models/user');
 var path = require('path');
 var bodyParser = require('body-parser');
 var markdown = require( "markdown" ).markdown;; // markdown模块
@@ -18,7 +19,7 @@ app.set('view engine','jade');      //模板引擎  jade?ejs?前端路由?
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 app.locals.moment = require('moment');
-
+ 
 
 app.listen(port);
 
@@ -36,6 +37,10 @@ app.get('/',function(req,res){
     });
 });
 
+app.post('/user/signup',function(req, res){
+    var _user = req.body.user;
+    console.log(_user);
+});
 app.get('/read/:id',function(req,res){
     var id = req.params.id;
 

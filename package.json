@@ -4,6 +4,10 @@
   "description": "node将之前的服务端（python）重写",
   "main": "app.js",
   "dependencies": {
+    "async": "~0.2.10",
+    "bcrypt": "~0.7.8",
+    "connect-mongo": "~0.3.3",
+    "crypto": "~0.0.3",
     "body-parser": "^1.17.1",
     "bower": "^1.8.0",
     "express": "^4.15.2",
