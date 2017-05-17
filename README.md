@@ -12,12 +12,13 @@
         # apt-get update  
         # apt-get install nodejs
 
-安装mongodb
+安装mongodb、查看版本
 
         # apt-get install mongodb
-        查看版本
-        # mongo -version
+        # mongo -version
+安装git
 
-更新npm至最新版本
-
-        # npm install -g npm
+        # apt-get install git
+npm更新至最新版本
+    
+        #npm install -g npm
