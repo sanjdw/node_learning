@@ -21,4 +21,4 @@
         # apt-get install git
 npm更新至最新版本
     
-        #npm install -g npm
+        # npm install -g npm
