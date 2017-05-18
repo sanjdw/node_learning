@@ -24,3 +24,12 @@
 npm更新至最新版本
     
         # npm install -g npm
+
+npm install由于环境变量没有配置提示node版本不够的问题
+
+    修改/etc/profile文件，在末尾添加:
+
+          >export NODE_HOME=/usr/local/n/versions/node/7.10.0/bin  //本地新版本Node所在路径
+          >export PATH=$NODE_HOME/bin:$PATH
+    
+    source /etc/profile生效
