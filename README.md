@@ -4,13 +4,15 @@
 #### 系统环境
 >ubuntu14.0
 #### 开发环境的搭建
-安装nodejs
+安装nodejs、升级至最新版本
 
         # apt-get update  
         # apt-get install -y python-software-properties software-properties-common  
         # add-apt-repository ppa:chris-lea/node.js  
         # apt-get update  
         # apt-get install nodejs
+        # npm install -g n
+        # n stable
 
 安装mongodb、查看版本
 
