@@ -11,8 +11,8 @@
         # add-apt-repository ppa:chris-lea/node.js  
         # apt-get update  
         # apt-get install nodejs
-        # npm install -g n
-        # n stable
+        # npm install -g n
+        # n stable
 
 安装mongodb、查看版本
 
