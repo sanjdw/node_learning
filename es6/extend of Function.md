@@ -45,7 +45,7 @@
     }
 
     var numbers = [4,5];
-    add(...nums);//9
+    add(...numbers);//9
 
     将字符串转为数组：
     [..."hello"]
@@ -61,7 +61,7 @@
     var f = function(v){
         return v;
     }
-当参数有没有或者有多个，用一个圆括号表示：
+当不需要参数或者参数有多个时，用一个圆括号圈起来表示：
 
     var f = () => 5;
         等价于
@@ -81,7 +81,7 @@
 
 2. 不可以当作构造函数，也就是说，不可以使用new命令，否则会抛错。
 
-3. 不可以使用arguments对象，该对象在函数体内不存在。要用的话可以用Rest参数代替。
+3. 不可以使用arguments对象，arguments对象在函数体内不存在。要用的话可以用Rest参数代替。
 
 4. 不可以使用yield命令，因此箭头函数不能用作Generator函数。
 
@@ -97,6 +97,7 @@
 
     foo.call({ name: "inner" });
     //name:inner
+
 第二个：
 
     function Timer() {
@@ -114,6 +115,7 @@
     setTimeout(() => console.log('s2: ', timer.s2), 3100);
     //s1:3
     //s2:0
+
 this指向的固定化，并不是因为箭头函数内部有绑定this的机制，实际原因是箭头函数根本没有自己的this，导致内部的this就是外层代码块的this。
 箭头函数转成ES5的代码如下：
 
@@ -132,6 +134,7 @@ this指向的固定化，并不是因为箭头函数内部有绑定this的机制
             console.log('id:', _this.id);
         }, 100);
     }
+
  在下面代码之中，只有一个this，即函数foo的this，所以t1、t2、t3都输出同样的结果。因为所有的内层函数都是箭头函数，都没有自己的this，它们的this其实都是最外层foo函数的this。
 
     function foo() {
@@ -163,6 +166,7 @@ this指向的固定化，并不是因为箭头函数内部有绑定this的机制
     }
 
     insert("love").into(["i", "u"]).after("i"); //["i","love", "u"]
+
 用箭头函数改写：
 
     let insert = (value) => ({into: (array) => ({after: (afterValue) => {
@@ -182,6 +186,7 @@ this指向的固定化，并不是因为箭头函数内部有绑定this的机制
     foo::bar(...arguments)
     //等价于
     bar.apply(foo,arguments)
+
 如果双冒号左边为空，右边为一个对象方法，则等于将该方法绑定到该对象上去。
 
     var method = ::obj.foo;
@@ -191,12 +196,14 @@ this指向的固定化，并不是因为箭头函数内部有绑定this的机制
     let log = ::console.log;
     //等价于
     let log = console.log::console.log
+
 #### 尾掉优化
 尾调用是一个函数式编程的概念，是指某个函数的最后一步是调用另一个函数。
 
     function f(){
         return g();
     }
+
 由于函数调用在内存中会有入栈的操作，而尾调用是函数的最后一步，所以不需要保留外层函数的调用帧，看一下下面的代码：
 
     function f(){
@@ -214,6 +221,7 @@ this指向的固定化，并不是因为箭头函数内部有绑定this的机制
 
     //等价于
     g(3);
+
  这个就叫`尾调用优化`，即只保留内层函数的调用帧，这样做的意义在于节省内存。
 
  #### 尾递归
@@ -226,6 +234,7 @@ this指向的固定化，并不是因为箭头函数内部有绑定this的机制
         return n * factorial(n - 1);
     }
     factorial(5);//120
+
 复杂度为O(n)。
 
 改写成尾递归，复杂度为O(1)：
