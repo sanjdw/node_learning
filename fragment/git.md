@@ -54,3 +54,12 @@ git merge dev
 - 修改提交过的 commit 的 author 信息
 author邮箱不正确无法push到远程仓库
 git commit --amend --author="username&lt;mailname@✘✘✘.com&gt;"
+
+- 将本地的修改保存起来,并且将当前代码切换到HEAD提交上
+什么意思？比如开发了一半要同步远程代码。如果直接 git pull 的话如果有冲突会提示你本地的修改没有 commit，需要你 commit 之后再拉代码。但是你的功能还未做完，可以 git stash 将修改先隐藏起来：
+git pull origin [branchname]
+// 提示失败，巴拉巴拉
+git stash
+git pull origin [branchname]
+git stash pop // 将隐藏的之前的修改pop出来
+继续开发，需要merge。如果没有冲突不需要merge的话那么最初 git pull 也不会失败
