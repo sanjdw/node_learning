@@ -8,9 +8,9 @@ svg在网页中有三种引入方式：
 - 保存在独立文件中，通过\<img>，\<embed>，\<iframe>等标签的src属性引入
 - 通过CSS的background属性引入
 
-## 语法
+## 语法
 
-1. 所有svg代码通过\<svg>\</svg>标签包裹起来
+1. 所有svg代码通过\<svg>\</svg>标签包裹起来
 
 ```
     <svg width="100" height="100" viewBox="50 50 50 50">
@@ -51,7 +51,7 @@ SVG的CSS属性与网页元素有所不同：
 
 \<line>标签的x1和y1，表示线段起点的横、纵坐标；x2和y2，表示线段终点的横、纵坐标。
 
-4. 折线\<polyline>
+4. 折线\<polyline>
 
 ```
 <polyline points="3,3 30,28 3,53" fill="none" stroke="black" />
@@ -82,7 +82,7 @@ SVG的CSS属性与网页元素有所不同：
 </svg>
 ```
 
-\<polygon>的points属性指定了每个端点的坐标，横坐标与纵坐标之间与逗号分隔，点与点之间用空格分隔，与polyline相似。
+\<polygon>的points属性指定了每个端点的坐标，横坐标与纵坐标之间与逗号分隔，点与点之间用空格分隔，与polyline相似。
 
 8. 路径\<path>
 
