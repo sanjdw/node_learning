@@ -108,7 +108,7 @@ SVG的CSS属性与网页元素有所不同：
 9. 文本\<text>
 
 ```
-<<text x="50" y="25">Hello World</text>
+<text x="50" y="25">Hello World</text>
 ```
 
 \<text>的x属性和y属性，表示文本区块基线（baseline）起点的横坐标和纵坐标。
