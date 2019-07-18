@@ -25,16 +25,16 @@ console.log(arr)
 ##### 闭包会导致内存泄漏：
 
 ```
-var theThing = null
-var replaceThing = function () {
-  var originalThing = theThing
-  var unused = function () {
+let theThing = null
+const replaceThing = function () {
+  const originalThing = theThing
+  const unused = function () {
     if (originalThing) console.log("hi")
   }
   theThing = {
     longStr: new Array(1000000).join('*'),
     someMethod: function () {
-      console.log(someMessage)
+      console.log('someMessage')
     }
   }
 }
