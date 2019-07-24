@@ -25,18 +25,37 @@ class MyPromise {
 
   _resolve (val) {
     if (this._status !== PENDING) return
-    this._status = FULFILLED
-    this._value = val
+
+    const run = () => {
+      this._status = FULFILLED
+      this._value = val
+      let cb = undefined
+      while (cb = this._fulFilledQueues.shift()) {
+        cb(val)
+      }
+
+      setTimeout(() => run(), 0)
+    }
   }
-  _reject (val) {
+  _reject (err) {
     if (this._status !== PENDING) return
-    this._status = REJECTED
-    this._value = val
+
+    const run = () => {
+      this._status = REJECTED
+      this._value = err
+      let cb = undefined
+      while (cb = this._rejectedQueues.shift()) {
+        cb(err)
+      }
+    }
+
+    setTimeout(() => run(), 0)
   }
 
   then (onFulfilled, onRejected) {
     const { _status, _value } = this
 
+    // then 返回的是一个Promise，因为需要实现链式调用
     return new MyPromise((onFulfilledNext, onRejectedNext) => {
       const fulfilled = value => {
         try {
