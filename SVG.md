@@ -12,8 +12,8 @@ svg在网页中有三种引入方式：
 
 1. 所有svg代码通过\<svg>\</svg>标签包裹起来
 
-```
-    <svg width="100" height="100" viewBox="50 50 50 50">
+```html
+<svg width="100" height="100" viewBox="50 50 50 50">
 ```
 
 其中width属性和height属性，指定了SVG图像在HTML元素中所占据的宽度和高度。如果不指定这两个属性，SVG图像默认大小是300像素 x 150像素。
@@ -24,18 +24,19 @@ viewBox属性的值有四个数字，分别是视口左上角的横坐标和纵�
 
 2. 圆\<circle>
 
-```
-    <circle cx="100" cy="100" r="10" class="red">
+```html
+<circle cx="100" cy="100" r="10" class="red">
 ```
 
 \<circle>标签的cx、cy、r属性分别为横坐标、纵坐标和半径，单位为像素。坐标都是相对于\<svg>画布的左上角原点。
 
- 	.red {
-	  fill: red;
-	  stroke: #e8e8e8;
-	  stroke-width: 1pt;
-	}
-
+```css
+.red {
+  fill: red;
+  stroke: #e8e8e8;
+  stroke-width: 1pt;
+}
+```
 SVG的CSS属性与网页元素有所不同：
     
  \ | 填充色 | 描边色 | 边框宽度 
@@ -45,7 +46,7 @@ SVG的CSS属性与网页元素有所不同：
  
 3. 直线\<line>
 
-```
+```html
 <line x1="0" y1="0" x2="200" y2="0" style="stroke:rgb(0,0,0);" />
 ```
 
@@ -53,7 +54,7 @@ SVG的CSS属性与网页元素有所不同：
 
 4. 折线\<polyline>
 
-```
+```html
 <polyline points="3,3 30,28 3,53" fill="none" stroke="black" />
 ```
 
@@ -61,7 +62,7 @@ SVG的CSS属性与网页元素有所不同：
 
 5. 矩形\<rect>
 
-```
+```html
 <rect x="0" y="0" height="100" width="200" style="stroke: #70d5dd; fill: #dd524b" />
 ```
 
@@ -69,7 +70,7 @@ SVG的CSS属性与网页元素有所不同：
 
 6. 椭圆\<ellipse>
 
-```
+```html
 <ellipse cx="260" cy="300" ry="100" rx="20" stroke="black" stroke-width="2" fill="silver"/>
 ```
 
@@ -77,7 +78,7 @@ SVG的CSS属性与网页元素有所不同：
 
 7. 多边形\<polygon>
 
-```
+```html
 <polygon fill="green" stroke="orange" stroke-width="1" points="0,0 100,0 100,100 0,100 0,0"/>
 </svg>
 ```
@@ -86,7 +87,7 @@ SVG的CSS属性与网页元素有所不同：
 
 8. 路径\<path>
 
-```
+```html
 <path d="
 	M 18,3 
 	L 46,3 
@@ -107,7 +108,7 @@ SVG的CSS属性与网页元素有所不同：
 
 9. 文本\<text>
 
-```
+```html
 <text x="50" y="25">Hello World</text>
 ```
 
@@ -115,11 +116,11 @@ SVG的CSS属性与网页元素有所不同：
 
 10. 组\<g>
 
-```
-  <g id="myCircle">
-    <text x="25" y="20">圆形</text>
-    <circle cx="50" cy="50" r="20"/>
-  </g>
+```html
+<g id="myCircle">
+  <text x="25" y="20">圆形</text>
+  <circle cx="50" cy="50" r="20"/>
+</g>
 ```
 
 \<g>标签用于将多个形状组成一个组（group），方便复用。
@@ -127,7 +128,7 @@ SVG的CSS属性与网页元素有所不同：
 
 11. \<use>标签
 
-```
+```html
   <circle id="myCircle" cx="5" cy="5" r="4"/>
 
   <use href="#myCircle" x="10" y="0" fill="blue" />
@@ -141,7 +142,7 @@ SVG的CSS属性与网页元素有所不同：
 
 13. 图片\<image>
 
-```
+```html
  <image xlink:href="path/to/image.jpg" width="50%" height="50%"/>
 ```
 
@@ -149,10 +150,10 @@ SVG的CSS属性与网页元素有所不同：
 
 14. 动画\<animate>
 
-```
-  <rect x="0" y="0" width="100" height="100" fill="#feac5e">
-    <animate attributeName="x" from="0" to="500" dur="2s" repeatCount="indefinite" />
-  </rect>
+```html
+<rect x="0" y="0" width="100" height="100" fill="#feac5e">
+  <animate attributeName="x" from="0" to="500" dur="2s" repeatCount="indefinite" />
+</rect>
 ```
 
 上面代码中，矩形会不断移动，产生动画效果。
@@ -170,17 +171,17 @@ SVG的CSS属性与网页元素有所不同：
 
 使用\<object>，\<iframe>，\<embed>标签插入SVG文件时，可以通过以下方式获取SVG DOM：
 
-```
-	var svgObj = document.getElementId('object').contentDocument;
-	var svgIframe = document.getElementById('iframe').contentDocument;
-	var svgEmbed = document.getElementById('embed).getSVGDocument();
+```javascript
+var svgObj = document.getElementId('object').contentDocument;
+var svgIframe = document.getElementById('iframe').contentDocument;
+var svgEmbed = document.getElementById('embed).getSVGDocument();
 ```
 
 2. 读取SVG源码
 
 SVG本身就是一段XML文件，可以通过**XMLSerializer**实例的serializeToString()方法，获取SVG元素的代码：
 
-```
+```javascript
 var svgString = new XMLSerializer().serializeToString(document.querySelector('svg'))
 ```
 
@@ -188,16 +189,16 @@ var svgString = new XMLSerializer().serializeToString(document.querySelector('sv
 
 通过新建一个Image对象，将SVG图像指定到该Image对象的src属性，当图像加载完成后再将它绘制到\<canvas>元素中。
 
-```
-	var svgString = new XMLSerializer().serializeToString(document.querySelector('svg'))
-	var img = new Image();
-	var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
-	var DOMURL = self.URL || self.webkitURL || self;
-	var url = DOMURL.createObjectURL(svg);
-	img.onload = function () {
-		var canvas = document.getElementById('canvas');
-		var ctx = canvas.getContext('2d');
-		ctx.drawImage(img, 0, 0);
-	};
-	img.src = url
+```javascript
+var svgString = new XMLSerializer().serializeToString(document.querySelector('svg'))
+var img = new Image();
+var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+var DOMURL = self.URL || self.webkitURL || self;
+var url = DOMURL.createObjectURL(svg);
+img.onload = function () {
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+};
+img.src = url
 ```
