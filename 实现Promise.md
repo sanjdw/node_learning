@@ -1,3 +1,9 @@
+- 链式调用
+- 异常捕获
+- Promise.all 和 Promise.race
+- Promise 标准
+
+```js
 const PENDING = 'PENDING'
 const FULFILLED = 'FULFILLED'
 const REJECTED = 'REJECTED'
@@ -108,3 +114,4 @@ class MyPromise {
     })
   }
 }
+```
