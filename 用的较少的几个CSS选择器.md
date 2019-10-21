@@ -2,7 +2,7 @@
 
 1. 邻近元素选择器
 
-```
+```css
 ul + p {
     color: red;
 }
@@ -12,19 +12,19 @@ ul + p {
 
 2. 直接后代选择器
 
-```
+```css
 #container > ul {
   border: 1px solid black;
 }
 ```
 与
-```
+```css
 #container ul {
   border: 1px solid black;
 }
 ```
 区别是前者只会选中直接后代，如
-```
+```css
 <div id="container">
   <ul>
     <li> List Item
@@ -41,7 +41,7 @@ ul + p {
 `#container > ul`只会定义id为`container`的div里的第一代子元素ul，而不会定义第一个li里的第二代子元素ul。
 
 3. 兄弟选择器
-```
+```css
 ul ~ p {
   color: red;
 }
@@ -50,22 +50,22 @@ ul ~ p {
 
 4. 通过正则匹配前后缀等。
 - 
-  ``` 
+  ```css
   a[href*="nettuts"]
   ```
 - 
-  ```
+  ```css
   a[href^="http"]
   ```
 - 
-  ```
+  ```css
   a[href$="http"]
   ```
 
 
 
 5. 否定伪类
-```
+```css
 div:not(#container) {
   color: blue;
 }

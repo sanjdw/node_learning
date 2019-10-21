@@ -11,20 +11,20 @@
 
 ##### 全局变量，闭包都会引起内存泄漏。
 
-```javascript
+```js
 const arr = [1,2,3,4]
 console.log(arr)
 ```
 
 变量arr是对数组[1,2,3,4]的引用，因此[1,2,3,4]的引用次数是1，尽管后面不再用到arr，它还是会占用内存。只需要增加一行代码，解除对[1,2,3,4]的引用即可使这块内存被释放。
-```javascript
+```js
 const arr = [1,2,3,4]
 console.log(arr)
 arr = null
 ```
 ##### 闭包会导致内存泄漏：
 
-```javascript
+```js
 let theThing = null
 const replaceThing = function () {
   const originalThing = theThing
