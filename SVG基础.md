@@ -1,4 +1,3 @@
-# SVG
 ## 概念
 可缩放矢量图（Scalable Vector Graphics）,本质上是文本文件，体积较小，不管放大多少倍都不会失真。
 
