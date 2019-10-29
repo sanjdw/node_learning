@@ -171,14 +171,20 @@ SVG的CSS属性与网页元素有所不同：
 - repeatCount：动画的循环模式
 
 ## JavaScript操作
-#### 1. 获取SVG DOM
-使用`<object>`，`<iframe>`，`<embed>`标签插入SVG文件时，可以通过以下方式获取SVG DOM：
+#### 1. DOM操作
+如果SVG代码是写在HTML文档中的，那么它成为了DOM的一部分，像正常操作DOM一样：
+
+
+#### 2. 获取SVG DOM
+如果SVG是使用`<object>`，`<iframe>`，`<embed>`标签形式引入的，则可以通过以下方式获取SVG DOM：
 
 ```js
-const svgObj = document.getElementId('object').contentDocument;
-const svgIframe = document.getElementById('iframe').contentDocument;
-const svgEmbed = document.getElementById('embed).getSVGDocument();
+const svgObj = document.getElementId('object').contentDocument
+const svgIframe = document.getElementById('iframe').contentDocument
+const svgEmbed = document.getElementById('embed').getSVGDocument()
 ```
+
+> **Note**: 如果获取通过`<img>`标签引入的SVG DOM。
 
 #### 2. 读取SVG源码
 SVG本身就是一段XML文件，可以通过**XMLSerializer**实例的`serializeToString()`方法，获取SVG元素的代码：
@@ -192,14 +198,14 @@ const svgString = new XMLSerializer().serializeToString(document.querySelector('
 
 ```js
 const svgString = new XMLSerializer().serializeToString(document.querySelector('svg'))
-const img = new Image();
-const svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
-const DOMURL = self.URL || self.webkitURL || self;
-const url = DOMURL.createObjectURL(svg);
+const img = new Image()
+const svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"})
+const DomURL = window.URL || window.webkitURL
+const url = DomURL.createObjectURL(svg)
 img.onload = function () {
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0);
-};
+  const canvas = document.getElementById('canvas')
+  const ctx = canvas.getContext('2d')
+  ctx.drawImage(img, 0, 0)
+}
 img.src = url
 ```
