@@ -173,7 +173,21 @@ SVG的CSS属性与网页元素有所不同：
 ## JavaScript操作
 #### 1. DOM操作
 如果SVG代码是写在HTML文档中的，那么它成为了DOM的一部分，像正常操作DOM一样：
-
+```html
+<svg
+  id="svg"
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 800 600"
+>
+  <circle id="circle" cx="400" cy="300" r="50" />
+<svg>
+```
+```js
+const circle = document.getElementById('circle')
+circe.addEventListener('click', function () {
+  circle.setAttribute('r', 6)
+})
+```
 
 #### 2. 获取SVG DOM
 如果SVG是使用`<object>`，`<iframe>`，`<embed>`标签形式引入的，则可以通过以下方式获取SVG DOM：
@@ -184,7 +198,7 @@ const svgIframe = document.getElementById('iframe').contentDocument
 const svgEmbed = document.getElementById('embed').getSVGDocument()
 ```
 
-> **Note**: 如果获取通过`<img>`标签引入的SVG DOM。
+> **Note**: 无法获取通过`<img>`标签引入的SVG DOM。
 
 #### 2. 读取SVG源码
 SVG本身就是一段XML文件，可以通过**XMLSerializer**实例的`serializeToString()`方法，获取SVG元素的代码：
