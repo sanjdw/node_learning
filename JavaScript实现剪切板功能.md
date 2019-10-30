@@ -45,25 +45,28 @@ document.execCommand('copy')
 * @param { String }: 指定向剪切板中放置的内容
 */
 function copy(content = '') {
-  const btn = document.getElementById('btn')
   btn.addEventListener('click', function () {
+    const btn = document.getElementById('btn')
     const input = document.createElement('input')
     document.body.appendChild(input)
     input.setAttribute('value', content)
-    if (ios) {
-      input.focus()
-      input.setSelectionRange(0, content.length)
-    } else {
-      input.select()
-    }
+    // 兼容ios的写法
+    input.focus()
+    input.setSelectionRange(0, content.length)
+    // input.select()
     if (document.execCommand('copy')) {
       document.execCommand('copy')
     }
+    document.body.removeChild(input)
   })
 }
 
 copy('http://p0.meituan.net/moviesh/6d6b2a44e3d59d0472e82624c5c256aa10334.png')
 ```
+
+这样算是大略完成了剪切板功能，通过它大致可以推测知乎是如何实现拷贝文本内容后向剪切板中追加`...著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。`效果的。
+
+浏览了文档，发现除了`copy`，`document.execCommand()`的`aCommandName`参数还支持：`FontSize`、`FontName`等，这些可以帮助实现富文本编辑器的一些功能。
 
 #### 参考：
 - [富文本原理了解一下？](https://juejin.im/post/5cfe4e8a6fb9a07ec63b09a4)
