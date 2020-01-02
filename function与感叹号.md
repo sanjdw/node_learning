@@ -20,7 +20,7 @@ function foo () { console.log('haha') }
 ```js
 function foo (){ console.log('haha') }() // Uncaught SyntaxError: Unexpected token )
 ```
-然而会得到语法错误的提示，这是因为当解析器遇到 `function` 这样的关键字时，默认会把它视为函数声明处理。而在 `function` 之前加上一个感叹号，将它变成了一个函数表达式。感叹号（其实是取反符号）`!` 同时使表达式返回 `true`, 因为 立即执行函数表达式 `IIFE` 的返回值是 `undefined`，而 `!undefined = true`
+然而会得到语法错误的提示，这是因为当解析器遇到 `function` 这样的关键字时，默认会把它视为函数声明处理。**而在 `function` 之前加上一个感叹号，将它变成了一个函数表达式**。感叹号（其实是取反符号）`!` 同时使表达式返回 `true`, 因为 立即执行函数表达式 `IIFE` 的返回值是 `undefined`，而 `!undefined = true`
 
 另外，单单一个感叹号 `!` 并不能使函数得以执行，在最后加上一个括号 `()` 才会调用函数。
 
