@@ -48,7 +48,10 @@ ul ~ p {
 ```
 兄弟选择器和邻近选择器(`ul + p`)很像，但没有那么严格。`ul + p`只会选择紧接在ul元素后的第一个兄弟元素p，但兄弟选择器更广泛，在上面的例子中，只要在ul后的p兄弟元素都会被选中。
 
-4. 通过正则匹配前后缀等。
+4. first-child 、first-of-type 、 nth-child(n) 与 nth-of-type(n)
+
+
+5. 通过正则匹配前后缀等。
 - 
   ```css
   a[href*="nettuts"]
@@ -64,12 +67,10 @@ ul ~ p {
 
 
 
-5. 否定伪类
+6. 否定伪类
 ```css
 div:not(#container) {
   color: blue;
 }
 ```
 否定伪类非常有用。比如，希望选中所有的div元素，除了一个id为`container`的div。
-
-6. 伪元素
