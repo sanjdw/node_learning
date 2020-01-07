@@ -68,6 +68,14 @@ copy('http://p0.meituan.net/moviesh/6d6b2a44e3d59d0472e82624c5c256aa10334.png')
 
 浏览了文档，发现除了`copy`，`document.execCommand()`的`aCommandName`参数还支持：`FontSize`、`FontName`等，这些可以帮助实现富文本编辑器的一些功能。
 
+### 补充
+
+此外，chrome 66新增了 `Async Clipboard` API，
+```js
+navigator.clipboard.writeText('需要复制的文本')
+```
+如果是只需要针对Chrome的复制功能可以考虑使用它，具体[点击阅读这里](https://zhuanlan.zhihu.com/p/34698155)
+
 #### 参考：
 - [富文本原理了解一下？](https://juejin.im/post/5cfe4e8a6fb9a07ec63b09a4)
 - [JavaScript赋值内容到剪切板](https://github.com/axuebin/articles/issues/26)
