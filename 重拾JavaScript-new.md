@@ -28,7 +28,7 @@ F.apply(f)
 
 需要注意的是**构造函数的返回**:
 ```js
-// 1. 有返回值，且返回为对象
+// 1. 有返回值，且返回值为引用类型
 function G (age) {
   this.age = age
   return new F('foo')
@@ -41,7 +41,7 @@ F:
   __proto__: Object
 */
 
-// 2. 有返回值，且返回为基本数据类型值
+// 2. 有返回值，且返回值为基本数据类型值
 function G (age) {
   this.age = age
   return 'age'
@@ -68,9 +68,18 @@ G
 ```
 
 总结：
-> 构造函数有返回**且返回为对象**会导致通过该构造函数创建的实例原型被改写为返回对象的原型，所以构造函数尽量不需要手写返回。
+> 构造函数有返回值**且返回值为引用类型**会导致通过该构造函数创建的实例原型被改写为返回对象的原型，所以构造函数尽量不需要手写返回。
 
 #### 模拟new
-目标：
+目标：实现一个函数，接收不定量的参数，第一个参数为构造函数，剩余参数为构造函数所接收，
 
-1. 
+```js
+function create () {
+  const _constructor = Array.prototype.shift.apply(arguments)
+  const obj = {}
+  obj.__proto__ = _constructor.prototype
+  // 对返回值处理
+  const _return = _constructor.apply(obj, arguments)
+  return _return instanceof Object ? return : obj
+}
+```
