@@ -80,6 +80,6 @@ function create () {
   obj.__proto__ = _constructor.prototype
   // 对返回值处理
   const _return = _constructor.apply(obj, arguments)
-  return _return instanceof Object ? return : obj
+  return _return instanceof Object ? _return : obj
 }
 ```
