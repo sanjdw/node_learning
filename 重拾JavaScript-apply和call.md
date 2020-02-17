@@ -38,17 +38,36 @@ Function.prototype.Apply = function (context, args) {
 Function.prototype.Apply = function (context, args) {
   // 处理context为null的情况
   context = context || window
-  context.fn = this
+  // Symbol处理方法名，避免与context原有的fn属性冲突
+  const fn = Symbol('fn标记')
+  context[fn] = this
   let _return
   if (!args) {
-    _return = context.fn()
+    _return = context[fn]()
   } else {
-    for (let i = 1; i < args.length; i ++) {
-      _args.push('args[' + i + ']')
-    }
-    _return = eval('context.fn(' + args +')');
+    // 需要对args是否为类数组类型进行处理，
+    // if (isNotArray(args)) {
+    //   throw new Error('参数错误')
+    // } else
+    _return = context[fn](...args)
   }
-  delete context.fn
+  delete context[fn]
+  return _return
+}
+```
+#### call
+`call`的模拟实现与`appply`相似，只是方法的参数需要另外收集：
+```js
+Function.prototype.Call = function (context) {
+  context = context || window
+  const fn = Symbol('fn标记')
+  context[fn] = this
+  const args = []
+  for (let i = 1; i < arguments.length; i++) {
+    args.push(arguments[i])
+  }
+  let _return = context[fn](...args)
+  delete context[fn]
   return _return
 }
 ```
