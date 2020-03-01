@@ -1,6 +1,15 @@
-### 概念
-
+#### 概念
 深拷贝和浅拷贝是针对复杂数据类型来说的，浅拷贝只拷贝一层，而深拷贝是层层拷贝。
+
+#### 数据类型
+
+#### 深浅拷贝
+
+#### 赋值与浅拷贝
+
+#### 浅拷贝的实现
+
+#### 深拷贝的实现
 
 这里有一个例子：
 
@@ -17,9 +26,9 @@ const obj3 = {...obj}
 obj.name = 'Gates'
 obj.hobbies.push('coding')
 ```
-由于`obj2`、`obj3`在这里是**浅拷贝**，`obj2.name`、`obj3.name` 不变，但是`obj2.hobbies`、`obj3.hobbies`会受到影响。
+由于`obj2`、`obj3`在这里是浅拷贝，当对拷贝源`obj`的**非引用类型属性值**`name`进行修改操作时，`obj2.name`、`obj3.name` 不变，但是对**引用类型值**`hobbies`进行修改操作时，`obj2.hobbies`、`obj3.hobbies`也随之改变。
 
-最简单的深拷贝实现：```JSON.parse(JSON.stringify(obj))```，这种方法有下面几个缺点：
+最简单的**深拷贝**实现：```JSON.parse(JSON.stringify(obj))```，这种方法有下面几个缺点：
 
 - 不能正确处理正则类型
 - 不能正确处理`Date`类型

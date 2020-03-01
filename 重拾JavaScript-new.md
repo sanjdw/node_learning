@@ -78,7 +78,7 @@ function create () {
   const _constructor = Array.prototype.shift.apply(arguments)
   const obj = {}
   obj.__proto__ = _constructor.prototype
-  // 对返回值处理
+  // 对返回值处理，构造函数如果有返回值且为对象则使用该对象，否则obj作为返回
   const _return = _constructor.apply(obj, arguments)
   return _return instanceof Object ? _return : obj
 }
