@@ -66,7 +66,7 @@ copy('http://p0.meituan.net/moviesh/6d6b2a44e3d59d0472e82624c5c256aa10334.png')
 
 这样算是大略完成了剪切板功能，通过它大致可以推测知乎是如何实现拷贝文本内容后向剪切板中追加`...著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。`效果的。
 
-浏览了文档，发现除了`copy`，`document.execCommand()`的`aCommandName`参数还支持：`FontSize`、`FontName`等，这些可以帮助实现富文本编辑器的一些功能。
+浏览了MDN文档，发现除了`copy`，`document.execCommand()`的`aCommandName`参数也可以是`FontSize`、`FontName`等，这些可以帮助实现富文本编辑器的一些功能。
 
 ### 补充
 
