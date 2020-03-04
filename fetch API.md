@@ -1,4 +1,4 @@
-传统的 `AJAX (Asynchronous JavaScript and XML)` 是通过`XMLHttpRequest/ActiveXObject` 来实现的，这种方式存在了很久，而 `XHR` 的API设计非常粗糙，且不符合职责分离的原则，为了修正上述提到的缺陷，`fetch` 出现了。
+传统的 `AJAX (Asynchronous JavaScript and XML)` 是通过`XMLHttpRequest/ActiveXObject` 来实现的，这种方式存在了很久，而 `XHR` 的API设计非常粗糙，且不符合职责分离的原则，为了修正上述提到的缺陷，`fetch` 也就出现了。
 
 ```js
 // XHR 的写法
@@ -37,11 +37,11 @@ fetch(url)
   })
 ```
 
-显然，从上面的代码中可以看到 `fetch` 具有语法简洁、
-基于标准 `Promise` 实现、支持 `async/await` 等优点。同时，作为原生的底层API，`fetch` 也存在以下缺陷：
+显然，从上面的代码中可以看出 `fetch` 具有语法简洁、
+基于标准 `Promise` 实现、支持 `async/await` 等优点。但是，作为原生的底层API，`fetch` 同时也存在以下缺陷：
 
 #### 1. 兼容问题
-浏览器支持率不是很好，需要借助 `polyfill` 兼容各浏览器。
+浏览器端的支持率不是很友好，在某些低版本的Firefox、Chrome中，以及IE、Edge、Safari中均没不被支持，因此需要借助 `polyfill` 兼容各浏览器。
 
 #### 2. 错误处理
 `fetch` 请求会返回一个 `Promise` 对象，只有在遇到网络故障的时候（比如用户网络断开连接或请求的域名无法解析等情况）才会 `reject` 这个 `Promise`，只要服务器能够返回HTTP响应（即使HTTP响应的状态码是代表错误的404、500等），`Promise` 对象一定是 `resolved` 的状态。
@@ -83,8 +83,8 @@ xhr.abort()
 #### 5. 不支持检测请求进度
 对于 `XHR` 来说，可以通过 `xhr.onprogress` 的回调来检测请求的进度，而 `fetch` 无原生支持。
 
-## 拓展
-### request
+### 拓展
+#### request
 除了给 `fetch` 传递一个资源地址，还可以通过 `Request` 构造函数来创建一个 `request` 对象作为参数传给 `fetch`：
 
 ```js
@@ -110,7 +110,7 @@ fetch(myRequest)
   })
 ```
 
-### response
+#### response
 `fetch` 请求返回一个 `response` 对象，它有以下几个常见属性：
 - status: 整数，默认为200，表示response的状态码
 - statusText: 字符串，默认值为`OK`,该值与HTTP状态码消息对应
@@ -125,7 +125,9 @@ fetch(myRequest)
 - blob: 读取 `response` 对象并将 `bodyUsed` 置为`true`，并返回一个被解析为 `Blob` 格式的 `Promise` 对象。
 - formData: 读取 `response` 对象并将 `bodyUsed` 置为`true`，并返回一个被解析为 `FormData` 格式的 `Promise` 对象。
 
-
-参考:
-
-[MDN：使用fetch](https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API/Using_Fetch)
+### 总结
+作为一个底层API，fetch确实存在很多缺陷。一般在项目开发中，我们很少直接使用fetch来做HTTP请求。
+___
+#### 参考:
+1. [MDN：使用fetch](https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API/Using_Fetch)
+2. [https://segmentfault.com/a/1190000003810652](https://segmentfault.com/a/1190000003810652)
