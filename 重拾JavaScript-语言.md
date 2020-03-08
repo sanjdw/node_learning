@@ -51,7 +51,7 @@ C语言一般被认为是编译型语言，由源代码经过编译器编译生�
 
 Python和Java既有编译的实现，也有解释的实现。Python/Java源码，首先被编译成平台无关字节码，然后通过平台上的虚拟机解释执行。
 
-JavaScript一般被认为是解释型语言，它是完全的**一边解释一边执行**，又叫**即时编译**。它既不会有中间代码产生，也不会有目标代码产生，这个过程由宿主环境（比如浏览器或Node.js的JavaScript虚拟机v8）处理。
+JavaScript一般被认为是解释型语言，它是完全的**一边解释一边执行**，又叫**即时编译**。它既不会有中间代码产生，也不会有目标代码产生，这个过程由宿主环境（比如浏览器或Node.js的JavaScript虚拟机V8）处理。
 
 ## 关于单线程
 #### 1. JavaScript是单线程的
@@ -77,12 +77,12 @@ console.log(1)
 - Bindings + Addons：可以看做是连接JavaScript代码和C/C++代码的桥梁
   - Binding的作用是把用C/C++编写的Node.js使用的核心模块接口暴露给JavaScript环境
   - Addons：暴露其他第三方或自开发C/C++模块给JavaScript环境
-- v8、libuv及其他C/C++组件及库：
-  - v8：JavaScript引擎，以C++实现，为JavaScript提供了非浏览器端运行环境
+- V8、libuv及其他C/C++组件及库：
+  - V8：JavaScript引擎，以C++实现，为JavaScript提供了非浏览器端运行环境
   - libuv：为Node.js提供了跨平台、线程池、事件池、异步I/O等能力
   - 其他C/C++组件和库：c-ares、crypto、http-parser、zlib等，这些为Node.js提供了对系统底层功能如网络、加密、压缩等的访问能力。
 
-Node.js启动后将会创建v8实例，v8实例本身是多线程的：
+Node.js启动后将会创建V8实例，V8实例本身是多线程的：
 - 主线程：编译执行JavaScript代码
 - 编译线程：在主线程执行时，优化代码
 - proifiler线程：记录分析代码运行时间，为Crankshaft优化代码提供依据
@@ -93,6 +93,17 @@ Node.js启动后将会创建v8实例，v8实例本身是多线程的：
 在单核CPU系统上，我们采用**单进程 + 单线程**的模式来开发，而在多核CPU系统上，为了提高对CPU的利用率，可以通过`child_process.fork`开启多个进程，即**多进程 + 单线程**模式。
 
 #### 4. 浏览器不是单线程的，它甚至可能是多进程的
+单进程架构是指浏览器所有功能模块都运行在同一个进程中，这些模块包括网络、插件、JavaScript运行环境、渲染引擎和页面等。
+
+![单进程浏览器架构](https://pic.downk.cc/item/5e63a50898271cb2b8f08f7e.png)
+
+早期的IE浏览器就是单进程架构，从IE8开始其进程架构变成多进程，Firefox经过从Firefox 48到56共9个版本的迭代，逐步的完善了其多进程架构，而Chrome一开始就是基于多进程架构。
+
+下图为Chrome的进程架构：
+
+![多进程浏览器架构](https://pic.downk.cc/item/5e63b26a98271cb2b8f79903.png)
+
+有关浏览器的工作原理，会写在另外一篇笔记里。
 
 ___
 #### 参考
@@ -101,3 +112,4 @@ ___
 3. [虚拟机随谈：解释器，树遍历解释器，基于栈与基于寄存器](https://www.iteye.com/blog/rednaxelafx-492667)
 4. [JavaScript是如何执行的](https://segmentfault.com/a/1190000020438413)
 5. [理解Node.js中的“多线程”](https://zhuanlan.zhihu.com/p/74879045)
+6. [浏览器进程架构的演化](https://zhuanlan.zhihu.com/p/96957235)
