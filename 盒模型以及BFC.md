@@ -11,7 +11,7 @@
 盒模型分为 **IE盒模型** 和 **W3C标准盒模型**，通过CSS属性 `box-sizing: content-box | border-box`可以设置盒模型为标准模型`(content-box)`和IE模型`(border-box)`，默认值为盒模型`(content-box)`。
 
 #### 2.两种盒模型的区别
-在标准盒模型中，元素的宽度(高度)与元素content的宽度(高度)相同
+在标准盒模型中，元素的宽度(高度)与元素content的宽度(高度)一致
 
 而在IE盒模型中，元素的宽度(高度)为元素content的宽度(高度)+内边距+边框
 
