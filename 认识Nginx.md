@@ -86,11 +86,15 @@ location / {
 
 
 #### 5. Gzip压缩
-Gzip是文件压缩程序的简称。Nginx可以利用gzip压缩，来减小响应给客户端的静态资源的HTTP请求的体积。
+Gzip是文件压缩程序的简称。Nginx可以利用gzip压缩，来减小响应给客户端的静态资源的HTTP请求的体积，提高传输速率。
 
 ```nginx
 # 开启gzip压缩
 gzip on;
+gzip types text/css text/xml application/javascript;      # 指定开启压缩的资源类型
+gzip_min_length 1k;   # 对大于1K文件资源开启压缩
+gzip_buffers 4 16k;   # 设置压缩缓冲区大小，此处设置为4个16K内存作为压缩结果流缓存
+gzip_comp_level 6;    # 设置gzip压缩等级，最小为1，处理速度快，传输速度慢；9为最大压缩比，处理速度慢，传输速度快; 级别越高，压缩就越小，节省了带宽资源，但同时也消耗CPU资源，一般折中为6
 ```
 
 浏览器在发送请求时会在请求头部中带上
@@ -104,10 +108,21 @@ Content-Encoding: gzip
 ```
 告诉浏览器对获得的资源做解压缩处理。
 
+两类文件资源不建议启用Gzip压缩：
+
+1. **图片类型资源 (还有视频文件)**
+
+    图片如jpg、png文件本身就会有压缩，所以gzip压缩前和压缩后体积不会有太大区别，所以开启Gzip反而会浪费资源。
+
+2. **大文件资源**
+  
+    会消耗大量cpu资源，且不一定有明显的效果。
+
 #### 6. 合并请求
 
 借助淘宝开发的第三方模块[nginx-http-concat](https://github.com/alibaba/nginx-http-concat)。
 
+___
 #### 参考
 1. [Nginx与前端开发](https://juejin.im/post/5bacbd395188255c8d0fd4b2)
 2. [Nginx常见正则匹配符号表示](https://www.cnblogs.com/netsa/p/6383094.html)
