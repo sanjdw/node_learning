@@ -3,12 +3,14 @@
 2. float
 3. 绝对定位 -->
 
-### 盒模型
+### 盒模型（Box Model）
+**所有HTML元素可以看作盒子**，在CSS中，**Box Model**这一术语是用来设计和布局时使用的。CSS盒模型本质上是一个盒子，封装周围的HTML元素，它包括：边距，边框，填充，和实际内容。
+
 #### 1. 什么是盒模型
-盒模型又叫框模型(Box Model)，它包含了内容元素(content)、内边距(padding)、边框(border)、外边距(margin)几个要素：
+盒模型又叫框模型，它包含了内容元素(content)、内边距(padding)、边框(border)、外边距(margin)几个要素：
 ![盒模型](https://www.runoob.com/images/box-model.gif)
 
-盒模型分为 **IE盒模型** 和 **W3C标准盒模型**，通过CSS属性 `box-sizing: content-box | border-box`可以设置盒模型为标准模型`(content-box)`和IE模型`(border-box)`，默认值为盒模型`(content-box)`。
+盒模型分为 **IE盒模型** 和 **W3C标准盒模型**两种，通过CSS属性 `box-sizing: content-box | border-box`可以设置盒模型为标准模型`(content-box)`和IE模型`(border-box)`，默认值为盒模型`(content-box)`。
 
 #### 2.两种盒模型的区别
 在标准盒模型中，元素的宽度(高度)与元素content的宽度(高度)一致
@@ -80,3 +82,4 @@ ___
 2. [10分钟理解BFC原理](https://zhuanlan.zhihu.com/p/25321647)
 3. [什么是BFC](https://github.com/YvetteLau/Step-By-Step/issues/15)
 4. [全面分析总结BFC原理及实践](https://segmentfault.com/a/1190000021924606)
+5. [](https://segmentfault.com/a/1190000021924606)
