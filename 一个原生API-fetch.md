@@ -73,7 +73,7 @@ fetch(url, {
 })
 ```
 
-#### 4. 取消请求
+#### 4. 不支持取消请求
 `fetch` 不支持 `abort`，比如：
 ```js
 xhr.abort()
@@ -126,7 +126,7 @@ fetch(myRequest)
 - formData: 读取 `response` 对象并将 `bodyUsed` 置为`true`，并返回一个被解析为 `FormData` 格式的 `Promise` 对象。
 
 ### 总结
-作为一个底层API，fetch确实存在很多缺陷。一般在项目开发中，我们很少直接使用fetch来做HTTP请求。
+作为一个底层API，fetch确实存在很多缺陷。一般在项目开发中，我们很少直接使用fetch来做HTTP请求,而是使用`axios`、`Superagent`等第三方网络请求库，记录以上这些是因为在自己开发某个需求手动加载图片以获得文件流时使用过这个API，在网上找到的资料也都是几年之前的了，并未看到fetch有被广泛使用的讨论，也许对于简单的项目来说它也够用。
 
 ___
 #### 参考:
