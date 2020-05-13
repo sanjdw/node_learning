@@ -131,7 +131,7 @@ console.log(copy)
 
 #### 实现一个完善的深拷贝
 ```js
-function deepCopy (source) {
+function deepCopy (source, map = new Map()) {
   const type = Object.prototype.toString.apply(source).toLowerCase().slice(8, -1)
   if (source === 'null') {
     // typeof null === 'object'需要单独处理
@@ -144,21 +144,23 @@ function deepCopy (source) {
     return new Date(source)
   }
   
-  // 如何解决Map、Set等类型变量的拷贝？
-  // 原型链
+ 
+  // 利用source.constructor保存原型
   const copy = new source.constructor()
+  if (map.get(source)) return map.get(source)
+  // 用map => source维护对copy的备份
+  map.set(source, copy)
   for (let key in source) {
     if (source.hasOwnProperty(key)) {
       // 递归处理属性
-      copy[key] = arguments.callee(source[key])
+      copy[key] = deepCopy(source[key], map)
     }
   }
   return copy
 }
 ```
 
-问题：未解决函数拷贝、Map、Set类型数据拷贝
-循环引用？
+如何解决Map、Set等类型变量的拷贝？
 
 ___
 #### 参考
