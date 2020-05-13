@@ -1,3 +1,8 @@
+<!--
+ * @Description: 
+ * @author: guyu
+ * @Date: 2020-03-02 16:58:37
+ -->
 之前写过一个这样的功能：通过点击图片旁的`“复制”`按钮，将图片链接比如 
 ```
 http://p0.meituan.net/moviesh/6d6b2a44e3d59d0472e82624c5c256aa10334.png
@@ -74,7 +79,7 @@ copy('http://p0.meituan.net/moviesh/6d6b2a44e3d59d0472e82624c5c256aa10334.png')
 ```js
 navigator.clipboard.writeText('需要复制的文本')
 ```
-如果是只需要针对Chrome的复制功能可以考虑使用它，具体[点击阅读这里](https://zhuanlan.zhihu.com/p/34698155)
+如果是只需要针对Chrome的复制功能可以考虑使用它，具体[阅读这里](https://zhuanlan.zhihu.com/p/34698155)
 
 ___
 #### 参考：
@@ -82,3 +87,4 @@ ___
 - [JavaScript赋值内容到剪切板](https://github.com/axuebin/articles/issues/26)
 - [javascript execCommand,复文本框神器](https://blog.csdn.net/gertyy/article/details/65936318)
 - [How do I copy to the clipboard in JavaScript?](https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript)
+- [前端er怎样操作剪切复制以及禁止复制+破解等](https://juejin.im/post/5b66993ee51d451924734c35)

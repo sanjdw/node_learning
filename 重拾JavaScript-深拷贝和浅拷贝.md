@@ -67,6 +67,9 @@ var obj2 = obj
 
 > 浅拷贝是指在对引用类型的原始数据进行拷贝时，原始类型属性拷贝其值，引用类型属性只拷贝其内存地址，所以对于拷贝得到的数据和原始数据其中任一个改变了引用类型属性时，另一个也会受影响。
 
+换言之，浅拷贝只拷贝指向某个对象的指针，而不拷贝对象本身，新旧对象还是共享同一块内存。但深拷贝会另外创造一个一模一样的对象，新对象与原对象不共享内存，操作新对象不会影响原对象。
+
+
 ```js
 const bill = {
   name: 'Bill',
@@ -116,40 +119,50 @@ console.log(copy)
 
 - 不能正确处理正则类型
 - 不能正确处理`Date`类型
-- 不嫩改正确处理`Set`、`Map`类型
+- 不能正确处理`Set`、`Map`类型
 - 会忽略函数
 - 会忽略值为`undefined`的key
 - 会忽略`Symbol`类型
-- 原型链上的属性无法拷贝
+- 原型链丢失
 
-且需要拷贝的对象存在循环引用的话，`JSON.stringify`会出错：
+且当拷贝对象存在循环引用的时，`JSON.stringify`会出错：
 
 ![JSON error](https://pic.downk.cc/item/5e5e765e98271cb2b86b5b01.jpg)
 
 #### 实现一个完善的深拷贝
 ```js
-function deepCopy (obj) {
-  const type = Object.prototype.toString.apply(obj).toLowerCase().slice(8, -1)
-  if (typeof obj !== 'object') {
-    return obj
+function deepCopy (source) {
+  const type = Object.prototype.toString.apply(source).toLowerCase().slice(8, -1)
+  if (source === 'null') {
+    // typeof null === 'object'需要单独处理
+    return null
+  } else if (typeof source !== 'object') {
+    return source
   } else if (type === 'regexp') {
-    return new RegExp(obj)
+    return new RegExp(source)
   } else if (type === 'date') {
-    return new Date(obj)
+    return new Date(source)
   }
   
-  // 原型属性的拷贝
-  const copy = new obj.constructor()
-  for (let key in obj) {
-    if (obj.hasOwbProperty(key)) {
-      copy[key] = arguments.calle(obj[key])
+  // 如何解决Map、Set等类型变量的拷贝？
+  // 原型链
+  const copy = new source.constructor()
+  for (let key in source) {
+    if (source.hasOwnProperty(key)) {
+      // 递归处理属性
+      copy[key] = arguments.callee(source[key])
     }
   }
   return copy
 }
 ```
 
+问题：未解决函数拷贝、Map、Set类型数据拷贝
+循环引用？
+
 ___
 #### 参考
 1. [你真的掌握变量和类型了吗？](https://juejin.im/post/5cec1bcff265da1b8f1aa08f#heading-6)
 2. [深拷贝与浅拷贝的实现](http://www.alloyteam.com/2017/08/12978/)
+3. [引用、浅拷贝及深拷贝到Map、Set](https://juejin.im/post/5d843abe6fb9a06af510050c)
+4. [深拷贝-循环引用的处理](https://juejin.im/post/5dd0caea6fb9a01fe736b186)
