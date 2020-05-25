@@ -8,7 +8,6 @@ Nginx作为一个轻量级的HTTP服务器，能够很好地应对高并发的HT
 
 如上图所示，在客户端与服务端通信的架构中，Nginx作为HTTP服务器，可以将服务器文件系统的静态文件（HTML、图片等）通过HTTP协议响应给客户端；而对于动态资源请求，Nginx将请求交给**应用服务器**处理。
 
-
 #### 反向代理服务器
 互联网应用大多基于CS架构，即client端和server
 端，代理就是在client端和server端之间的服务器，称为代理服务器。
@@ -26,7 +25,6 @@ Nginx作为一个轻量级的HTTP服务器，能够很好地应对高并发的HT
 客户端发往服务端的请求，首先进入代理服务器，代理服务器将请求代理到真正处理请求的服务器上，Nginx就是扮演这个反向服务器的角色的。
 
 反向代理有两个好处：
-
 - 安全：使用反向代理后，客户端无法通过请求直接访问真正提供服务的服务器，请求首先经过Nginx，而Nginx可以将危险或没有权限的请求过滤掉。
 
 - 负载均衡：通过各种调度算法机制将来自客户端的请求分发给真实的服务器，以减轻对单个服务器的负载压力。
@@ -34,7 +32,7 @@ Nginx作为一个轻量级的HTTP服务器，能够很好地应对高并发的HT
 ### 前端眼里的Nginx
 #### 1. 解决跨域
 
-
+___
 #### 2. 图片处理
 前端项目的开发中，经常会有对图片尺寸、品质处理的需要，依赖[ngx_http_image_filter_module](http://nginx.org/en/docs/http/ngx_http_image_filter_module.html)模块，Nginx可以搭建图片处理服务，下面是一个Nginx配置图片尺寸裁剪的demo：
 
@@ -59,6 +57,7 @@ server {
 
 ![338w_500h](https://pic.downk.cc/item/5e6cf613e83c3a1e3a5ba2d2.jpg)
 
+___
 #### 3. 静态资源缓存
 ```nginx
 {
@@ -68,6 +67,7 @@ server {
 
 ```
 
+___
 #### 4. 适配PC端与移动端
 为更好提升移动端的用户体验，在PC端站点之外，互联网公司一般都会单独开发一个给移动端用户访问的站点。当用户用移动终端访问PC站点，自动跳转到m站点。
 
@@ -84,7 +84,7 @@ location / {
 ```
 在移动设备上访问[猫眼电影的PC端站点(https://maoyan.com/)](https://maoyan.com/)会跳转到[http://maoyan.com/](http://maoyan.com/)。
 
-
+___
 #### 5. Gzip压缩
 Gzip是文件压缩程序的简称。Nginx可以利用gzip压缩，来减小响应给客户端的静态资源的HTTP请求的体积，提高传输速率。
 
@@ -118,13 +118,12 @@ Content-Encoding: gzip
   
     会消耗大量cpu资源，且不一定有明显的效果。
 
+___
 #### 6. 合并请求
-
 借助淘宝开发的第三方模块[nginx-http-concat](https://github.com/alibaba/nginx-http-concat)。
 
 ___
 #### 参考
 1. [Nginx与前端开发](https://juejin.im/post/5bacbd395188255c8d0fd4b2)
 2. [Nginx常见正则匹配符号表示](https://www.cnblogs.com/netsa/p/6383094.html)
-3. [入门系列之在Nginx配置Gzip
-](https://juejin.im/post/5b518d1a6fb9a04fe548e8fc)
+3. [入门系列之在Nginx配置Gzip](https://juejin.im/post/5b518d1a6fb9a04fe548e8fc)
