@@ -87,7 +87,7 @@ HEAD引用指向指定`commit`，并且暂存区、工作区全部重置
   这个功能一般配合`git reflog`命令使用。
 
 ___
-#### <font color="red">移植commit：commitcherry-pick</font>
+#### <font color="red">移植commit：cherry-pick</font>
 1. 找到需要移植的commit对应的哈希值（如：4946569a3067c4c7f7b483034cbb64b42ced0156）
 2. 切到需要此次commit的branch(如 git checkout dev)
 3. 在dev分支:
