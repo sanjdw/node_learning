@@ -1,5 +1,16 @@
 关于CSS3的过渡和动画，很早之前需求开发中使用过，文章也零零散散地看过，上午开发中需要实现一个过渡的效果，想了半天又忘了实现的具体写法，再查了一遍文档才回想起来。现在想来最初在用的时候也只是应付需求，所以针对CSS3的`transition`和`animation`整理了这篇笔记。
 
+在CSS3之前，动画都是靠JavaScript实现的，比如：
+```js
+setTimeout(funcntion() {
+  document.getElementById("box").style.opacity += 0.1;
+}, 300)
+```
+
+JavaScript动画有以下缺点：
+- 由于JavaScript线程运行在渲染进程中，而渲染进程中还有GUI线程、JavaScript线程、事件触发线程、异步请求线程等，对执行JavaScript动画的线程的影响可能导致JavaScript线程阻塞，从而造成丢帧的情况
+- 代码复杂度较高，维护性较差
+
 ## transition
 `transition`提供了一种在改变CSS属性时控制动画速度的方法——通常情况下，CSS的属性值变化所产生的影响是**立刻生效**的，比如改变了某个元素的背景色、增大了某个块级元素的width，是可以马上看到相应的变化的。
 
@@ -49,4 +60,4 @@
 
 ___
 #### 参考
-1. []()
+1. [CSS3动画简介](https://www.ruanyifeng.com/blog/2014/02/css_transition_and_animation.html)
