@@ -46,7 +46,7 @@ JavaScript动画有以下缺点：
 ```
 
 正如上面所说的，`transitions`可以让开发者决定CSS属性值变化的过程，包括变化过程对应的CSS属性名、什么时间开始变化、变化持续的时间以及变化的类型：
-- transition-property: 过渡效果的CSS属性名，不写则表示所有
+- transition-property: 过渡效果的CSS属性名，不写或`all`则表示所有CSS属性
 - transition-duration: 过渡效果持续的时间
 - transition-timing-function: 过渡效果的速度曲线，可选值
   - linear：匀速
@@ -96,24 +96,131 @@ JavaScript动画有以下缺点：
   ```
 
 #### 局限
+`transition`用法简单，但是使用场景有限：
 - 需要事件触发
 - `transition`是一次性的，不能重复发生，除非一再触发
 - `transition`只能定义开始状态和结束状态，不能定义中间状态
 - 并不是所有CSS属性都支持`transition`
+  1. 支持`transition`的CSS属性列表见[这里](https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_animated_properties)
+  2. 支持`transition`的CSS属性的属性值必须设置为绝对值：比如，不能让height从`0px`过渡到`auto`，因为浏览器不能计算中间过渡值。
 
-## animation
-`animation`由三部分组成：`keyframes`、`properties`、`CSS`。
+___
+## animation动画
+`animation`弥补了`transition`使用场景有限的缺点。
 
+#### 基本使用
+首页需要为动画指定一个周期的持续时间、动画名称：
+
+```css
+div {
+  animation: 2s rainbow;
+}
+```
+
+这段代码表示`div`元素会产生持续时间为2s、名为`rainbow`的动画效果。为此，我们还需要用`keyframes`关键字来定义这个`rainbow`的具体效果：
+
+```css
+@keyframes rainbow {
+  0% { width: 200px; }
+  50% { width: 300px; }
+  100% { width: 500px; }
+}
+```
+
+也可以指定动画播放次数
+
+```css
+img:hover {
+  animation: 2s rainbow infinite; // 无限循环
+  animation: 2s rainbow 3; // 3次
+}
+```
+
+动画结束以后，会立刻从结束状态还原到起始状态。如果想让动画保持在结束状态，需要使用`animation-fill-mode`属性：
+
+```css
+img:hover {
+  animation: 2s rainbow 3 forwards; // 停留在结束状态
+}
+```
+
+`animation-fill-mode`还有以下可选：
+- `none`：默认值，回到动画**没开始时**的状态
+- `backwords`，回到动画第一帧的状态
+- `both`：根据`animation-direction`（下文会提到）轮流应用`forwards`和`backwards`规则
+
+动画循环播放时，每个周期结束都是从结束状态跳回到起始状态开始下一个周期的动画。`animation-direction`属性，可以改变这种行为，默认值为`normal`：
+
+```css
+div:hover {
+  animation: 2s rainbow 3 normal|alternate|reverse|alternate-reverse;
+}
+
+@keyframes rainbow {
+  0% { background-color: yellow; }
+  100% { background: blue; }
+}
+```
+
+`animation-direction`属性指定了动画的播放方向：
+
+|值|描述|
+|----|----|
+|reverse|反向播放|
+|alternate|动画在奇数次（1、3、5...）正向播放，在偶数次（2、4、6...）反向播放|
+|alternate-reverse|动画在奇数次（1、3、5...）反向播放，在偶数次（2、4、6...）正向播放|
+
+对应的上面这段代码设置的四个值，效果如下：
+
+![animation-direction](https://pic.downk.cc/item/5ed4c4ccc2a9a83be5e78112.png)
+
+与`transition`一样，`animation`既可以简写也可以分成各个单独的属性：
+
+```css
+div {
+  animation: 1s 1s rainbow linear 3 forwards normal;
+}
+div {
+  animation-name: rainbow;
+  animation-duration: 1s;
+  animation-timing-function: linear;
+  animation-delay: 1s;
+  animation-fill-mode:forwards;
+  animation-direction: normal;
+  animation-iteration-count: 3;
+}
+```
+
+`keyframes`定义动画的的写法则比较自由：
+
+```css
+@keyframes rainbow {
+  0% { background: #c00 }
+  50% { background: orange }
+  100% { background: yellowgreen }
+}
+/* 0%可以用from代表，100%可以用to代表 */
+@keyframes rainbow {
+  from { background: #c00 }
+  50% { background: orange }
+  to { background: yellowgreen }
+}
+```
+
+上面实现的`animation`从一个状态向另一个状态的过渡，是平滑过渡。`steps`函数可以实现分步过渡。
+
+___
+## 硬件加速
+
+___
 ## 总结
-在极端情况下，`animation`比`transition`更占资源，导致前端压力过大时`animation`的关键帧动画无法很好的展现出来，而`transition`占用的资源更少，当然效果也没有`animation`好，所以能用`transition`完成的动画尽量用`transition`，追求更好更复杂的效果的话使用`animation`。
-
-缺点：
-- CSS运行过程控制较弱,无法附加事件绑定回调函数
-- 代码冗长。想用 CSS 实现稍微复杂一点动画,最后CSS代码都会变得非常笨重
+CSS3动画的缺点：
+- CSS运行过程控制较弱,无法附加事件回调
+- 代码冗长。想用CSS实现稍微复杂一点动画，最后CSS代码都会变得非常笨重
 
 优点：
--
--
+- 1
+- 2
 
 如果动画只是需要简单状态切换的交互动效，不需要中间过程控制，那么css动画是优选方案。然而如果需要设计复杂需要大量控制的动画，那么应该使用JavaScript动画。
  
@@ -122,4 +229,4 @@ ___
 1. [CSS3动画简介](https://www.ruanyifeng.com/blog/2014/02/css_transition_and_animation.html)
 2. [css与 js动画 优缺点比较](https://www.cnblogs.com/wangpenghui522/p/5394778.html)
 3. [两张图解释CSS动画的性能](https://github.com/ccforward/cc/issues/42)
-4. [你不知道的 transition 与 animation](https://github.com/rccoder/blog/issues/11)
+4. [CSS animation和transition的性能探究](http://zencode.in/18.CSS-animation%E5%92%8Ctransition%E7%9A%84%E6%80%A7%E8%83%BD%E6%8E%A2%E7%A9%B6.html)
