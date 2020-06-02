@@ -18,6 +18,7 @@ i'm 12 years old
 i'm a boy
 */
 ```
+
 可以看出，`apply`用于改变绑定函数的运行时环境，且与`bind`不同的是，`apply`直接调用函数而不是返回新函数。
 
 #### 模拟apply
@@ -33,7 +34,9 @@ Function.prototype.Apply = function (context, args) {
   return _return
 }
 ```
+
 上面的`apply`模拟实现对于参数的处理是有问题的，由于`apply`将提供给函数调用的参数以数组形式传入，需要将参数依次提取出来：
+
 ```js
 Function.prototype.Apply = function (context, args) {
   // 处理context为null的情况
@@ -55,8 +58,9 @@ Function.prototype.Apply = function (context, args) {
   return _return
 }
 ```
+
 #### call
-`call`的模拟实现与`appply`相似，只是方法的参数需要另外收集：
+`call`的模拟实现与`appply`相似，不同的只是方法的参数需要另外收集：
 ```js
 Function.prototype.Call = function (context) {
   context = context || window
