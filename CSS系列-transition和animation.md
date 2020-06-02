@@ -136,6 +136,7 @@ img:hover {
 }
 ```
 
+#### animation-fill-mode
 动画结束以后，会立刻从结束状态还原到起始状态。如果想让动画保持在结束状态，需要使用`animation-fill-mode`属性：
 
 ```css
@@ -149,6 +150,7 @@ img:hover {
 - `backwords`，回到动画第一帧的状态
 - `both`：根据`animation-direction`（下文会提到）轮流应用`forwards`和`backwards`规则
 
+#### animation-direction
 动画循环播放时，每个周期结束都是从结束状态跳回到起始状态开始下一个周期的动画。`animation-direction`属性，可以改变这种行为，默认值为`normal`：
 
 ```css
@@ -170,10 +172,11 @@ div:hover {
 |alternate|动画在奇数次（1、3、5...）正向播放，在偶数次（2、4、6...）反向播放|
 |alternate-reverse|动画在奇数次（1、3、5...）反向播放，在偶数次（2、4、6...）正向播放|
 
-对应的上面这段代码设置的四个值，效果如下：
+对应的上面这段代码`animation-direction`设置的四个值，效果如下：
 
 ![animation-direction](https://pic.downk.cc/item/5ed4c4ccc2a9a83be5e78112.png)
 
+#### animation各项属性
 与`transition`一样，`animation`既可以简写也可以分成各个单独的属性：
 
 ```css
@@ -191,6 +194,7 @@ div {
 }
 ```
 
+#### keyframes写法
 `keyframes`定义动画的的写法则比较自由：
 
 ```css
@@ -207,7 +211,27 @@ div {
 }
 ```
 
-上面实现的`animation`从一个状态向另一个状态的过渡，是平滑过渡。`steps`函数可以实现分步过渡。
+#### steps功能
+上面实现的从一个状态向另一个状态的过渡动画，是平滑过渡。`steps`函数可以实现分步过渡。
+
+#### animation-play-state
+此外，我们还可以通过`animation-play-state`属性控制动画运行还是暂停：
+
+```css
+div {
+  animation: animation: 1s rainbow linear infinite;
+  animation-play-state: paused;
+}
+div:hover {
+  animation-play-state: running;
+}
+@keyframes rainbow {
+  0% { background: #c00 }
+  100% { background: yellowgreen }
+}
+```
+
+上面这段，为div元素定义了动画效果，当鼠标悬停在div元素上时动画会运行，鼠标移走动画会暂停，鼠标悬停动画会继续播放。
 
 ___
 ## 硬件加速
@@ -215,12 +239,13 @@ ___
 ___
 ## 总结
 CSS3动画的缺点：
-- CSS运行过程控制较弱,无法附加事件回调
-- 代码冗长。想用CSS实现稍微复杂一点动画，最后CSS代码都会变得非常笨重
+- CSS运行过程控制较弱，无法附加事件回调
+- 对于一些复杂的动画，如果用CSS3实现，则会导致CSS代码荣昌
 
 优点：
-- 1
-- 2
+- 占用的内存更小，运行更加流畅
+- 可以强制使用硬件加速（通过GPU来提高动画性能）
+- 对于帧速表现不好的低版本浏览器，CSS3动画可以做到自然降级，而JavaScript则需要撰写额外代码
 
 如果动画只是需要简单状态切换的交互动效，不需要中间过程控制，那么css动画是优选方案。然而如果需要设计复杂需要大量控制的动画，那么应该使用JavaScript动画。
  
