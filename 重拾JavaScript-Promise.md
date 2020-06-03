@@ -47,10 +47,6 @@ class MyPromise {
     // 初始状态为 PENDING
     this.state = PENDING
     
-    this.value = undefined
-
-    this.reason = undefined
-
     try {
       handle(this.resolve, this.reject)
     } catch (err) {
@@ -74,7 +70,28 @@ class MyPromise {
 }
 ```
 
-下面我们需要实现`then`方法，这是`Promise`一个非常实用的特性：
+#### then方法
+我们知道，`Promise`对象有一个`then`方法，用来注册在这个`Promise`对象状态发生了改变后的回调。不论是成功还是失败，`then`方法注册的回调都要执行。再来看一眼我们是怎么使用`then`的：
+
+```js
+const promise = new Promise(function(resolve, reject) {
+  // ... some code
+
+  if (/* 异步操作成功 */){
+    resolve(successValue);
+  } else {
+    reject(failValue);
+  }
+});
+
+promise.then(function (data) {
+  // ...Promise状态变为FUlFILLED 执行的回调
+}, function (err) {
+  // ...Promise状态变为REJECTED 执行的回调
+})
+```
+
+下面我们需要实现`then`方法：
 
 ```js
 // Promise对象的三种状态
@@ -84,11 +101,18 @@ const REJECTED = 'REJECTED'
 
 class MyPromise {
   constructor (handle) {
+    // handle必须为一个方法
+    if (!isFunction(handle)) {
+      throw new Error('MyPromise handle is not a function')
+    }
+
     // 初始状态为 PENDING
     this.state = PENDING
     
-    // value和reason存放Promise对象状态改变后的结果、错误原因
+    // 储存 状态变为FULFILLED后对外传递的值
     this.value = undefined
+
+    // 储存 状态变为REJCTED后对外传递的值
     this.reason = undefined
 
     // 存放Promise对象状态变为 FULFILLED 后执行的回调函数
@@ -109,7 +133,6 @@ class MyPromise {
       // 将 Promise对象 状态 置为 FULFILLED
       this.state = FULFILLED
 
-      // 储存 状态变为FULFILLED后对外
       this.value = value
     }
   }
@@ -119,15 +142,27 @@ class MyPromise {
       // 将 Promise对象 状态 置为 FULFILLED
       this.state = REJECTED
 
-      // 储存失败的值
       this.reason = reason
     }
+  }
+
+  then (onFulfilled, onRejected) {
+
+
+
+
+
+
+
+
+
+
+
   }
 }
 ```
 
-ssssss
-
+#### all、race、catch补充
 ```js
 const PENDING = 'PENDING'
 const FULFILLED = 'FULFILLED'
