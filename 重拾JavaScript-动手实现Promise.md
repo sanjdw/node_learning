@@ -158,12 +158,7 @@ class MyPromise {
 
     if (this.state === PENDING) {
       return new MyPromise(function (resolve, reject){
-        try {
-          const result = onFulfilled(self.data)
-          resolve(result)
-        } catch (err){
-          reject(err)
-        }
+        // todo
       })
     }
 
@@ -175,9 +170,11 @@ class MyPromise {
           const result = onFulfilled(self.data)
           if (result instanceof MyPromise) {
             // result 是Promise对象
-            result.then()
+            result.then(resolve, reject)
           } else {
-            // result是空 或 result不是Promise对象，将新的返回的Promise对象状态置为Fulfilled且将result作为参数传递出去
+            // result是空 或 result不是Promise对象
+            // 1.将新的返回的Promise对象状态置为Fulfilled
+            // 2.将result作为参数传递出去
             resolve(result)
           }
         } catch (err) {
@@ -191,7 +188,7 @@ class MyPromise {
         try {
           const result = onRejected(self.data)
           if (result instanceof MyPromise) {
-
+            result.then(resolve, reject)
           } else {
             reject(result)
           }
