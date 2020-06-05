@@ -166,5 +166,4 @@ ___
 #### 参考
 1. [你真的掌握变量和类型了吗？](https://juejin.im/post/5cec1bcff265da1b8f1aa08f#heading-6)
 2. [深拷贝与浅拷贝的实现](http://www.alloyteam.com/2017/08/12978/)
-3. [引用、浅拷贝及深拷贝到Map、Set](https://juejin.im/post/5d843abe6fb9a06af510050c)
-4. [深拷贝-循环引用的处理](https://juejin.im/post/5dd0caea6fb9a01fe736b186)
+3. [深拷贝-循环引用的处理](https://juejin.im/post/5dd0caea6fb9a01fe736b186)
