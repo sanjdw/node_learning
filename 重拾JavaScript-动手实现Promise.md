@@ -59,7 +59,7 @@ class MyPromise {
       }
     }
 
-    fucntion reject () {
+    function reject () {
       if (this.state === PENDING) {
         // 将 Promise对象 状态 置为 FULFILLED
         this.state = REJECTED
@@ -74,6 +74,9 @@ class MyPromise {
   }
 }
 ```
+
+这里要搞清楚一个问题，`Promise`对象的状态何时发生改变？——`Promise`对象的状态是用户手动改变的，我们向用户创建`Promise`对象时注册的`handle`提供了`resolve`和`reject`方法，由用户决定何时使用`resolve`和`reject`。
+
 
 ### then方法
 我们知道，`Promise`对象有一个`then`方法，用来注册这个`Promise`对象状态发生改变后的回调。不论是成功还是失败，通过`then`方法注册的回调方法都要执行。再来看一眼我们是怎么使用`then`的：
@@ -124,27 +127,46 @@ class MyPromise {
     this.data = undefined
 
     // 存放 Promise对象状态变为FULFILLED后 需要执行的回调函数
-    this.onResolvedCallbacks = []
+    this._onResolvedCallbacks = []
 
     // 存放 Promise对象状态变为REJECTED后 需要执行的回调函数
-    this.onRejectedCallbacks = []
+    this._onRejectedCallbacks = []
 
     function resolve (value) {
       if (this.state === PENDING) {
-        this.state = FULFILLED
-        this.data = value
+        // 当前Promise状态改变时，按顺序依次执行队列中的任务
+        function run () {
+          this.state = FULFILLED
+          this.data = value
+
+          let cb
+          while (cb = this._onResolvedCallbacks.shift()) {
+            cb(value)
+          }
+        }
+
+        setTimeout(function() { run() }, 0)
       }
     }
 
     function reject (reason) {
       if (this.state === PENDING) {
-        this.state = REJECTED
-        this.data = reason
+        function run () {
+          this.state = FULFILLED
+          this.data = value
+
+          let cb
+          while (cb = this._onRejectedCallbacks.shift()) {
+            cb(reason)
+          }
+        }
+
+        setTimeout(function() { run() }, 0)
       }
     }
 
     try {
-      handle(resolve, reject)
+      handle(resolve.bind(this), reject.bind(this))
     } catch (err) {
       reject(err)
     }
@@ -152,54 +174,67 @@ class MyPromise {
 
   then (onFulfilled, onRejected) {
     const self = this
-    // 首先对onFulfilled、onRejected做方法校验
-    onFulfilled = isFunction(onFulfilled) ? onFulfilled : function () {}
-    onRejected = isFunction(onRejected) ? onRejected : function () {}
+    // onFulfilled、onRejected方法可以缺省
+    onFulfilled = isFunction(onFulfilled) ? onFulfilled : function (v) { return v }
+    onRejected = isFunction(onRejected) ? onRejected : function (v) { return v}
 
-    if (this.state === PENDING) {
-      return new MyPromise(function (resolve, reject){
-        // todo
-      })
-    }
-
-    if (this.state === FULFILLED) {
-      // onFulfilled、onFulfilled 是用户输入，可能会出错，用try-catch处理
-      return new MyPromise(function (resolve, reject){
-        try {
-          // result：通过then方法注册的onFulfilled方法的返回值
-          const result = onFulfilled(self.data)
-          if (result instanceof MyPromise) {
-            // result 是Promise对象
-            result.then(resolve, reject)
-          } else {
-            // result是空 或 result不是Promise对象
-            // 1.将新的返回的Promise对象状态置为Fulfilled
-            // 2.将result作为参数传递出去
-            resolve(result)
+    // then 方法返回一个新的MyPromise对象
+    return new MyPromise(function (resolve, reject) {
+      function _resolve (data) {
+        // then方法中注册的回调要求是异步执行的
+        setTimeout(function () {
+          try {
+            // result：通过then方法注册的onFulfilled方法的返回
+            const result = onFulfilled(self.data)
+            if (result instanceof MyPromise) {
+              // result本身就是Promise对象
+              // 则当result的状态改变时，利用result的回调去改变当前Promise的状态
+              result.then(resolve, reject)
+            } else {
+              // result不是Promise对象，那么将result作为参数，传递给下一个then的成功的回调(onFulfilled)
+              resolve(result)
+            }
+          } catch (err) {
+            // 如果then中注册的回调方法执行且抛出了异常，那么就会把这个异常作为参数，传递给下一个then的失败的回调(onRejected)
+            reject(resul)
           }
-        } catch (err) {
-          reject(err)
-        }
-      })
-    }
+        })
+      }
 
-    if (this.state === REJCTED) {
-      return new MyPromise(function (resolve, reject){
-        try {
-          const result = onRejected(self.data)
-          if (result instanceof MyPromise) {
-            result.then(resolve, reject)
-          } else {
-            reject(result)
+      function _reject (data) {
+        setTimeout(function () {
+          try {
+            const result = onRejected(data)
+            if (result instanceof MyPromise) {
+              result.then(resolve, reject)
+            } else {
+              resolve(result)
+            }
+          } catch (err) {
+            reject(resul)
           }
-        } catch (err) {
-          reject(err)
-        }      
-      })
-    }
+        })
+      }
+
+      if (self.state === PENDING) {
+        // 之前Promise对象（记为p1）状态未改变
+        // 则将 onFulfilled、onRejcted 回调推入p1的_onResolvedCallbacks、_onRejectedCallbacks栈中
+        // 在p1的resolve、reject方法中调用这些回调
+        self._onResolvedCallbacks.push(_resolve)
+        self._onRejectedCallbacks.push(_reject)
+      } else if (self.state === FULFILLED) {
+        _resolve(self.data)
+      } else if (self.state === REJCTED) {
+        _reject(self.data)
+      }
+    })
   }
 }
 ```
+
+`then`方法需要返回一个新的`Promise`对象（记为`p1`），这里主要需要考虑的是何时改变这个`p1`的状态。
+- 当在`p1`的`then`中注册的回调返回的刚好也是一个`Promise`对象（记为`p2`）时，则将用于改变`p1`状态的`resolve`/`reject`方法注册到`p2`的`then`回调中，在`p2`状态改变的回调中去改变`p1`的状态
+- 当在`p1`的`then`中注册的回调返回的不是`Promsie`对象，则直接将`p1`状态置为`FULFILLED`/`REJECTED`，并将该返回值作为参数返回
 
 ### 补充finally、catch
 ```js
@@ -224,10 +259,11 @@ class MyPromise {
       reject(err)
     }
   }
+
+  finally () {}
+
+  catch () {}
 }
 ```
 
-___
-#### 参考
-1. [可能是目前最易理解的手写promise](https://juejin.im/post/5dc383bdf265da4d2d1f6b23)
-2. [【面试题解析】手动实现Promise](https://juejin.im/post/5e6fbf88e51d45270d532b7f)
+### 静态方法resolve、reject、all、race
