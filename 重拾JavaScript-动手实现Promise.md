@@ -67,7 +67,7 @@ class MyPromise {
     }
 
     try {
-      handle(resolve, reject)
+      handle(resolve.bind(this), reject.bind(this))
     } catch (err) {
       reject(err)
     }
@@ -133,34 +133,36 @@ class MyPromise {
     this._onRejectedCallbacks = []
 
     function resolve (value) {
-      if (this.state === PENDING) {
+      const self = this
+      if (self.state === PENDING) {
         // 当前Promise状态改变时，按顺序依次执行队列中的任务
         function run () {
-          this.state = FULFILLED
-          this.data = value
-
+          self.state = FULFILLED
+          self.data = value
+  
           let cb
-          while (cb = this._onResolvedCallbacks.shift()) {
+          while (cb = self._onResolvedCallbacks.shift()) {
             cb(value)
           }
         }
-
+  
         setTimeout(function() { run() }, 0)
       }
     }
 
     function reject (reason) {
-      if (this.state === PENDING) {
+      const self = this
+      if (self.state === PENDING) {
         function run () {
-          this.state = FULFILLED
-          this.data = value
-
+          self.state = FULFILLED
+          self.data = reason
+  
           let cb
-          while (cb = this._onRejectedCallbacks.shift()) {
+          while (cb = self._onRejectedCallbacks.shift()) {
             cb(reason)
           }
         }
-
+  
         setTimeout(function() { run() }, 0)
       }
     }
@@ -185,7 +187,7 @@ class MyPromise {
         setTimeout(function () {
           try {
             // result：通过then方法注册的onFulfilled方法的返回
-            const result = onFulfilled(self.data)
+            const result = onFulfilled(data)
             if (result instanceof MyPromise) {
               // result本身就是Promise对象
               // 则当result的状态改变时，利用result的回调去改变当前Promise的状态
@@ -196,7 +198,7 @@ class MyPromise {
             }
           } catch (err) {
             // 如果then中注册的回调方法执行且抛出了异常，那么就会把这个异常作为参数，传递给下一个then的失败的回调(onRejected)
-            reject(resul)
+            reject(err)
           }
         })
       }
@@ -211,7 +213,7 @@ class MyPromise {
               resolve(result)
             }
           } catch (err) {
-            reject(resul)
+            reject(err)
           }
         })
       }
@@ -236,7 +238,8 @@ class MyPromise {
 - 当在`p1`的`then`中注册的回调返回的刚好也是一个`Promise`对象（记为`p2`）时，则将用于改变`p1`状态的`resolve`/`reject`方法注册到`p2`的`then`回调中，在`p2`状态改变的回调中去改变`p1`的状态
 - 当在`p1`的`then`中注册的回调返回的不是`Promsie`对象，则直接将`p1`状态置为`FULFILLED`/`REJECTED`，并将该返回值作为参数返回
 
-### 补充finally、catch
+### 实例方法finally、catch方法；静态方法resolve、reject、all、race
+
 ```js
 const PENDING = 'PENDING'
 const FULFILLED = 'FULFILLED'
@@ -253,17 +256,83 @@ class MyPromise {
 
     this._fulFilledQueues = []
     this._rejectedQueues = []
+
+    function resolve () {}
+
+    function reject () {}
     try {
-      handle(resolve, reject)
+      handle(resolve.bind(this), reject.bind(this))
     } catch (err) {
       reject(err)
     }
   }
 
-  finally () {}
+  then () {}
 
-  catch () {}
+  catch (cb) {
+    // 通过then方法注册catch的handle
+    return this.then(undefined, cb)
+  }
+
+  finally (cb) {
+    return this.then(function (res) {
+      res => this.resolve(cb()).then(() => res)
+    }, function (err) {
+      err => this.reject(cb()).then(() => throw err)
+    })
+  }
+
+  // 静态resolve
+  static resolve (value) {
+    // 如果参数是MyPromise实例，则直接返回
+    if (value instanceof MyPromise) return value
+    return new MyPromise(function (resolve) {
+      resolve(value)
+    })
+  }
+
+  // 静态reject
+  static reject (value) {
+    if (value instanceof MyPromise) return value
+    return new MyPromise(function(resolve ,reject) {
+      reject(value)
+    })
+  }
+
+  // 静态方法all
+  static all (plist) {
+    const length = plist.length
+    const values = []
+    let count = 0
+
+    return new MyPromise (function (resolve, reject) {
+      for (let p of plist) {
+        // 静态resolve方法——如果p不是promise对象则先将其转为promise
+        this.resolve(p).then(function (res) {
+          values.push(res)
+          count++
+          // 所有状态均变为FULFILLED将返回的promise状态置为FULFILLED
+          if (count === length) resolve(values)
+        }, function (error) {
+          // 有一个被REJECTED，则将返回的MyPromise状态变为REJECTED
+          reject(error)
+        })
+      }
+    })
+  }
+
+  // 静态方法race
+  static race (plist) {
+    return new MyPromise(function (resolve, reject) {
+      for (let p of plist) {
+        // 有一个状态变为FULFILLED则将返回的promise状态置为FULFILLED
+        this.resolve(p).then(function (res) {
+          resolve(res)
+        }, function (error) {
+          reject(error)
+        })
+      }
+    })
+  }
 }
 ```
-
-### 静态方法resolve、reject、all、race
