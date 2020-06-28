@@ -15,3 +15,4 @@ ___
 2. [CSS Background 属性详解](https://juejin.im/entry/589ff0c75c497d0056358912)
 3. [CSS 属性篇：background-size属性](https://juejin.im/post/5c70017cf265da2d9b5e1940)
 4. [CSS Background 之神奇渐变色](https://juejin.im/entry/589ff0be0ce46300563c2dd9)
+5. [CSS 渐变gradient专题](https://juejin.im/post/5ad9d43951882567236e5133)

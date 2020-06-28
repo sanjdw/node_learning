@@ -127,10 +127,12 @@ ___
 ```git
 git stash save "sss"
 ```
+
 暂存了一个修改，那么当切换到b分支，使用
 ```git
 git stash pop
 ```
+
 就能把在a分支保存的`"sss"`这个修改同步到b分支上。所以当我们需要在不同的分支上取出不同的分支上保存的修改，那么就用到了`git stash list`，这个命令可以把在所有分支上暂存的信息显示出来：
 
 ![git stash list](https://pic.downk.cc/item/5ea02700c2a9a83be58fdcdb.jpg)
@@ -145,6 +147,7 @@ ___
     ```git
     git commit --amend
     ```
+
     本人这条命令常用的场景是：自以为fix了一个bug，commit之后提交测试，测试反馈bug未修复，重新修改代码`commit`，希望将此次commit与前一次commit合并为一次commit。
 
     ![git commit --amend](https://pic.downk.cc/item/5ea173b2c2a9a83be5fd7a45.jpg)
@@ -155,6 +158,7 @@ ___
     ```git
     git commit --amend -m 'change commit message'
     ```
+    
     ![git commit --amend -m 'commit message'](https://pic.downk.cc/item/5ea17655c2a9a83be5009cba.jpg)
 
 第一个合并`commit`也是非常实用的指令。
