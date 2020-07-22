@@ -21,10 +21,10 @@ set是ES6提供的一种新的数据结构，类似于数组，但是成员都�
 
     let set = new Set();
 
-    set.add({name:'sanjdw'});
+    set.add({name:'grain'});
     set.size //1
 
-    set.add({name:'sanjdw'})
+    set.add({name:'grain'})
     set.size //2
 Set实例有两个属性：
 - `Set.prototype.constructor`
