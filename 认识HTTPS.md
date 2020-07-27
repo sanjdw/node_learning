@@ -94,5 +94,4 @@ ___
 #### 参考
 1. [HTTPS 原理详解](http://liuduo.me/2018/05/14/https-detail/)
 2. [HTTPS 温故知新（三） —— 直观感受 TLS 握手流程(上)](https://halfrost.com/https_tls1-2_handshake/)
-3. [HTTPS篇之SSL握手过程详解
-](https://razeencheng.com/post/ssl-handshake-detail)
+3. [HTTPS篇之SSL握手过程详解](https://razeencheng.com/post/ssl-handshake-detail)

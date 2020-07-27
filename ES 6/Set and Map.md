@@ -4,28 +4,34 @@
 set是ES6提供的一种新的数据结构，类似于数组，但是成员都是唯一的，无重复值。
 
 使用Set构造函数来生成Set数据结构：
+```js
+const s = new Set();
+["s","t","u","d","e","n","t"].forEach(x => s.add(x));
 
-    const s = new Set();
-    ["s","t","u","d","e","n","t"].forEach(x => s.add(x));
+for (let i of s){
+	console.log(i);
+}
+//s t u d e n
+```
 
-    for (let i of s){
-        console.log(i);
-    }
-    //s t u d e n
 所以Set也提供了一种数组去重的方法：
+```js
+[...new Set(array)]
+```
 
-    [...new Set(array)]
 向Set中加入值得时候，不会发生数值类型转换，`'1'`和`1`是两个不同的值，类似于精确运算符`===`，有一个区别是`NaN`等于自身。
 
 另外，两个对象总是不等的：
+```js
+let set = new Set();
 
-    let set = new Set();
+set.add({name:'grain'});
+set.size //1
 
-    set.add({name:'grain'});
-    set.size //1
+set.add({name:'grain'})
+set.size //2
+```
 
-    set.add({name:'grain'})
-    set.size //2
 Set实例有两个属性：
 - `Set.prototype.constructor`
 - `Set.prototype.size`
@@ -43,71 +49,79 @@ Set实例有两个属性：
 - `forEach` 使用回调函数遍历每个成员
 
 ***
+```js
+let set = new Set(['red', 'green', 'blue']);
 
-    let set = new Set(['red', 'green', 'blue']);
+for (let item of set.keys()) {
+	console.log(item);
+}
+// red
+// green
+// blue
 
-    for (let item of set.keys()) {
-      console.log(item);
-    }
-    // red
-    // green
-    // blue
+for (let item of set.values()) {
+	console.log(item);
+}
+// red
+// green
+// blue
 
-    for (let item of set.values()) {
-      console.log(item);
-    }
-    // red
-    // green
-    // blue
+for (let item of set.entries()) {
+	console.log(item);
+}
+// ["red", "red"]
+// ["green", "green"]
+// ["blue", "blue"]
+```
 
-    for (let item of set.entries()) {
-      console.log(item);
-    }
-    // ["red", "red"]
-    // ["green", "green"]
-    // ["blue", "blue"]
 Set结构的实例默认可遍历，它的默认遍历器生成函数就是它的values方法。
 
 这意味着，可以省略values方法，直接用`for...of`循环遍历Set。
+```js
+let set = new Set(['red', 'green', 'blue']);
 
-    let set = new Set(['red', 'green', 'blue']);
+for (let x of set) {
+	console.log(x);
+}
+// red
+// green
+// blue
+```
 
-    for (let x of set) {
-      console.log(x);
-    }
-    // red
-    // green
-    // blue
 Set的`forEach`方法和数组的`forEach`基本相同。
-
+```js
     let set = new Set([1, 2, 3]);
     set.forEach((value, key) => console.log(value * 2) )
     //2
     //4
-    //6
+		//6
+```
+
 利用Set可以容易的实现并集、交集和差集：
+```js
+let a = new Set([1,2,3,4]);
+let b=  new Set([4,5,6,6]);
 
-    let a = new Set([1,2,3,4]);
-    let b=  new Set([4,5,6,6]);
+//并集
+let union = new Set([...a,...b])
 
-    //并集
-    let union = new Set([...a,...b])
+//交集
+let intersect = new Set([...a].filter(x => b.has(x)))
 
-    //交集
-    let intersect = new Set([...a].filter(x => b.has(x)))
-
-    //差集
-    let diff = new Set([...a].filter(x => !b.has(x)))
+//差集
+let diff = new Set([...a].filter(x => !b.has(x)))
+```
 
 #### WeakSet
 与Set类似，WeakSet也是不重复值的集合，它与Set有两个区别：
 - WeakSet的成员只能是对象。
 - WeakSet的对象是弱引用，无法引用WeakSet的成员，也无法遍历WeakSet的成员。
-
-    var ws = new WeakSet();
-    ws.add(1)
-    // TypeError: Invalid value used in weak set
-    //只能添加对象成员
+```js
+var ws = new WeakSet();
+ws.add(1)
+// TypeError: Invalid value used in weak set
+//只能添加对象成员
+```
 
 WeakSet实例有以下三个方法：
 - add() 添加成员
@@ -118,24 +132,27 @@ WeakSet实例有以下三个方法：
 
 #### Map
 JavaScript中的对象，本质上是键值对的集合，由于只能用字符串当做键，它的使用收到了限制：
+```js
+var data = {};
+var element = document.getElementById('myDiv');
 
-    var data = {};
-    var element = document.getElementById('myDiv');
+data[element] = 'metadata';
+data['[object HTMLDivElement]'] // "metadata"
+```
 
-    data[element] = 'metadata';
-    data['[object HTMLDivElement]'] // "metadata"
 由于对象只接受字符串作键名，element在data对象中被自动转为字符串`[object HTMLDivElement]`。
 
 ES6提供了Map数据结构，它类似于对象，也是键值对的集合，但是键的范围不限于字符串。
+```js
+var m = new Map();
+var o  = {p : 'Hello World'};
 
-    var m = new Map();
-    var o  = {p : 'Hello World'};
+m.set(o, 'content');
+m.get(o) // 'content'
 
-    m.set(o, 'content');
-    m.get(o) // 'content'
-
-    m.has(o)    //true
-    m.delete(o) //true
-    m.has(o)    //false
+m.has(o)    //true
+m.delete(o) //true
+m.has(o)    //false
+```
 
 

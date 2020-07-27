@@ -15,7 +15,6 @@ JavaScript动画有以下缺点：
 
 ## transition过渡
 在引入`transition`概念之前，CSS是没有时间轴的——CSS的属性值的变化是**立刻生效**的，比如改变了某个元素的背景色、增大了某个块级元素的width，是可以马上看到相应的变化的。
-
 ```css
 .img {
   width: 200px;
@@ -110,7 +109,6 @@ ___
 
 #### 基本使用
 首页需要为动画指定一个周期的持续时间、动画名称：
-
 ```css
 div {
   animation: 2s rainbow;
@@ -118,7 +116,6 @@ div {
 ```
 
 这段代码表示`div`元素会产生持续时间为2s、名为`rainbow`的动画效果。为此，我们还需要用`keyframes`关键字来定义这个`rainbow`的具体效果：
-
 ```css
 @keyframes rainbow {
   0% { width: 200px; }
@@ -128,7 +125,6 @@ div {
 ```
 
 也可以指定动画播放次数
-
 ```css
 img:hover {
   animation: 2s rainbow infinite; // 无限循环
@@ -138,7 +134,6 @@ img:hover {
 
 #### animation-fill-mode
 动画结束以后，会立刻从结束状态还原到起始状态。如果想让动画保持在结束状态，需要使用`animation-fill-mode`属性：
-
 ```css
 img:hover {
   animation: 2s rainbow 3 forwards; // 停留在结束状态
@@ -152,7 +147,6 @@ img:hover {
 
 #### animation-direction
 动画循环播放时，每个周期结束都是从结束状态跳回到起始状态开始下一个周期的动画。`animation-direction`属性，可以改变这种行为，默认值为`normal`：
-
 ```css
 div:hover {
   animation: 2s rainbow 3 normal|alternate|reverse|alternate-reverse;
@@ -178,7 +172,6 @@ div:hover {
 
 #### animation各项属性
 与`transition`一样，`animation`既可以简写也可以分成各个单独的属性：
-
 ```css
 div {
   animation: 1s 1s rainbow linear 3 forwards normal;
@@ -196,7 +189,6 @@ div {
 
 #### keyframes写法
 `keyframes`定义动画的的写法则比较自由：
-
 ```css
 @keyframes rainbow {
   0% { background: #c00 }
@@ -216,7 +208,6 @@ div {
 
 #### animation-play-state
 此外，我们还可以通过`animation-play-state`属性控制动画运行还是暂停：
-
 ```css
 div {
   animation: animation: 1s rainbow linear infinite;
@@ -235,23 +226,25 @@ div:hover {
 
 ___
 ## 硬件加速
+CSS3硬件加速又叫做`GPU加速`，是利用GPU进行渲染，减少CPU操作的一种优化方案。由于GPU中的transform等CSS属性不会触发repaint，所以能大大提高网页的性能。
 
 ___
 ## 总结
-CSS3动画的缺点：
+#### CSS3动画的缺点：
 - CSS运行过程控制较弱，无法附加事件回调
-- 对于一些复杂的动画，如果用CSS3实现，则会导致CSS代码荣昌
+- 对于一些复杂的动画，如果用CSS3实现，则会导致CSS代码冗长
 
-优点：
+#### 优点：
 - 占用的内存更小，运行更加流畅
 - 可以强制使用硬件加速（通过GPU来提高动画性能）
 - 对于帧速表现不好的低版本浏览器，CSS3动画可以做到自然降级，而JavaScript则需要撰写额外代码
 
 如果动画只是需要简单状态切换的交互动效，不需要中间过程控制，那么css动画是优选方案。然而如果需要设计复杂需要大量控制的动画，那么应该使用JavaScript动画。
- 
+
 ___
 #### 参考
 1. [CSS3动画简介](https://www.ruanyifeng.com/blog/2014/02/css_transition_and_animation.html)
 2. [css与 js动画 优缺点比较](https://www.cnblogs.com/wangpenghui522/p/5394778.html)
 3. [两张图解释CSS动画的性能](https://github.com/ccforward/cc/issues/42)
 4. [CSS animation和transition的性能探究](http://zencode.in/18.CSS-animation%E5%92%8Ctransition%E7%9A%84%E6%80%A7%E8%83%BD%E6%8E%A2%E7%A9%B6.html)
+5. [在CSS动画中使用硬件加速](https://juejin.im/post/5b6143996fb9a04fd343ae28#heading-3)
