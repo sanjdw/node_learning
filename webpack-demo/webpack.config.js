@@ -17,7 +17,8 @@ module.exports = {
           { loader: 'style-loader' },
           { loader: 'css-loader' },
           {
-            loader: 'less-loader',
+            // loader: 'less-loader',
+            loader: 'lesss-loader',
             options: {
               sourceMap: true
             }
@@ -25,5 +26,9 @@ module.exports = {
         ]
       }
     ]
+  },
+  // 配置自定义loader路径
+  resolveLoader: {
+    modules: ['node_modules', './loader']
   }
 }
