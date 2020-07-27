@@ -1,0 +1,29 @@
+{
+  "name": "my-note",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grain0217/note.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/grain0217/note/issues"
+  },
+  "homepage": "https://github.com/grain0217/note#readme",
+  "dependencies": {
+    "css-loader": "^4.0.0",
+    "less-loader": "^6.2.0",
+    "style-loader": "^1.2.1"
+  },
+  "devDependencies": {},
+  "description": ""
+}
