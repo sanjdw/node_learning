@@ -18,7 +18,7 @@ module.exports = {
           { loader: 'css-loader' },
           {
             // loader: 'less-loader',
-            loader: 'lesss-loader',
+            loader: 'my-less-loader',
             options: {
               sourceMap: true
             }
