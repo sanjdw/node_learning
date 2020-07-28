@@ -1,4 +1,4 @@
-webpack允许我们使用loader来处理文件，loader是一个导出为function的模块。loader可以将匹配到的文件进行转换，同时loader可以链式传递。
+> loader是webpack容纳各类资源的一个重要手段，它用于对模块的源代码进行转换，允许你在import或加载模块时预处理文件，利用loader，我们可以将各种类型的资源转换成webpack本质接受的资源类型，如javascript。
 
 如何在webpack中配置loader在这里就不再多讲了，今天以less-loader为例学习loader是如何工作的。
 
@@ -116,7 +116,7 @@ function getLessImplementation(implementation) {
 }
 ```
 
-其实它对less-loader的配置参数做了一个校验，如果没有为less-loader设置`implementation`方法，则默认使用`less`库来转换处理模块。
+其实它对less-loader的配置参数做了一个校验，如果没有为less-loader设置`implementation`方法，则默认使用`less`编译器来转换处理模块。
 
 ### 用自定义的my-less-loader处理less文件
 为了验证上述推断，我们把less-loader拷出来重新命名为`my-less-loader`，并告诉webpack使用`my-less-loader`处理less模块。此外，我们还需要告诉webpack到哪里去找`my-less-loader`：
@@ -176,3 +176,7 @@ module.exports = function (source) {
 ![my-less-loader](https://pic.downk.cc/item/5f200c8a14195aa594ee2c17.jpg)
 
 至此，我们知道了loader是如何实现的，有需要的话我们可以针对项目编写自己的loader。
+
+#### 参考
+1. [手把手教你写webpack loader](https://wecteam.io/2019/09/17/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E5%86%99webpack-loader/)
+2. [从使用loader到实现loader](https://github.com/lefex/FE/tree/master/webpack)
