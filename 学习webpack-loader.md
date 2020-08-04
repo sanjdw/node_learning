@@ -83,6 +83,7 @@ import {
 function lessLoader(source) {
   const options = getOptions(this);
 
+  // async 是webpack提供的返回转换后的content的异步方法
   const callback = this.async();
   const lessOptions = getLessOptions(this, options);
 
@@ -175,7 +176,9 @@ module.exports = function (source) {
 
 ![my-less-loader](https://pic.downk.cc/item/5f200c8a14195aa594ee2c17.jpg)
 
-至此，我们知道了loader是如何实现的，有需要的话我们可以针对项目编写自己的loader。
+终端打印出来的正是我们所预期的。
+
+回头再看less-loader的源码，可以发现less-loader还做了一些配置参数校验、调整的工作，至此，我们知道了loader是如何实现的，有需要的话我们可以针对项目编写自己的loader。
 
 #### 参考
 1. [手把手教你写webpack loader](https://wecteam.io/2019/09/17/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E5%86%99webpack-loader/)
