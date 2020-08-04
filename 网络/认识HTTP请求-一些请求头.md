@@ -1,0 +1,32 @@
+#### Content-Encoding内容编码
+`Accept-Encoding`和`Content-Encoding`是HTTP中用来对「采用何种编码格式传输正文」进行协定的一对头部字段。
+
+它的工作原理大概是：
+1. 浏览器发送请求时，通过`Accept-Encoding`带上自己支持的内容编码格式列表；
+2. 服务端从中挑选一种用来对正文进行编码，并通过`Content-Encoding`响应头指明选定的格式；
+3. 浏览器拿到响应正文后，依据`Content-Encoding`进行解压。当然，服务端也可以返回未压缩的正文，但这种情况不允许返回`Content-Encoding`。
+
+![content-encoding](https://pic.downk.cc/item/5f1037ea14195aa594a9017a.jpg)
+
+这就是HTTP的内容编码机制。
+
+内容编码目的是优化传输内容大小。一般对于文本类响应是否开启了内容压缩，是我们做性能优化时首先要检查的重要项目；而对于图片类型资源 (还有视频文件)，这类文件本身已经是高度压缩过的二进制文件，开启`gzip`压缩效果微乎其微且会浪费`CPU`资源。
+
+#### Transfer-Encoding传输编码
+上文已经讲到到，`Content-Encoding`通常用于对实体内容进行压缩编码，目的是优化传输。而`Transfer-Encoding`则是用来改变报文的格式，它不会减小传输体积的大小，反而会是传输体积增大。在介绍`Transfer-Encoding`之前，我们先来看看`Content-Length`。
+
+我们知道HTTP运行在TCP连接之上，而TCP的三次握手连接机制导致TCP连接的创建成本较高。为了尽可能的提高HTTP性能，`HTTP/1.1`规定所有连接都必须是持久的，除非显式地在头部加上`Connection: close`。持久连接的引入又带来了另一个问题——在`HTTP/1.1`之前，一个HTTP响应完成时服务端会通过响应头部的`Connection: close`告诉客户端HTTP响应完成了并且关闭TCP连接，但在`HTTP/1.1`中由于持久连接的需要，客户端如何判断一个HTTP响应是否结束了？
+
+答案就是`Content-Length`——客户端可以通过`Content-Length`的长度信息，判断出响应实体是否结束。
+
+新的问题也来了——在实际应用中响应资源的体积有时候并没那么好获得，比如实体来自于网络文件、由动态语言生成等情况。这时候要想准确获取长度，只能开一个足够大的`buffer`，等内容全部生成好再计算。但这样做一方面需要更大的内存开销，另一方面也会让客户端等更久。
+
+好了，到这里，`Transfer-Encoding`终于可以登场了。
+
+#### Referrer
+
+#### Content-Disposition
+
+#### 参考
+1. [Content-Encoding](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Encoding)
+2. []()

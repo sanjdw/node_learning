@@ -72,7 +72,7 @@ less模块如下：
 ![less-loader打包效果](https://pic.downk.cc/item/5f20012314195aa594e2c9be.jpg)
 
 #### less-loader做了什么
-那么less-loader都做了什么呢？我们到[less-loader源码](https://github.com/webpack-contrib/less-loader/blob/master/src/index.js)中去看一看，这里仅贴出主要代码：
+那么less-loader都做了什么呢？到[less-loader源码](https://github.com/webpack-contrib/less-loader/blob/master/src/index.js)中看了一下，这里仅贴出主要代码：
 ```js
 import { getOptions } from 'loader-utils'
 import {
@@ -117,7 +117,7 @@ function getLessImplementation(implementation) {
 }
 ```
 
-其实它对less-loader的配置参数做了一个校验，如果没有为less-loader设置`implementation`方法，则默认使用`less`编译器来转换处理模块。
+其实它对less-loader的配置参数做了一个校验，如果没有为less-loader设置`implementation`的自定义实现，则默认使用`less`编译器来转换处理模块。
 
 ### 用自定义的my-less-loader处理less文件
 为了验证上述推断，我们把less-loader拷出来重新命名为`my-less-loader`，并告诉webpack使用`my-less-loader`处理less模块。此外，我们还需要告诉webpack到哪里去找`my-less-loader`：
@@ -178,7 +178,14 @@ module.exports = function (source) {
 
 终端打印出来的正是我们所预期的。
 
-回头再看less-loader的源码，可以发现less-loader还做了一些配置参数校验、调整的工作，至此，我们知道了loader是如何实现的，有需要的话我们可以针对项目编写自己的loader。
+回头再看less-loader的源码，可以发现less-loader还做了一些配置参数校验、调整的工作。
+
+1. 通过module.exports导出一个函数
+2. 函数第一默认参数为source(源文件内容)
+3. 在函数体中处理资源(可引入第三方模块扩展功能)
+4. 通过同步或异步的方式返回最终转换结果(字符串形式)
+
+至此，我们知道了loader是如何实现的，有需要的话我们可以针对项目编写自己的loader。至于`less`编译器编译less的细节不在这里展开。
 
 #### 参考
 1. [手把手教你写webpack loader](https://wecteam.io/2019/09/17/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E5%86%99webpack-loader/)

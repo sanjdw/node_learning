@@ -26,3 +26,7 @@
 
 ## Nginx
 1. [认识Nginx](https://github.com/grain0217/note/blob/master/%E8%AE%A4%E8%AF%86Nginx.md)
+
+## ES6
+1. [var和let的区别]
+2. [钩子函数与普通函数的区别]
