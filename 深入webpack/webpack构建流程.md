@@ -51,17 +51,13 @@ function webpack (options, callback) {
     }
 
     /**
-     * 5.
+     * 5. 触发environment、afterEnvironment钩子
      */
     compiler.hooks.environment.call()
-
-    /**
-     * 6.
-     */
     compiler.hooks.afterEnvironment.call()
 
     /**
-     * 7. options中其他的配置进行初始化处理
+     * 6. options中其他的配置进行初始化处理
      */
     compiler.options = new WebpackOptionsApply().process(options, compiler)
   } else {
@@ -69,7 +65,7 @@ function webpack (options, callback) {
   }
 
   /**
-   * 如果传入callback，compiler.run(callback)
+   * 7. 如果传入callback，compiler.run(callback) 返回compiler
    */
   if (callback) {
     if (typeof callback !== "function") {
@@ -92,34 +88,43 @@ function webpack (options, callback) {
 
 #### 1. 校验以及初始化默认参数配置options
 ```js
+validateSchema(
+  webpackOptionsSchema,
+  options
+)
 options = new WebpackOptionsDefaulter().process(options)
 ```
 
+
 #### 2. 实例化compiler
+`compiler`负责文件监听和启动编译，这一步通过`Compiler`构造函数初步实例化`compiler`：
 ```js
-compiler = new Compiler(options.context);
+compiler = new Compiler(options.context)
 ```
 
-Compiler负责文件监听和启动编译
-
 #### 3. 初始化complier的文件系统输入、输出、缓存以及监视文件系统
+这一步包括下一步挂载`plugin`仍属于实例化`compiler`的范畴，但是第三四步对`compiler`的实例化...
 ```js
-new NodeEnvironmentPlugin().apply(compiler)
+new NodeEnvironmentPlugin({
+  infrastructureLogging: options.infrastructureLogging
+}).apply(compiler)
 ```
 
 #### 4. 挂载plugin
 将`compiler`作为参数传入插件实现的`apply`方法，使插件可以监听`compiler`后续的所有事件
 
-#### 钩子
+#### 5. 触发environment、afterEnvironment钩子
+```js
 compiler.hooks.environment.call()
-
-#### 钩子
 compiler.hooks.afterEnvironment.call()
+```
 
-## options
+#### 6. options的其他的配置进行初始化处理
+```js
 compiler.options = new WebpackOptionsApply().process(options, compiler)
+```
 
-## run传入的callback
+#### 7. 返回compiler，如果有callback传入则通过compiler.run走构建流程
 ```js
 if (callback) {
   if (
