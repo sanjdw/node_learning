@@ -1,8 +1,9 @@
 ## 实例化compiler
-
+```js
 compiler = new Compiler(options.context)
+```
 
-`Compiler`模块是webpack的支柱引擎，它通过CLI或Node API传递的所有选项，创建出一个compilation实例。它继承自`Tapable`类，以便注册和调用插件。大多数面向用户的插件首，会先在`Compiler`上注册。
+`compiler`模块是webpack的支柱引擎，它继承自`Tapable`类，以便注册和调用插件。大多数面向用户的插件，会先在`Compiler`上注册。`compiler`对象上记录了完整的webpack环境信息，在webpack从启动到结束，`compiler`只会生成一次。
 
 #### Compiler
 ```js
@@ -10,11 +11,17 @@ class Compiler extends Tapable {
   constructor () {
     super()
     this.hooks = {
+      shouldEmit: new SyncBailHook(["compilation"]),
       done: new AsyncSeriesHook(["stats"]),
       beforeRun: new AsyncSeriesHook(["compiler"]),
       run: new AsyncSeriesHook(["compiler"]),
       emit: new AsyncSeriesHook(["compilation"]),
+      assetEmitted: new AsyncSeriesHook(["file", "content"]),
+      afterEmit: new AsyncSeriesHook(["compilation"]),
+      compilation: new SyncHook(["compilation", "params"]),
       compile: new SyncHook(["params"]),
+      environment: new SyncHook([]),
+      afterEnvironment: new SyncHook([]),
 			// 其他hook
     }
     this._pluginCompat.tap("Compiler", options => {

@@ -1,5 +1,5 @@
 ## 挂载配置的plugin
-将compiler作为参数传入插件实现的apply方法，使插件可以监听compiler后续的所有事件：
+这一步遍历配置的`plugins`数组，依次调用插件的`apply`方法，并给插件传入`compiler`实例的引用，使插件可以监听`compiler`后续的所有事件：
 ```js
 if (options.plugins && Array.isArray(options.plugins)) {
   for (const plugin of options.plugins) {
@@ -11,6 +11,8 @@ if (options.plugins && Array.isArray(options.plugins)) {
   }
 }
 ```
+
+这里我们结合一个插件`clean-webpack-plugin`，看一看插件的`aplly`方法接收了`compiler`后做了哪些处理。
 
 #### 以clean-webpack-plugin为例
 在clean-webpack-plugin实现的apply方法内调用compiler的plugin方法：

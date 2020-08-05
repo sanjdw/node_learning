@@ -1,4 +1,5 @@
-## 初始化complier的输入输出文件系统以及监视文件系统
+## 设置complier的文件系统
+这一步的操作主要是应用Node.js风格的文件系统到`compiler`对象，以方便后续的文件寻找和读取。
 
 new NodeEnvironmentPlugin().apply(compiler)
 
@@ -24,7 +25,7 @@ class NodeEnvironmentPlugin {
     compiler.watchFileSystem = new NodeWatchFileSystem(
       compiler.inputFileSystem
     );
-    
+
     // 注册NodeEnvironmentPlugin
     compiler.hooks.beforeRun.tap("NodeEnvironmentPlugin", compiler => {
       if (compiler.inputFileSystem === inputFileSystem) inputFileSystem.purge();

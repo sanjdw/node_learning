@@ -1,5 +1,7 @@
 ## webapck构建流程
 
+![webpack构建流程](https://pic.downk.cc/item/5f2a98fe14195aa594f3cd3f.png)
+
 #### 入口文件
 在`/webpack/lib/webpack.js`中定义了webpack方法：
 ```js
@@ -24,7 +26,7 @@ function webpack (options, callback) {
 
     /**
      * 2. 实例化compiler
-     */ 
+     */
     compiler = new Compiler(options.context)
     compiler.options = options
 
@@ -49,10 +51,18 @@ function webpack (options, callback) {
     }
 
     /**
-     * 5. 
+     * 5.
      */
     compiler.hooks.environment.call()
+
+    /**
+     * 6.
+     */
     compiler.hooks.afterEnvironment.call()
+
+    /**
+     * 7. options中其他的配置进行初始化处理
+     */
     compiler.options = new WebpackOptionsApply().process(options, compiler)
   } else {
     throw new Error("Invalid argument: options")
@@ -60,7 +70,7 @@ function webpack (options, callback) {
 
   /**
    * 如果传入callback，compiler.run(callback)
-   */ 
+   */
   if (callback) {
     if (typeof callback !== "function") {
       throw new Error("Invalid argument: callback");
@@ -98,7 +108,7 @@ new NodeEnvironmentPlugin().apply(compiler)
 ```
 
 #### 4. 挂载plugin
-将compiler作为参数传入插件实现的apply方法，使插件可以监听compiler后续的所有事件
+将`compiler`作为参数传入插件实现的`apply`方法，使插件可以监听`compiler`后续的所有事件
 
 #### 钩子
 compiler.hooks.environment.call()
