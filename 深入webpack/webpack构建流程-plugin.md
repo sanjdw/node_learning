@@ -1,5 +1,5 @@
 ## 挂载配置的plugin
-这一步遍历配置的`plugins`数组，依次调用插件的`apply`方法，并给插件传入`compiler`实例的引用，使插件可以监听`compiler`后续的所有事件：
+这一步遍历配置的`plugins`数组，依次调用插件的`apply`方法，并给插件传入`compiler`实例的引用，使插件可以监听`compiler`的生命周期钩子：
 ```js
 if (options.plugins && Array.isArray(options.plugins)) {
   for (const plugin of options.plugins) {
@@ -50,7 +50,7 @@ class CleanWebpackPlugin {
     }
 
     if (hooks) {
-      // compiler的done钩子上注册clean-webpack-plugin回调
+      // compiler的done钩子上注册回调
       hooks.done.tap('clean-webpack-plugin', stats => {
         this.handleDone(stats);
       });
@@ -60,5 +60,32 @@ class CleanWebpackPlugin {
       });
     }
   }
+
+  handleDone(stats) {
+    const assets = stats.toJson().assets || [];
+    const assetList = assets.map(asset => {
+      return asset.name;
+    });
+    const staleFiles = this.currentAssets.filter(previousAsset => {
+      const assetCurrent = assetList.includes(previousAsset) === false;
+      return assetCurrent;
+    });
+
+    this.currentAssets = assetList.sort();
+    const removePatterns = [];
+
+    if (this.cleanStaleWebpackAssets === true && staleFiles.length !== 0) {
+      removePatterns.push(...staleFiles);
+    }
+    if (this.cleanAfterEveryBuildPatterns.length !== 0) {
+      removePatterns.push(...this.cleanAfterEveryBuildPatterns);
+    }
+
+    if (removePatterns.length !== 0) {
+      this.removeFiles(removePatterns);
+    }
+  }
 }
 ```
+
+可以看到，`CleanWebpackPlugin`在`apply`方法内为`compiler`的生命周期钩子`done`注册了回调，而`complier.hooks.done`钩子的声明及触发是在`compiler`的初始化阶段就定义好了的。
