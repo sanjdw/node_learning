@@ -1,4 +1,4 @@
-## compiler构建相关方法
+## compiler的方法
 我们已经知道，`compiler.hooks`上维护了生命周期相关的钩子，这些钩子在webpack构建流程的不同阶段触发：
 ```js
 class Compiler extends Tapable {
@@ -17,7 +17,7 @@ class Compiler extends Tapable {
       compile: new SyncHook(["params"]),
       environment: new SyncHook([]),
       afterEnvironment: new SyncHook([]),
-			// 其他hook
+      // 其他hook
     }
   }
 
@@ -29,7 +29,7 @@ class Compiler extends Tapable {
 }
 ```
 
-现在来看一下触发这些钩子的方法。
+接下来我们来看一下`compiler`在构建不同阶段调用的这些方法。
 
 #### run方法
 

@@ -32,7 +32,7 @@ class NodeEnvironmentPlugin {
       compiler.inputFileSystem
     );
 
-    // 订阅了beforeRun钩子的事件
+    // 在beforeRun钩子上注册了回调
     compiler.hooks.beforeRun.tap("NodeEnvironmentPlugin", compiler => {
       if (compiler.inputFileSystem === inputFileSystem) inputFileSystem.purge();
     });
