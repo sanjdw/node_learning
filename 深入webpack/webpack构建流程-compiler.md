@@ -141,4 +141,4 @@ Tapable.prototype.apply = util.deprecate(function apply() {
 
 至此，我们知道了`compiler`的初步初始化过程中，做了以下事情：
 1. 定义了两类钩子：生命周期相关的`compiler.hooks`，`compiler._pluginCompat`
-2. 定义了两类方法：生命周期相关的方法`compiler.run`、`compiler.compile`、`compiler.watch`等，供插件调用的`compiler.plugin`方法。
+2. 定义了两类方法：生命周期相关的`compiler.run`、`compiler.compile`、`compiler.watch`等方法，供插件调用的`compiler.plugin`方法。
