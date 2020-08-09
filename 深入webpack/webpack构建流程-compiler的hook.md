@@ -4,10 +4,29 @@ webpack本质是事件流机制，类似于发布订阅模式，实现这个的�
 1. hook
 2. HookCodeFactory
 
-在分析`compiler`的实例化过程后，我们已经知道，`compiler`实例上有两大类`hook`：生命周期相关钩子和`compiler._pluginCompat`。
+在分析`compiler`的实例化过程后，我们已经知道，`compiler`实例上有两处`hook`：生命周期相关钩子`compiler.hooks`和`compiler._pluginCompat`。
+
+`Tapable`的核心功能就是控制一系列注册回调之间的执行流控制，比如注册了在一个钩子上注册三个回调，可以控制它们是并发的，或者是同步依次执行的，又或者其中一个出错后，后面的回调就不执行了。为此，`Tapable`实现了以下钩子：
+
+![Tapable Hooks](https://pic.downk.cc/item/5f2fb91814195aa594d2c25b.jpg)
+
+`Tapable`的钩子大致可以分为两类：
+#### 同步钩子
+1. `SyncHook`：串同步行，不关心回调方法的返回，在触发钩子之后，会按照注册的先后顺序依次执行回调
+2. `SyncBailHook`：同步串行，如果当前回调方法有返回值，则跳过剩下未执行的回调方法
+3. `SyncWaterfallHook`：同步串行，前一个回调方法的返回值作为参数传递给下一个回调
+4. `SyncLoopHook`：同步串行，如果当前回调有返回值，则继续执行这个回调方法，否则执行后续的回调方法
+
+#### 异步钩子
+1. `AsyncParallelHook`：异步并行，不关心回调方法的返回
+2. `AsyncParallelBailHook`：异步并行，如果当前回调方法有返回值，则跳过剩下未执行的回调方法
+3. `AsyncSeriesHook`：异步串行，不关心回调方法的参数
+4. `AsyncSeriesBailHook`：异步串行，回调方法的参数不为空，就会直接执行callAsync等触发函数绑定的回调函数
+5. `AsyncSeriesLoopHook`：异步串行
+6. `AsyncSeriesWaterfallHook`：异步串行，前一个回调方法的返回值作为参数传递给下一个回调
 
 #### Hook类
-上面提到的两类钩子都继承自`Hook`：
+上面提到的所有钩子都继承自`Hook`：
 ```js
 class Hook {
   constructor(args) {
@@ -175,8 +194,7 @@ this.promise = this._promise
 this.callAsync = this._callAsync
 ```
 
-并且后面会发现子类上也没有`call`、`callAsync`、`promise`方法的重写。至于webpack为什么这么处理用于触发在钩子注册的回调的方法，暂时先放到一边。现在先来看`Hook.prototype`上的这三个方法：
-
+接下来就来看一看`Hook.prototype`上的这三个通过属性拦截器定义的方法：
 ```js
 class Hook {
   constructor () {}
@@ -217,7 +235,7 @@ Object.defineProperties(Hook.prototype, {
 })
 ```
 
-这里通过属性拦截器的方式为`Hook.prototype`定义了`_call`、`_callAsync`、`_promise`方法，它们是通过`createCompileDelegate`方法生成的函数。以`_call`为例，`createCompileDelegate('call', 'sync')`方法会将钩子实例的`call`方法重写为`_createCall('sync')`：
+这里通过属性拦截器的方式为`Hook.prototype`定义了`_call`、`_callAsync`、`_promise`方法，它们是通过`createCompileDelegate`方法生成的函数。以`_call`为例，`createCompileDelegate('call', 'sync')`方法会将钩子实例的`call`方法重写为执行`_createCall('sync')`返回的结果：
 ```js
 this['call'] = this._createCall('sync')
 return this['call'](...args)
@@ -236,14 +254,9 @@ this._call = function lazyCompileHook(...args) {
 }
 ```
 
-这意味着，第一次调用钩子的`call`方法（其实是`_call`）时，钩子的`call`方法会被生成的方法重新赋值，并执行：
-```js
-this['call'](...args)
-```
+这意味着，第一次通过`_call`调用钩子的这个`call`方法，是通过`_createCall` -> `compile`生成的。后面再调用钩子的`call`方法，就不要通过`_call`了，因为第一次调用`call`的同时重写了`call`。
 
-后面再执行钩子的`call`方法实际上执行的都是`this._createCall('sync')`生成的方法的这个方法。而`_createCall`又调用了子类的`compile`方法，所以钩子上的`call`方法其实都是由子类自行在`comile`中实现的。
-
-再次回到`Hook`中，在注册回调的方法`tap`、`tapAsync`、`tapPromise`以及注册拦截器的`intercept`方法中，发现它们都会调用`_resetCompilation`：
+再次回到`Hook`中，在注册回调的方法`tap`/`tapAsync`/`tapPromise`以及注册拦截器的`intercept`方法中，发现它们都会调用`_resetCompilation`：
 ```js
 _resetCompilation() {
   this.call = this._call
@@ -253,10 +266,10 @@ _resetCompilation() {
 ```
 
 这里有两个问题：
-1. 一是`call`、`callAsync`、`promise`等方法为什么不直接在子类中实现，而是采用这种通过在`Hook`中调用子类的`compile`的方式生成，且在注册回调、拦截器时重新赋值？
-2. 二是`_call`、`_callAsync`、`_promise`方法没有直接被定义在原型上，而是采用属性拦截器的方式？
+1. 一是`_call`/`_callAsync`/`_promise`方法没有直接被定义在原型上，而是采用属性拦截器的方式？
+2. 二是`call`/`callAsync`/`promise`等方法为什么不直接在子类中实现，而是采用这种通过在`Hook`中调用子类的`compile`的方式生成，且在注册回调、拦截器时重新赋值？
 
-第一个问题，简单的说是因为我们的插件彼此有着联系，所以我们用了这么多类型的钩子来控制这些联系，一个钩子上每次有新的回调或拦截器被注册时，我们就要重新排布回调和拦截器的调用顺序，因此需要重写`call`方法。这两个问题我们后面再来解答。
+简单的说是因为插件彼此有着联系，所以用了这么多类型的钩子来控制这些联系，一个钩子上每次有新的回调或拦截器被注册时，就要重新排布回调和拦截器的调用顺序，因此需要重写`call`方法，并通过属性拦截器将生成`call`的方法记录在`_call`上。这个逻辑后面还会再次讲到，不能理解的话暂时先记住。
 
 #### 以SyncBailHook为例
 ```js
@@ -294,11 +307,11 @@ class SyncBailHook extends Hook {
 }
 ```
 
-在这里，我们发现子类中并没有重写父类的`call`、`callAsync`、`promise`方法。前文已经提到：
-1. 钩子触发回调的方法通过`Hook`的`_createCall`调用子类的`compile`生成。
+在这里，正如前文已经提到的，我们发现子类中确实没有重写父类的`call`/`callAsync`/`promise`方法：
+1. 钩子触发回调的方法通过`Hook`的`_createCall`调用子类的`compile`生成
 2. 钩子根据各自的需要继承了父类`Hook`的注册回调方法同时禁用了部分不支持的注册回调的方法
 
-最需要关注的是子类的`compiler`方法：
+需要关注的是子类的`compiler`方法：
 ```js
 compile(options) {
   factory.setup(this, options)
@@ -306,7 +319,9 @@ compile(options) {
 }
 ```
 
-这里又使用了`HookCodeFactory`的概念。
+前文已经提到过，`comile`方法是用于生成`call`/`callAsync`/`promise`方法的。在这里可以看到，不同的钩子在调用`compile`方法时使用了不同的工厂类实例的`create`方法。
+
+在`SyncBailHookCodeFactory`定义中可以发现它只提供了`content`方法，其他变量和方法继承自`HookCodeFactory`。
 
 #### HookCodeFactory
 ```js
@@ -704,3 +719,23 @@ class HookCodeFactory {
   }
 }
 ```
+
+在`HookCodeFactory`中我们找到了`setup`方法的定义：
+```js
+setup(instance, options) {
+  instance._x = options.taps.map(t => t.fn)
+}
+```
+
+结合`SyncBailHook`的`compile`方法：
+```js
+compile(options) {
+  // this指向钩子实例
+  factory.setup(this, options)
+  return factory.create(options)
+}
+```
+
+这里再次遇到了`Hook`构造函数中的`_x`，现在我们知道它是什么了——执行钩子的工厂类实例的`setup`方法时，在钩子上注册的回调会被全部推入钩子的`_x`数组中。
+
+接着是`create`方法，这里通过`new Function`来创建`call`/`callAsync`/`promise`的静态脚本。
