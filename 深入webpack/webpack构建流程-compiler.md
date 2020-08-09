@@ -52,7 +52,7 @@ class Compiler extends Tapable {
     }
   }
 
-  // 定义了
+  // 构建流程中相关的方法
   watch(watchOptions, handler) {}
   run(callback) {}
   purgeInputFileSystem() {}

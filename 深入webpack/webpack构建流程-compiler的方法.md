@@ -1,5 +1,13 @@
 ## compiler的方法
-我们已经知道，`compiler.hooks`上维护了生命周期相关的钩子，这些钩子在webpack构建流程的不同阶段触发：
+在掌握了`compiler`上的各种钩子及其机制之后，接下来的任务是了解webpack的流程：因为我们需要知道将回调注册在哪些钩子上，就需要知道这些钩子都在哪些阶段触发。
+
+开始之前，应该关心如下几点：
+1. webpack的编译过程主要有哪些阶段
+2. webpack是如何从entry开始解析出整个依赖树的
+3. `loaders`是在何时被调用的
+4. 最终是如何知道要生成几个文件，以及每个文件的内容的
+
+
 ```js
 class Compiler extends Tapable {
   constructor () {
