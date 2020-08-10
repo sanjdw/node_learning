@@ -745,3 +745,59 @@ compile(options) {
 到这里整一个`new SyncHook()`->`tap`->`call`的流程就结束了。主要的比较有趣的点在执行`call`的时候会进行缓存。
 
 webpack通过`tapable`这种巧妙的钩子设计很好的将实现与流程解耦开来。
+
+#### _pluginCompat钩子的作用
+```js
+function Tapable () {
+  this._pluginCompat = new SyncBailHook(["options"])
+	this._pluginCompat.tap(
+		{ name: "Tapable camelCase", stage: 100 },
+		options => {
+			options.names.add(
+				options.name.replace(/[- ]([a-z])/g, (str, ch) => ch.toUpperCase())
+			)
+		}
+	)
+  this._pluginCompat.tap(
+    { name: "Tapable this.hooks", stage: 200 },
+    options => {
+      let hook
+      for (const name of options.names) {
+        hook = this.hooks[name];
+        if (hook !== undefined) {
+          break
+        }
+      }
+      if (hook !== undefined) {
+        const tapOpt = {
+          name: options.fn.name || "unnamed compat plugin",
+          stage: options.stage || 0
+        }
+        if (options.async) hook.tapAsync(tapOpt, options.fn)
+        else hook.tap(tapOpt, options.fn)
+        return true
+      }
+    }
+  )
+}
+
+Tapable.prototype.plugin = util.deprecate(function plugin(name, fn) {
+	if (Array.isArray(name)) {
+		name.forEach(function(name) {
+			this.plugin(name, fn)
+		}, this)
+		return
+	}
+	this._pluginCompat.call({
+		name: name,
+		fn: fn,
+		names: new Set([name])
+	})
+})
+```
+
+`Tapable`实例化`compiler`时定义了一个`_pluginCompat`，这是一个同步保险钩子，并且注册了两个回调，在执行`compiler.plugin`的时候触发了钩子从而执行这两个回调：
+1. 将传入的插件名`camelize`化
+2. 然后在`compiler.hooks`上寻找对应的钩子实例，并且调用`tap`方法真正注册的回调
+
+这么做的目的是什么？老版本webpack的插件的注册与现在有所不同，不是通过`compiler.hooks.**`注册回调的，这种方式兼容了老的webpack插件，将它们的回调注册到`compiler`对应的钩子上。
