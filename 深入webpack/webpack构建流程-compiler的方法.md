@@ -9,7 +9,9 @@
 
 `compiler`上的方法有两处来源：
 1. `Compiler`中，构建流程相关
-2. `Tapable`中，
+2. `Tapable`原型——`plugin`和`apply`，提供给插件使用
+
+重点分析`Compiler`中定义的构建流程相关的方法。
 
 ```js
 class Compiler extends Tapable {
@@ -108,8 +110,25 @@ run(callback) {
 }
 ```
 
+#### compile方法
+```js
+compile(callback) {
+  const params = this.newCompilationParams()
+  this.hooks.beforeCompile.callAsync(params, err => {
+    this.hooks.compile.call(params)
+    const compilation = this.newCompilation(params)
 
+    this.hooks.make.callAsync(compilation, err => {
+      compilation.finish(err => {
+        compilation.seal(err => {
+          this.hooks.afterCompile.callAsync(compilation, err => {
+            return callback(null, compilation)
+          })
+        })
+      })
+    })
+  })
+}
+```
 
 #### emitAssets方法
-
-#### compile方法
