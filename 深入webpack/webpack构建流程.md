@@ -57,7 +57,7 @@ function webpack (options, callback) {
     compiler.hooks.afterEnvironment.call()
 
     /**
-     * 6. options中其他的配置进行初始化处理
+     * 6. 根据option配置注册各种插件
      */
     compiler.options = new WebpackOptionsApply().process(options, compiler)
   } else {
@@ -65,7 +65,7 @@ function webpack (options, callback) {
   }
 
   /**
-   * 7. 如果传入callback，compiler.run(callback) 返回compiler
+   * 7. 如果传入callback，通过compiler.run(callback)开启构建工作
    */
   if (callback) {
     if (typeof callback !== "function") {
@@ -119,12 +119,12 @@ compiler.hooks.environment.call()
 compiler.hooks.afterEnvironment.call()
 ```
 
-#### 6. options的其他的配置进行初始化处理
+#### 6. 根据option配置注册各种插件
 ```js
 compiler.options = new WebpackOptionsApply().process(options, compiler)
 ```
 
-#### 7. 返回compiler，如果有callback传入则通过compiler.run走构建流程
+#### 7. 返回compiler，如果有callback传入则通过compiler.run启动构建工作
 ```js
 if (callback) {
   if (

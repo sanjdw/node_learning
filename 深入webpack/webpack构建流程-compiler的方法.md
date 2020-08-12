@@ -42,6 +42,8 @@ class Compiler extends Tapable {
 }
 ```
 
+![webpack构建流程](https://pic.downk.cc/item/5f33cb4d14195aa594ffd8b3.png)
+
 接下来我们来看一下`compiler`在构建的不同阶段用到的这些方法。
 
 #### run方法
