@@ -55,6 +55,46 @@ class WebpackOptionsApply extends OptionsApply {
 }
 ```
 
-主要工作可以分为两类：注册内置插件、触发某些钩子。
+`WebpackOptionsApply.process`主要工作可以分为两类：注册一系列内置插件、触发某些钩子。
+
+这里拎出两处插件分析：`EntryOptionPlugin`和`LoaderPlugin`。
+
+#### EntryOptionPlugin
+```js
+new EntryOptionPlugin().apply(compiler)
+compiler.hooks.entryOption.call(options.context, options.entry)
+```
+
+这里注册了`EntryOptionPlugin`插件，然后触发了注册在`entryOption`钩子上的回调，在`EntryOptionPlugin`的`apply`方法内可以发现：
+```js
+const itemToPlugin = (context, item, name) => {
+	if (Array.isArray(item)) {
+		return new MultiEntryPlugin(context, item, name)
+	}
+	return new SingleEntryPlugin(context, item, name)
+}
+class EntryOptionPlugin {
+  apply(compiler) {
+		compiler.hooks.entryOption.tap("EntryOptionPlugin", (context, entry) => {
+			if (typeof entry === "string" || Array.isArray(entry)) {
+				itemToPlugin(context, entry, "main").apply(compiler)
+			} else if (typeof entry === "object") {
+				for (const name of Object.keys(entry)) {
+					itemToPlugin(context, entry[name], name).apply(compiler)
+				}
+			} else if (typeof entry === "function") {
+				new DynamicEntryPlugin(context, entry).apply(compiler)
+			}
+			return true
+		})
+	}
+}
+```
+
+
+#### LoaderPlugin
+```js
+new LoaderPlugin().apply(compiler)
+```
 
 `process`方法执行完，所有的回调都注册在了相应的钩子上，等待后续编译过程中钩子的触发。
