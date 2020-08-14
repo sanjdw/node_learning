@@ -60,12 +60,7 @@ class WebpackOptionsApply extends OptionsApply {
 这里拎出两处插件分析：`EntryOptionPlugin`和`LoaderPlugin`。
 
 #### EntryOptionPlugin
-```js
-new EntryOptionPlugin().apply(compiler)
-compiler.hooks.entryOption.call(options.context, options.entry)
-```
-
-这里注册了`EntryOptionPlugin`插件，然后触发了注册在`entryOption`钩子上的回调，在`EntryOptionPlugin`的`apply`方法内可以发现：
+在`EntryOptionPlugin`内可以发现它在`entryOption`钩子上注册了回调：
 ```js
 const itemToPlugin = (context, item, name) => {
 	if (Array.isArray(item)) {
@@ -91,6 +86,44 @@ class EntryOptionPlugin {
 }
 ```
 
+当`entryOption`钩子被触发时，会有入口插件将被注册，入口插件的类型取决于构建入口配置，若其为单入口时，有：
+```js
+new SingleEntryPlugin(context, entry, 'main').apply(compiler)
+```
+
+继续看`SingleEntryPlugin`：
+```js
+class SingleEntryPlugin {
+	apply(compiler) {
+		compiler.hooks.compilation.tap("SingleEntryPlugin",
+			(compilation, { normalModuleFactory }) => {
+				compilation.dependencyFactories.set(
+					SingleEntryDependency,
+					normalModuleFactory
+				)
+			}
+		)
+
+		compiler.hooks.make.tapAsync("SingleEntryPlugin",
+			(compilation, callback) => {
+				const { entry, name, context } = this
+				const dep = SingleEntryPlugin.createDependency(entry, name)
+				compilation.addEntry(context, dep, name, callback)
+			}
+		)
+	}
+}
+```
+
+`SingleEntryPlugin`又在`compilation`和`make`钩子上注册回调，分别
+
+结合`WebpackOptionsApply`中的这段代码：
+```js
+new EntryOptionPlugin().apply(compiler)
+compiler.hooks.entryOption.call(options.context, options.entry)
+```
+
+这里先是注册了`EntryOptionPlugin`插件，紧接着触发`entryOption`钩子，相当于在`compilation`、`make`钩子上注册回调。
 
 #### LoaderPlugin
 ```js
