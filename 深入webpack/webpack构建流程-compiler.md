@@ -5,7 +5,7 @@ compiler = new Compiler(options.context)
 
 `compiler`对象上记录了完整的webpack环境信息，以便注册和插件调用。在webpack从启动到结束，`compiler`只会生成一次。
 
-#### Compiler类
+### Compiler类
 `Compiler`模块是webpack的支柱引擎，它继承自`Tapable`类：
 ```js
 class Compiler extends Tapable {
@@ -70,7 +70,7 @@ class Compiler extends Tapable {
 
 接下来是`Compiler`的父类`Tapable`，我们来看一看`compiler`的实例化还有哪些操作。
 
-#### Tapable类
+### Tapable类
 ```js
 function Tapable () {
   this._pluginCompat = new SyncBailHook(["options"])

@@ -1,4 +1,4 @@
-#### 引子
+### 引子
 我们都知道，JavaScript从诞生之日起就是一门单线程的非阻塞的脚本语言。这是由其最初的用途来决定的：与浏览器交互。
 
 单线程意味着JavaScript代码在执行的任何时候，都只有一个主线程来处理所有的任务。
@@ -13,7 +13,7 @@
 <!-- - EventLoop是什么？
 - macrotask 和 microtask 是什么，它们有何区别 -->
 
-#### eventLoop
+### eventLoop
 1. 所有同步任务都在主线程上执行，形成一个**执行栈**（execution context stack）。
 2. 主线程之外，还存在 **"任务队列"**(task queue)。只要异步任务有了运行结果，就在"任务队列"之中放置一个**事件**。
 3. 一旦"执行栈"中的所有同步任务执行完毕，JavaScript引擎就会读取"任务队列"，看看里面有哪些事件。那些对应的异步任务，于是结束等待状态，进入执行栈，开始执行。
@@ -21,7 +21,7 @@
 
 
 ___
-#### 参考
+### 参考
 1. [](http://lynnelv.github.io/js-event-loop-browser)
 2. [](https://github.com/amandakelake/blog/issues/26)
 3. [](https://juejin.im/post/5df631afe51d45581269a7b5)

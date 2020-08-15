@@ -1,4 +1,4 @@
-#### apply
+### apply
 > apply()方法调用一个指定运行时上下文以及具有类数组形式的实参的函数
 
 来自MDN的定义，读起来还是很拗口，看一下代码就可以明白：
@@ -21,7 +21,7 @@ i'm a boy
 
 可以看出，`apply`用于改变绑定函数的运行时环境，且与`bind`不同的是，`apply`直接调用函数而不是返回新函数。
 
-#### 模拟apply
+### 模拟apply
 模拟的主要思路是将绑定函数作为属性添加给`context`并通过`context`调用绑定函数：
 ```js
 Function.prototype.Apply = function (context, args) {
@@ -59,7 +59,7 @@ Function.prototype.Apply = function (context, args) {
 }
 ```
 
-#### call
+### call
 `call`的模拟实现与`appply`相似，不同的只是方法的参数需要另外收集：
 ```js
 Function.prototype.Call = function (context) {

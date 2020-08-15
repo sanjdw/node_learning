@@ -11,13 +11,13 @@ webpack本质是事件流机制，类似于发布订阅模式，实现这个的�
 ![Tapable Hooks](https://pic.downk.cc/item/5f2fb91814195aa594d2c25b.jpg)
 
 `Tapable`的钩子大致可以分为两类：
-#### 同步钩子
+### 同步钩子
 1. `SyncHook`：串同步行，不关心回调方法的返回，在触发钩子之后，会按照注册的先后顺序依次执行回调
 2. `SyncBailHook`：同步串行，如果当前回调方法有返回值，则跳过剩下未执行的回调方法
 3. `SyncWaterfallHook`：同步串行，前一个回调方法的返回值作为参数传递给下一个回调
 4. `SyncLoopHook`：同步串行，如果当前回调有返回值，则继续执行这个回调方法，否则执行后续的回调方法
 
-#### 异步钩子
+### 异步钩子
 1. `AsyncParallelHook`：异步并行，不关心回调方法的返回
 2. `AsyncParallelBailHook`：异步并行，如果当前回调方法有返回值，则跳过剩下未执行的回调方法
 3. `AsyncSeriesHook`：异步串行，不关心回调方法的参数
@@ -25,7 +25,7 @@ webpack本质是事件流机制，类似于发布订阅模式，实现这个的�
 5. `AsyncSeriesLoopHook`：异步串行
 6. `AsyncSeriesWaterfallHook`：异步串行，前一个回调方法的返回值作为参数传递给下一个回调
 
-#### Hook类
+### Hook类
 上面提到的所有钩子都继承自`Hook`：
 ```js
 class Hook {
@@ -271,7 +271,7 @@ _resetCompilation() {
 
 简单的说是因为插件彼此有着联系，所以用了这么多类型的钩子来控制这些联系，一个钩子上每次有新的回调或拦截器被注册时，就要重新排布回调和拦截器的调用顺序，因此需要重写`call`方法，并通过属性拦截器将生成`call`的方法记录在`_call`上。这个逻辑后面还会再次讲到，不能理解的话暂时先记住。
 
-#### 以SyncBailHook为例
+### 以SyncBailHook为例
 ```js
 class SyncBailHookCodeFactory extends HookCodeFactory {
   content({ onError, onResult, resultReturns, onDone, rethrowIfPossible }) {
@@ -323,7 +323,7 @@ compile(options) {
 
 在`SyncBailHookCodeFactory`定义中可以发现它只提供了`content`方法，其他变量和方法继承自`HookCodeFactory`。
 
-#### HookCodeFactory
+### HookCodeFactory
 ```js
 class HookCodeFactory {
   constructor(config) {
@@ -746,7 +746,7 @@ compile(options) {
 
 webpack通过`tapable`这种巧妙的钩子设计很好的将实现与流程解耦开来。
 
-#### _pluginCompat钩子的作用
+### _pluginCompat钩子的作用
 ```js
 function Tapable () {
   this._pluginCompat = new SyncBailHook(["options"])

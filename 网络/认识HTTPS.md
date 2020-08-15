@@ -22,7 +22,7 @@
 
 ![TLS握手流程](https://pic.downk.cc/item/5ec00e81c2a9a83be55d6ca6.png)
 
-#### 1. 客户端发出请求（ClientHello）
+### 1. 客户端发出请求（ClientHello）
 客户端发出加密通信请求，在这一步客户端在请求中主要提供以下信息：
 1. 支持的`TLS`协议版本
 2. 客户端生成的一个随机数`sessionKey1`
@@ -31,7 +31,7 @@
 
 注意，在这一步还处于明文传输阶段。
 
-#### 2. 服务端响应（ServerHello）
+### 2. 服务端响应（ServerHello）
 收到客户端的加密通信请求后，服务端保留`sessionKey1`，并响应以下内容：
 1. 确认使用的`TLS`协议版本
 2. 服务端生成的一个随机数`sessionKey2`
@@ -54,7 +54,7 @@
 
 仍然是明文传输。
 
-#### 3. 客户端响应
+### 3. 客户端响应
 客户端收到服务端响应后，会按照以下步骤依次验证证书的合法性，校验不通过则不再继续后续步骤：
 1. 读取证书中的证书所有者、有效期等信息进行校验
 2. 查找操作系统中内置的受信任的证书发布机构CA，与证书中的CA比对
@@ -72,7 +72,7 @@
 
 在这一步中，`sessionKey3`已经是通过公钥`Pkey`加密的了，此时客户端通过`sessionKey1`+`sessionKey2`+`sessionKey3`可以计算出本次会话使用的会话密钥`SessionKey`。
 
-#### 4. 服务器最后响应
+### 4. 服务器最后响应
 服务端使用私钥解密，提出第三个`sessionKey3`后，通过`sessionKey1`+`sessionKey3`+`sessionKey3`，计算生成本次会话最终使用的会话密钥`SessionKey`，然后向客户端发送以下信息：
 1. 编码改变确认通知
 2. 服务器握手结束通知，表示服务器的握手阶段已经结束
@@ -91,7 +91,7 @@
 关于`HTTPS`的基本原理就总结到这里，关于`HTTPS`性能优化的问题以后有时间再写。
 
 ___
-#### 参考
+### 参考
 1. [HTTPS 原理详解](http://liuduo.me/2018/05/14/https-detail/)
 2. [HTTPS 温故知新（三） —— 直观感受 TLS 握手流程(上)](https://halfrost.com/https_tls1-2_handshake/)
 3. [HTTPS篇之SSL握手过程详解](https://razeencheng.com/post/ssl-handshake-detail)

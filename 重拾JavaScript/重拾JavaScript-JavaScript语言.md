@@ -16,7 +16,7 @@ int age = 12;
 ```
 如果尝试为变量`age`赋值为其他类型值，则编译出错。
 
-> #### 弱/强类型，指的是是否允许不兼容的类型进行运算
+> ### 弱/强类型，指的是是否允许不兼容的类型进行运算
 
 在JavaScript中允许不同数据类型的变量共同运算：
 ```js
@@ -54,19 +54,19 @@ Python和Java既有编译的实现，也有解释的实现。Python/Java源码�
 JavaScript一般被认为是解释型语言，它是完全的**一边解释一边执行**，又叫**即时编译**。它既不会有中间代码产生，也不会有目标代码产生，这个过程由宿主环境（比如浏览器或Node.js的JavaScript虚拟机V8）处理。
 
 ## 关于单线程
-#### 1. JavaScript是单线程的
+### 1. JavaScript是单线程的
 ```js
 while (true) {}
 console.log(1)
 ```
 这样的代码运行在浏览器或Node.js中，由于JavaScript是单线程的，`while (true) {}`阻塞了当前JavaScript执行线程，`console.log(1)`永远得不到执行。
 
-#### 2. Web Worker
+### 2. Web Worker
 单线程的缺点是无法充分利用多核CPU资源，CPU密集型计算可能会导致I/O阻塞，以及出现错误可能会导致应用崩溃。
 
 **HTML5** 制定了Web Worker标准，为JavaScript创造了多线程环境，允许JavaScript主线程创建Worker线程，将一些任务分配给Worker线程运行。在主线程运行的同时，Worker线程在后台运行，互不干扰。这样的好处是一些计算密集型、高延迟的任务，被Worker线程承担，主线程（负责UI以及交互）的运行就会更加流畅。
 
-#### 3. Node.js的“多线程”
+### 3. Node.js的“多线程”
 对于Node.js，其JavaScript执行线程（开发者编写的JavaScript代码）是单线程的，而Node.js进程是多线程的。要了解Nodejs.js进程有哪些线程，需要先了解Node.js内部架构：
 
 ![Node.js结构](https://image-static.segmentfault.com/411/182/4111821277-577a300546802_articlex)
@@ -92,7 +92,7 @@ Node.js启动后将会创建V8实例，V8实例本身是多线程的：
 
 在单核CPU系统上，我们采用**单进程 + 单线程**的模式来开发，而在多核CPU系统上，为了提高对CPU的利用率，可以通过`child_process.fork`开启多个进程，即**多进程 + 单线程**模式。
 
-#### 4. 浏览器不是单线程的，它甚至可能是多进程的
+### 4. 浏览器不是单线程的，它甚至可能是多进程的
 单进程架构是指浏览器所有功能模块都运行在同一个进程中，这些模块包括网络、插件、JavaScript运行环境、渲染引擎和页面等。
 
 ![单进程浏览器架构](https://pic.downk.cc/item/5e63a50898271cb2b8f08f7e.png)
@@ -106,7 +106,7 @@ Node.js启动后将会创建V8实例，V8实例本身是多线程的：
 有关浏览器的工作原理，会写在另外一篇笔记里。
 
 ___
-#### 参考
+### 参考
 1. [什么是解释型语言？](https://www.zhihu.com/question/268303059)
 2. [Java是编译型语言还是解释型语言？](https://www.zhihu.com/question/19608553)
 3. [虚拟机随谈：解释器，树遍历解释器，基于栈与基于寄存器](https://www.iteye.com/blog/rednaxelafx-492667)

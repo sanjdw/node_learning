@@ -5,7 +5,7 @@
 
 ![git三个工作区](https://pic.downk.cc/item/5e9fcd63c2a9a83be547667b.png)
  
-#### 查看commit历史记录
+### 查看commit历史记录
 ```git
 git log
 ```
@@ -31,17 +31,17 @@ git log --pretty=online
 
 ![git log --pretty=online](https://pic.downk.cc/item/5e9fde76c2a9a83be554f215.jpg) -->
 
-#### 查看命令历史记录
+### 查看命令历史记录
 ```git
 git reflog
 ```
 
-#### 撤销对文件的修改
+### 撤销对文件的修改
 ```git
 git checkout -- [filename]  
 ```
 
-#### 创建分支
+### 创建分支
 ```git
 git branch -b [branchname]
 // 等价于下面
@@ -49,13 +49,13 @@ git branch [branchname]
 git checkout [branchname]
 ```
 
-#### 从指定分支拉代码
+### 从指定分支拉代码
 ```git
 git clone -b [branchname] [gitAddress]
 ```
 
 ___
-#### <font color="red">版本回退</font>
+### <font color="red">版本回退</font>
 ```git
 git reset [mode] [commit]
 ```
@@ -87,7 +87,7 @@ HEAD引用指向指定`commit`，并且暂存区、工作区全部重置
   这个功能一般配合`git reflog`命令使用。
 
 ___
-#### <font color="red">移植commit：cherry-pick</font>
+### <font color="red">移植commit：cherry-pick</font>
 1. 找到需要移植的commit对应的哈希值（如：4946569a3067c4c7f7b483034cbb64b42ced0156）
 2. 切到需要此次commit的branch(如 git checkout dev)
 3. 在dev分支:
@@ -99,14 +99,14 @@ ___
 使用的场景——有的时候在某个分支上commit完之后发现需求开发在错误的分支上，可以切到目的bracn根据commit对应的`hash`将commit移植过来。
 
 ___
-#### 合并分支
+### 合并分支
 假设现在在dev分支上，要把代码合到master上
 ```git
 git checkout master
 git merge dev 
 ```
 
-#### 删除分支
+### 删除分支
 删除本地分支
 ```git
 git branch -D [branchname]
@@ -118,7 +118,7 @@ git branch origin :[branchname]
 ```
 
 ___
-#### <font color="red">将本地的修改保存起来，并且将当前代码切换到HEAD提交上</font>
+### <font color="red">将本地的修改保存起来，并且将当前代码切换到HEAD提交上</font>
 什么意思？比如开发了一半要同步远程代码。如果直接`git pull`的话如果有冲突会提示你本地的修改没有`commit`，需要`commit`之后再拉代码。但是功能还未开发完，可以用`git stash`将修改先保存起来。
 
 **`git stash`是针对整个git工程来进行保存的，它不会区分`branch`**。
@@ -142,7 +142,7 @@ git stash pop
 这是一条非常实用的指令，在工作经常遇到这样的情况——正在一个分支进行开发，又要切到另一个分支改bug。
 
 ___
-#### <font color="red">操作最近提交过的commit信息</font>
+### <font color="red">操作最近提交过的commit信息</font>
 1. 合并最近的commit
     ```git
     git commit --amend

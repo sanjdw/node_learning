@@ -14,7 +14,7 @@ if (options.plugins && Array.isArray(options.plugins)) {
 
 这里我们结合一个插件`clean-webpack-plugin`，看一看插件的`aplly`方法接收了`compiler`后做了哪些处理。
 
-#### 以clean-webpack-plugin为例
+### 以clean-webpack-plugin为例
 在clean-webpack-plugin实现的apply方法内调用compiler的plugin方法：
 ```js
 class CleanWebpackPlugin {

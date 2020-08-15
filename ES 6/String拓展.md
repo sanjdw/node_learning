@@ -1,6 +1,6 @@
 ## 字符串拓展
 
-##### 字符串的Unicode表示：
+#### 字符串的Unicode表示：
 在JavaScript中可以用`\uxxxx`的形式表示字符，码点范围为`\u0000`~`\uFFFF`，超出这个范围的字符要用占两个字节：
 ```
 	"\uD842\uDFB7"
@@ -13,7 +13,7 @@
 	//字符  "吉"
 ```
 
-#### includes(),startsWith(),endWith()
+### includes(),startsWith(),endWith()
 在ES6之前，只有一个`indexOf`方法可以直接使用去判断一个字符串是否包含另一个字符串，在ES6中，新增了三个方法：
 ```js
 var s = 'Hello world!';
@@ -30,13 +30,13 @@ s.endsWith('Hello', 5) // true
 s.includes('Hello', 6) // false
 ```
 
-#### repeat()
+### repeat()
 repeat方法返回一个新字符串，表示将原字符串重复n次。
 ```js
 "hello".repeat(3) //"hellohellohello"
 ```
 
-#### 模板字符串
+### 模板字符串
 传统JavaScript中，输出模板：
 ```js
 //变量拼接字符串
@@ -65,7 +65,7 @@ function fn() {
 //foo Hello World bar
 ```
 
-#### 标签模板
+### 标签模板
 ```js
 function tag(arg1,arg2,arg3){
 	// ...

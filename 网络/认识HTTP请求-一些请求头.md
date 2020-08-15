@@ -1,4 +1,4 @@
-#### Content-Encoding内容编码
+### Content-Encoding内容编码
 `Accept-Encoding`和`Content-Encoding`是HTTP中用来对「采用何种编码格式传输正文」进行协定的一对头部字段。
 
 它的工作原理大概是：
@@ -12,7 +12,7 @@
 
 内容编码目的是优化传输内容大小。一般对于文本类响应是否开启了内容压缩，是我们做性能优化时首先要检查的重要项目；而对于图片类型资源 (还有视频文件)，这类文件本身已经是高度压缩过的二进制文件，开启`gzip`压缩效果微乎其微且会浪费`CPU`资源。
 
-#### Transfer-Encoding传输编码
+### Transfer-Encoding传输编码
 上文已经讲到到，`Content-Encoding`通常用于对实体内容进行压缩编码，目的是优化传输。而`Transfer-Encoding`则是用来改变报文的格式，它不会减小传输体积的大小，反而会是传输体积增大。在介绍`Transfer-Encoding`之前，我们先来看看`Content-Length`。
 
 我们知道HTTP运行在TCP连接之上，而TCP的三次握手连接机制导致TCP连接的创建成本较高。为了尽可能的提高HTTP性能，`HTTP/1.1`规定所有连接都必须是持久的，除非显式地在头部加上`Connection: close`。持久连接的引入又带来了另一个问题——在`HTTP/1.1`之前，一个HTTP响应完成时服务端会通过响应头部的`Connection: close`告诉客户端HTTP响应完成了并且关闭TCP连接，但在`HTTP/1.1`中由于持久连接的需要，客户端如何判断一个HTTP响应是否结束了？
@@ -23,10 +23,10 @@
 
 好了，到这里，`Transfer-Encoding`终于可以登场了。
 
-#### Referrer
+### Referrer
 
-#### Content-Disposition
+### Content-Disposition
 
-#### 参考
+### 参考
 1. [Content-Encoding](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Encoding)
 2. []()

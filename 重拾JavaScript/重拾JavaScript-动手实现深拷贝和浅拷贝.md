@@ -43,7 +43,7 @@ d = 'world'
 ## 拷贝
 当我们从一个变量拷贝出另一个变量时，原始类型数据和引用类型数据的表现是不同的。
 
-#### 原始类型
+### 原始类型
 ```js
 var name = 'hello'
 var name2 = name
@@ -53,7 +53,7 @@ var name2 = name
 
 ![原始类型的拷贝](https://pic.downk.cc/item/5e5d439498271cb2b8ebd601.jpg)
 
-#### 引用类型
+### 引用类型
 ```js
 var obj = { name: 'hello' }
 var obj2 = obj
@@ -92,7 +92,7 @@ const gates = deepCopy(bill)
 
 ![深拷贝](https://pic.downk.cc/item/5e5e88ff98271cb2b8873ae9.jpg)
 
-#### JSON 实现深拷贝
+### JSON 实现深拷贝
 最简单的深拷贝实现——通过借助`JSON.stringify`将对象转为JSON字符串，然后再反转为JavaScript对象，这种方法在业务开发中适用于大多数场景：
 ```js
 function Person (name) {
@@ -129,7 +129,7 @@ console.log(copy)
 
 ![JSON error](https://pic.downk.cc/item/5e5e765e98271cb2b86b5b01.jpg)
 
-#### 实现一个完善的深拷贝
+### 实现一个完善的深拷贝
 ```js
 function deepCopy (source, map = new Map()) {
   const type = Object.prototype.toString.apply(source).toLowerCase().slice(8, -1)
@@ -163,7 +163,7 @@ function deepCopy (source, map = new Map()) {
 如何解决Map、Set等类型变量的拷贝？
 
 ___
-#### 参考
+### 参考
 1. [你真的掌握变量和类型了吗？](https://juejin.im/post/5cec1bcff265da1b8f1aa08f#heading-6)
 2. [深拷贝与浅拷贝的实现](http://www.alloyteam.com/2017/08/12978/)
 3. [深拷贝-循环引用的处理](https://juejin.im/post/5dd0caea6fb9a01fe736b186)

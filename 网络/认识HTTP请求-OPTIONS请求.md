@@ -6,7 +6,7 @@
 
 那么问题来了，浏览器以什么标准判定一个请求是否可能对服务端数据产生副作用？—— **浏览器将`CORS`请求分为两类：简单请求和非简单请求**，浏览器将非简单请求判定为可能对服务端数据产生副作用的请求处理。
 
-#### 简单请求
+### 简单请求
 成为简单请求需要同时满足下面两个条件：
 1. 请求方法是 `HEAD | GET | POST` 之一；
 2. `HTTP`请求头信息除了浏览器本身自动设置的部分，人为设置的请求头字段不得超出以下集合：
@@ -21,7 +21,7 @@
     - Viewport-Width
     - Width
 
-#### 非简单请求
+### 非简单请求
 与简单请求相对的，满足下面任一件则为非简单请求：
 1. 请求方法是下面之一：
     - PUT
@@ -85,18 +85,18 @@ $.ajax(settings).done(response) => {
     该字段用来指定本次预检请求的响应结果可以被缓存多久。
 
 
-#### 总结
+### 总结
 ![CORS flow](https://pic.downk.cc/item/5e75d9b89d7d586a54e0fd78.jpg)
 
 对于`CORS`非简单请求，浏览器会自动发出方法为`OPTIONS`的预检请求，这意味着——**一个`CORS`非简单请求可能会消耗两个TTL**，作为FE自然要考虑尽量避免这种情况，显然有两个方案：
 1. 通过简单请求发送`CORS`请求，在实际开发中就是尽量避免设置那些会触发预检请求的HTTP请求头部信息。
 2. 通过设置预检请求响应的头部`Access-Control-Max-Age`字段，缓存预检信息。
 
-#### 一个插曲
+### 一个插曲
 在验证上面的触发`CORS`预检请求条件的过程中，发现了那些本可以触发`OPTIONS`的请求在其他浏览器中正常触发了预检，在Chrome浏览器（80.0.3987.149（正式版本）（64 位））中却没有触发预检请求，事实上是chrome发送了预检请但做了隐藏，设置展示参考这里[https://stackoverflow.com/questions/57410051/chrome-not-showing-options-requests-in-network-tab](https://stackoverflow.com/questions/57410051/chrome-not-showing-options-requests-in-network-tab)。
 
 ___
-#### 参考
+### 参考
 1. [预检请求](https://developer.mozilla.org/zh-CN/docs/Glossary/Preflight_request)
 2. [科普一下 CORS 以及如何节省一次 OPTIONS 请求](https://zhuanlan.zhihu.com/p/70032617)
 3. [Chrome not showing OPTIONS requests in Network tab](https://stackoverflow.com/questions/57410051/chrome-not-showing-options-requests-in-network-tab)

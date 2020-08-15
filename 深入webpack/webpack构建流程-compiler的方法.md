@@ -46,23 +46,17 @@ class Compiler extends Tapable {
 
 接下来我们来看一下`compiler`在构建的不同阶段用到的这些方法。
 
-#### run方法
+### run方法
 ```js
 run(callback) {
   if (this.running) return callback(new ConcurrentCompilationError())
 
-  const finalCallback = (err, stats) => {
+  const finalCallback = (stats) => {
     this.running = false
-
-    if (err) {
-      this.hooks.failed.call(err)
-    }
-
-    if (callback !== undefined) return callback(err, stats)
+    if (callback !== undefined) return callback(stats)
   }
 
   const startTime = Date.now()
-
   this.running = true
 
   const onCompiled = (compilation) => {
@@ -72,7 +66,7 @@ run(callback) {
       stats.startTime = startTime
       stats.endTime = Date.now()
       this.hooks.done.callAsync(stats, ()) => {
-        return finalCallback(null, stats)
+        return finalCallback(stats)
       })
       return
     }
@@ -98,7 +92,7 @@ run(callback) {
         stats.startTime = startTime
         stats.endTime = Date.now()
         this.hooks.done.callAsync(stats, ()) => {
-          return finalCallback(null, stats)
+          return finalCallback(stats)
         })
       })
     })
@@ -113,7 +107,7 @@ run(callback) {
   })
 }
 ```
-#### readRecords方法
+### readRecords方法
 用于读取之前的records的方法，这里的records指的是一些数据片段，用于储存多次构建过程中的`module`的标识：
 ```js
 readRecords(callback) {
@@ -134,10 +128,11 @@ readRecords(callback) {
 }
 ```
 
-#### compile方法
+### compile方法
 `compile`是真正进行编译的过程，创建了一个`compilation`，并将`compilation`作为触发`compiler.make`钩子上的注册的回调方法的参数，注册在这些钩子上的函数方法将调用`compilation`上的方法，执行构建。在`compilation`结束（`finish`）和封装（`seal`）完成后，执行传入的回调得以执行，也就是在`compiler.run`中定义的`onCompiled`函数。
 ```js
 compile(callback) {
+  // 创建compilation的参数
   const params = this.newCompilationParams()
   this.hooks.beforeCompile.callAsync(params, ()) => {
     this.hooks.compile.call(params)
@@ -157,9 +152,55 @@ compile(callback) {
 }
 ```
 
+这里创建了
+
 `compiler.compile`钩子上有三个插件注册了回调：`DelegatedPlugin`、`DllReferencePlugin`、`ExternalsPlugin`。
 
-#### emitAssets方法
+### 创建compilation相关的方法
+```js
+newCompilationParams() {
+  const params = {
+    normalModuleFactory: this.createNormalModuleFactory(),
+    contextModuleFactory: this.createContextModuleFactory(),
+    compilationDependencies: new Set()
+  }
+  return params
+}
+
+createCompilation() {
+  return new Compilation(this)
+}
+
+newCompilation(params) {
+  const compilation = this.createCompilation()
+  compilation.fileTimestamps = this.fileTimestamps
+  compilation.contextTimestamps = this.contextTimestamps
+  compilation.name = this.name
+  compilation.records = this.records
+  compilation.compilationDependencies = params.compilationDependencies
+  this.hooks.thisCompilation.call(compilation, params)
+  this.hooks.compilation.call(compilation, params)
+  return compilation
+}
+
+createNormalModuleFactory() {
+  const normalModuleFactory = new NormalModuleFactory(
+    this.options.context,
+    this.resolverFactory,
+    this.options.module || {}
+  )
+  this.hooks.normalModuleFactory.call(normalModuleFactory)
+  return normalModuleFactory
+}
+
+createContextModuleFactory() {
+  const contextModuleFactory = new ContextModuleFactory(this.resolverFactory)
+  this.hooks.contextModuleFactory.call(contextModuleFactory)
+  return contextModuleFactory
+}
+```
+
+### emitAssets方法
 `emitAssets`负责构建资源的输出，其中`emitFiles`是具体输出文件的方法。
 ```js
 emitAssets(compilation, callback) {

@@ -59,7 +59,7 @@ class WebpackOptionsApply extends OptionsApply {
 
 这里拎出两处插件分析：`EntryOptionPlugin`和`LoaderPlugin`。
 
-#### EntryOptionPlugin
+### EntryOptionPlugin
 在`EntryOptionPlugin`内可以发现它在`entryOption`钩子上注册了回调：
 ```js
 const itemToPlugin = (context, item, name) => {
@@ -115,17 +115,10 @@ class SingleEntryPlugin {
 }
 ```
 
-`SingleEntryPlugin`又在`compilation`和`make`钩子上注册回调，分别
+`SingleEntryPlugin`又在`compilation`和`make`钩子上注册回调，接收`compilation`参数，分别调用`compilation.dependencyFactories.set`和`compilation.addEntry`。
 
-结合`WebpackOptionsApply`中的这段代码：
-```js
-new EntryOptionPlugin().apply(compiler)
-compiler.hooks.entryOption.call(options.context, options.entry)
-```
 
-这里先是注册了`EntryOptionPlugin`插件，紧接着触发`entryOption`钩子，相当于在`compilation`、`make`钩子上注册回调。
-
-#### LoaderPlugin
+### LoaderPlugin
 ```js
 new LoaderPlugin().apply(compiler)
 ```

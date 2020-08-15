@@ -1,14 +1,14 @@
 ### Nginx是什么
 Nginx是一款开源的HTTP服务器（又称Web服务器）和反向代理服务器，同时也是一个IMAP、POP3、SMTP代理服务器。
 
-#### HTTP服务器
+### HTTP服务器
 Nginx作为一个轻量级的HTTP服务器，能够很好地应对高并发的HTTP请求。
 
 ![客户端、HTTP服务器与应用服务器](https://pic.downk.cc/item/5e6cb1b7e83c3a1e3a2dbafd.jpg)
 
 如上图所示，在客户端与服务端通信的架构中，Nginx作为HTTP服务器，可以将服务器文件系统的静态文件（HTML、图片等）通过HTTP协议响应给客户端；而对于动态资源请求，Nginx将请求交给**应用服务器**处理。
 
-#### 反向代理服务器
+### 反向代理服务器
 互联网应用大多基于CS架构，即client端和server
 端，代理就是在client端和server端之间的服务器，称为代理服务器。
 
@@ -30,10 +30,10 @@ Nginx作为一个轻量级的HTTP服务器，能够很好地应对高并发的HT
 - 负载均衡：通过各种调度算法机制将来自客户端的请求分发给真实的服务器，以减轻对单个服务器的负载压力。
 
 ### 前端眼里的Nginx
-#### 1. 解决跨域
+### 1. 解决跨域
 
 ___
-#### 2. 图片处理
+### 2. 图片处理
 前端项目的开发中，经常会有对图片尺寸、品质处理的需要，依赖[ngx_http_image_filter_module](http://nginx.org/en/docs/http/ngx_http_image_filter_module.html)模块，Nginx可以搭建图片处理服务，下面是一个Nginx配置图片尺寸裁剪的demo：
 
 ```nginx
@@ -58,7 +58,7 @@ server {
 ![338w_500h](https://pic.downk.cc/item/5e6cf613e83c3a1e3a5ba2d2.jpg)
 
 ___
-#### 3. 静态资源缓存
+### 3. 静态资源缓存
 ```nginx
 {
   # add_header Cache-Control no-store; 禁用缓存
@@ -68,7 +68,7 @@ ___
 ```
 
 ___
-#### 4. 适配PC端与移动端
+### 4. 适配PC端与移动端
 为更好提升移动端的用户体验，在PC端站点之外，互联网公司一般都会单独开发一个给移动端用户访问的站点。当用户用移动终端访问PC站点，自动跳转到m站点。
 
 ```nginx
@@ -85,7 +85,7 @@ location / {
 在移动设备上访问[猫眼电影的PC端站点(https://maoyan.com/)](https://maoyan.com/)会跳转到[http://maoyan.com/](http://maoyan.com/)。
 
 ___
-#### 5. Gzip压缩
+### 5. Gzip压缩
 Gzip是文件压缩程序的简称。Nginx可以利用gzip压缩，来减小返回给客户端的静态资源的HTTP响应的体积，提高传输速率。
 
 ```nginx
@@ -119,11 +119,11 @@ Content-Encoding: gzip
     会消耗大量cpu资源，且不一定有明显的效果。
 
 ___
-#### 6. 合并请求
+### 6. 合并请求
 借助淘宝开发的第三方模块[nginx-http-concat](https://github.com/alibaba/nginx-http-concat)。
 
 ___
-#### 参考
+### 参考
 1. [Nginx与前端开发](https://juejin.im/post/5bacbd395188255c8d0fd4b2)
 2. [Nginx常见正则匹配符号表示](https://www.cnblogs.com/netsa/p/6383094.html)
 3. [入门系列之在Nginx配置Gzip](https://juejin.im/post/5b518d1a6fb9a04fe548e8fc)

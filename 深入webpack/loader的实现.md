@@ -2,7 +2,7 @@
 
 如何在webpack中配置loader在这里就不再多讲了，今天以less-loader为例学习loader是如何工作的。
 
-#### 前期准备
+### 前期准备
 首先，创建一个简单的demo项目（demo代码在[这里](https://github.com/grain0217/note/tree/master/webpack-demo)），并为它配置`webpack.config.js`：
 ```js
 const path = require('path')
@@ -71,7 +71,7 @@ less模块如下：
 
 ![less-loader打包效果](https://pic.downk.cc/item/5f20012314195aa594e2c9be.jpg)
 
-#### less-loader做了什么
+### less-loader做了什么
 那么less-loader都做了什么呢？到[less-loader源码](https://github.com/webpack-contrib/less-loader/blob/master/src/index.js)中看了一下，这里仅贴出主要代码：
 ```js
 import { getOptions } from 'loader-utils'
@@ -187,6 +187,6 @@ module.exports = function (source) {
 
 至此，我们知道了loader是如何实现的，有需要的话我们可以针对项目编写自己的loader。至于`less`编译器编译less的细节不在这里展开。
 
-#### 参考
+### 参考
 1. [手把手教你写webpack loader](https://wecteam.io/2019/09/17/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E5%86%99webpack-loader/)
 2. [从使用loader到实现loader](https://github.com/lefex/FE/tree/master/webpack)

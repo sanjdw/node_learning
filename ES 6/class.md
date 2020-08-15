@@ -1,5 +1,5 @@
 ## Class
-#### 基本语法
+### 基本语法
 JavaScript传统方法是通过构造函数定义生成对象：
 
     function Point(x, y) {
@@ -49,7 +49,7 @@ ES6提供了更接近传统语言的写法，引入了`Class`（类）这个概�
         }
     }
 
-#### constructor方法
+### constructor方法
 constructor方法是类的默认方法，通过new命令生成对象实例时，自动调用该方法。一个类必须有constructor方法，如果没有显式定义，一个空的constructor方法会被默认添加。
 
 **constructor方法默认返回实例对象（即this），完全可以指定返回另外一个对象**：
@@ -73,7 +73,7 @@ constructor方法是类的默认方法，通过new命令生成对象实例时，
     Foo()
     // TypeError: Class constructor Foo cannot be invoked without 'new'
 
-#### 类的实例对象
+### 类的实例对象
 实例的属性除非显式定义在其本身（即定义在this对象上），否则都是定义在原型上（即定义在class上）：
 
     class Point {
@@ -95,14 +95,14 @@ constructor方法是类的默认方法，通过new命令生成对象实例时，
     point.hasOwnProperty('toString') // false
     point.__proto__.hasOwnProperty('toString') // true
 
-#### 不存在变量提升
+### 不存在变量提升
 
     new Foo();// ReferenceError
     class Foo{
         //
     }
 
-#### 私有方法
+### 私有方法
 私有方法是常见需求，但 ES6 不提供，只能通过变通方法模拟实现：
 
 一种是命名区分：
@@ -150,7 +150,7 @@ constructor方法是类的默认方法，通过new命令生成对象实例时，
       // ...
     };
 
-#### this的指向
+### this的指向
 类的内部方法如果含有`this`，它默认指向类的实例。
 
     class Logger {

@@ -1,6 +1,6 @@
 ## Symbol
 
-#### 概述
+### 概述
 ES5中对象属性名都是字符串，容易造成名命名冲突，为了保证每个属性名都是独一无二的，ES6引入了`Symbol`。
 
 在ES6中，有七种数据类型：Undefined、Null、布尔值、字符串、数值（Number）、Object。
@@ -14,7 +14,7 @@ typeof s;
 //Symbol
 ```
 
-#### 作为属性名的Symbol
+### 作为属性名的Symbol
 ```js
 var mySymbol = Symbol()
 //第一种写法：
@@ -27,7 +27,7 @@ var obj = {
 }
 ```
 
-#### 属性名的遍历
+### 属性名的遍历
 Symbol值作为属性名，该属性不会出现在`for ... in`、`for ... of`中，也不会被`Object.keys()`、`Object.getOwnPropertyNames()`返回。有一个`Object.getOwnPropertySymbols`方法可以指定对象的所有Symbol属性名。
 ```js
 var obj = {};

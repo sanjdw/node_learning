@@ -1,6 +1,6 @@
 ## Set和Map
 
-#### set
+### set
 set是ES6提供的一种新的数据结构，类似于数组，但是成员都是唯一的，无重复值。
 
 使用Set构造函数来生成Set数据结构：
@@ -112,7 +112,7 @@ let intersect = new Set([...a].filter(x => b.has(x)))
 let diff = new Set([...a].filter(x => !b.has(x)))
 ```
 
-#### WeakSet
+### WeakSet
 与Set类似，WeakSet也是不重复值的集合，它与Set有两个区别：
 - WeakSet的成员只能是对象。
 - WeakSet的对象是弱引用，无法引用WeakSet的成员，也无法遍历WeakSet的成员。
@@ -130,7 +130,7 @@ WeakSet实例有以下三个方法：
 
 **WeakSet没有`size`属性，不能遍历成员。**
 
-#### Map
+### Map
 JavaScript中的对象，本质上是键值对的集合，由于只能用字符串当做键，它的使用收到了限制：
 ```js
 var data = {};

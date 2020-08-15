@@ -2,7 +2,7 @@
 
 在TypeScript里，接口的作用就是为这些类型命名、代码或第三方代码定义契约。
 
-#### 接口初探
+### 接口初探
 ```ts
 function printLabel(labelledObj: { label: string }) {}
 
@@ -26,7 +26,7 @@ let myObj = {size: 10, label: "Size 10 Object"};
 
 此外，类型检查器也不会去检查属性的顺序，只要相应的属性存在并且类型也是对的就可以。
 
-#### 可选属性
+### 可选属性
 ```ts
 interface SquareConfig {
   color?: string;

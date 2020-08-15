@@ -2,7 +2,7 @@
 
 ![webpack构建流程](https://pic.downk.cc/item/5f2a98fe14195aa594f3cd3f.png)
 
-#### 入口文件
+### 入口文件
 在`/webpack/lib/webpack.js`中定义了webpack方法：
 ```js
 function webpack (options, callback) {
@@ -86,7 +86,7 @@ function webpack (options, callback) {
 }
 ```
 
-#### 1. 校验以及初始化默认参数配置options
+### 1. 校验以及初始化默认参数配置options
 ```js
 validateSchema(
   webpackOptionsSchema,
@@ -96,13 +96,13 @@ options = new WebpackOptionsDefaulter().process(options)
 ```
 
 
-#### 2. 实例化compiler
+### 2. 实例化compiler
 `compiler`负责文件监听和启动编译，这一步通过`Compiler`构造函数初步实例化`compiler`：
 ```js
 compiler = new Compiler(options.context)
 ```
 
-#### 3. 初始化complier的文件系统输入、输出、缓存以及监视文件系统
+### 3. 初始化complier的文件系统输入、输出、缓存以及监视文件系统
 这一步包括下一步挂载`plugin`仍属于实例化`compiler`的范畴，但是第三四步对`compiler`的实例化...
 ```js
 new NodeEnvironmentPlugin({
@@ -110,21 +110,21 @@ new NodeEnvironmentPlugin({
 }).apply(compiler)
 ```
 
-#### 4. 挂载plugin
+### 4. 挂载plugin
 将`compiler`作为参数传入插件实现的`apply`方法，使插件可以监听`compiler`后续的所有事件
 
-#### 5. 触发environment、afterEnvironment钩子
+### 5. 触发environment、afterEnvironment钩子
 ```js
 compiler.hooks.environment.call()
 compiler.hooks.afterEnvironment.call()
 ```
 
-#### 6. 根据option配置注册各种插件
+### 6. 根据option配置注册各种插件
 ```js
 compiler.options = new WebpackOptionsApply().process(options, compiler)
 ```
 
-#### 7. 返回compiler，如果有callback传入则通过compiler.run启动构建工作
+### 7. 返回compiler，如果有callback传入则通过compiler.run启动构建工作
 ```js
 if (callback) {
   if (
