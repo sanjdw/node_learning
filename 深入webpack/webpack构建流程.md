@@ -38,7 +38,7 @@ function webpack (options, callback) {
     }).apply(compiler)
 
     /**
-     * 4. 挂载plugin
+     * 4. 注册开发者配置的plugin
      */
     if (options.plugins && Array.isArray(options.plugins)) {
       for (const plugin of options.plugins) {
@@ -57,7 +57,7 @@ function webpack (options, callback) {
     compiler.hooks.afterEnvironment.call()
 
     /**
-     * 6. 根据option配置注册各种插件
+     * 6. 根据option配置注册大量内置插件
      */
     compiler.options = new WebpackOptionsApply().process(options, compiler)
   } else {
@@ -110,7 +110,7 @@ new NodeEnvironmentPlugin({
 }).apply(compiler)
 ```
 
-### 4. 挂载plugin
+### 4. 注册开发者配置的plugin
 将`compiler`作为参数传入插件实现的`apply`方法，使插件可以监听`compiler`后续的所有事件
 
 ### 5. 触发environment、afterEnvironment钩子
@@ -124,7 +124,7 @@ compiler.hooks.afterEnvironment.call()
 compiler.options = new WebpackOptionsApply().process(options, compiler)
 ```
 
-### 7. 返回compiler，如果有callback传入则通过compiler.run启动构建工作
+### 7. 如果有callback传入则通过run方法开启构建任务，否则仅返回compiler
 ```js
 if (callback) {
   if (

@@ -50,12 +50,10 @@ class Compiler extends Tapable {
 ```js
 run(callback) {
   if (this.running) return callback(new ConcurrentCompilationError())
-
   const finalCallback = (stats) => {
     this.running = false
     if (callback !== undefined) return callback(stats)
   }
-
   const startTime = Date.now()
   this.running = true
 
@@ -65,7 +63,7 @@ run(callback) {
       const stats = new Stats(compilation)
       stats.startTime = startTime
       stats.endTime = Date.now()
-      this.hooks.done.callAsync(stats, ()) => {
+      this.hooks.done.callAsync(stats, () => {
         return finalCallback(stats)
       })
       return
@@ -75,12 +73,11 @@ run(callback) {
     this.emitAssets(compilation, ()) => {
       if (compilation.hooks.needAdditionalPass.call()) {
         compilation.needAdditionalPass = true
-
         const stats = new Stats(compilation)
         stats.startTime = startTime
         stats.endTime = Date.now()
-        this.hooks.done.callAsync(stats, ()) => {
-          this.hooks.additionalPass.callAsync(()) => {
+        this.hooks.done.callAsync(stats, () => {
+          this.hooks.additionalPass.callAsync(() => {
             this.compile(onCompiled)
           })
         })
@@ -91,15 +88,15 @@ run(callback) {
         const stats = new Stats(compilation);
         stats.startTime = startTime
         stats.endTime = Date.now()
-        this.hooks.done.callAsync(stats, ()) => {
+        this.hooks.done.callAsync(stats, () => {
           return finalCallback(stats)
         })
       })
     })
   }
 
-  this.hooks.beforeRun.callAsync(this, ()) => {
-    this.hooks.run.callAsync(this, ()) => {
+  this.hooks.beforeRun.callAsync(this, () => {
+    this.hooks.run.callAsync(this, () => {
       this.readRecords(() => {
         this.compile(onCompiled)
       })
@@ -107,8 +104,43 @@ run(callback) {
   })
 }
 ```
-### readRecords方法
-用于读取之前的records的方法，这里的records指的是一些数据片段，用于储存多次构建过程中的`module`的标识：
+
+先忽略`onCompiled`方法，`compiler.run`做了以下工作：
+1. 触发`beforeRun`钩子，在这之前`NodeEnvironmentPlugin`在此钩子上注册回调：
+```js
+compiler.hooks.beforeRun.tap("NodeEnvironmentPlugin", compiler => {
+	if (compiler.inputFileSystem === inputFileSystem) inputFileSystem.purge()
+})
+```
+
+2. `beforeRun`钩子之后是`run`钩子，`CachePlugin`在此钩子上注册了两个回调：
+```js
+compiler.hooks.watchRun.tap("CachePlugin", () => {
+  this.watching = true
+})
+compiler.hooks.run.tapAsync("CachePlugin", (compiler, callback) => {
+  const fs = compiler.inputFileSystem
+  const fileTs = (compiler.fileTimestamps = new Map())
+  asyncLib.forEach(
+    compiler._lastCompilationFileDependencies,
+    (file, callback) => {
+      fs.stat(file, (stat) => {
+        if (stat.mtime) this.applyMtime(+stat.mtime)
+        fileTs.set(file, +stat.mtime || Infinity)
+        callback()
+      })
+    },
+    () => {
+      for (const [file, ts] of fileTs) {
+        fileTs.set(file, ts + this.FS_ACCURACY)
+      }
+      callback()
+    }
+  )
+})
+```
+
+3. 接着是`readRecords`方法，该方法用于读取之前的records，这里的records指的是一些数据片段，用于储存多次构建过程中的`module`的标识：
 ```js
 readRecords(callback) {
   // recordsInputPath是webpack配置中指定的读取上一组records的文件路径
@@ -119,7 +151,7 @@ readRecords(callback) {
   // inputFileSystem是一个封装过的文件系统，扩展了fs的功能
   // 主要是判断一下recordsInputPath的文件是否存在 存在则读取并解析，存到this.records中
   // 最后执行callback
-  this.inputFileSystem.stat(this.recordsInputPath, ()) => {
+  this.inputFileSystem.stat(this.recordsInputPath, () => {
     this.inputFileSystem.readFile(this.recordsInputPath, content => {
       this.records = parseJson(content.toString("utf-8"))
       return callback()
@@ -128,21 +160,22 @@ readRecords(callback) {
 }
 ```
 
+4. 最后就是关键的`compile`方法了，下面做展开分析。
+
 ### compile方法
-`compile`是真正进行编译的过程，创建了一个`compilation`，并将`compilation`作为触发`compiler.make`钩子上的注册的回调方法的参数，注册在这些钩子上的函数方法将调用`compilation`上的方法，执行构建。在`compilation`结束（`finish`）和封装（`seal`）完成后，执行传入的回调得以执行，也就是在`compiler.run`中定义的`onCompiled`函数。
+`compile`是真正进行编译的过程，创建了一个`compilation`，并在触发`compiler.make`钩子上的注册的回调时将`compilation`作为参数传入，在这些回调中将调用`compilation`上的方法，执行构建。在`compilation`结束（`finish`）和封装（`seal`）完成后，执行传入的回调得以执行，也就是在`compiler.run`中定义的`onCompiled`函数。
 ```js
 compile(callback) {
   // 创建compilation的参数
   const params = this.newCompilationParams()
-  this.hooks.beforeCompile.callAsync(params, ()) => {
+  this.hooks.beforeCompile.callAsync(params, () => {
     this.hooks.compile.call(params)
     const compilation = this.newCompilation(params)
-
-    this.hooks.make.callAsync(compilation, ()) => {
-      compilation.finish(()) => {
-        compilation.seal(()) => {
+    this.hooks.make.callAsync(compilation, () => {
+      compilation.finish(() => {
+        compilation.seal(() => {
           // seal完成即编译过程完成
-          this.hooks.afterCompile.callAsync(compilation, ()) => {
+          this.hooks.afterCompile.callAsync(compilation, () => {
             return callback(null, compilation)
           })
         })
@@ -152,9 +185,11 @@ compile(callback) {
 }
 ```
 
-这里创建了
-
-`compiler.compile`钩子上有三个插件注册了回调：`DelegatedPlugin`、`DllReferencePlugin`、`ExternalsPlugin`。
+这里的主要工作：
+1. 触发`beforeCompile`钩子
+2. 创建`compilation`的参数，并触发`compile`钩子
+3. 生成`compilation`，并作为触发`make`钩子的参数传给钩子上的回调
+4. `make`钩子之后调用`compilation`的`finish`、`seal`方法。
 
 ### 创建compilation相关的方法
 ```js
@@ -229,7 +264,6 @@ emitAssets(compilation, callback) {
               cacheEntry = { sizeOnlySource: undefined, writtenTo: new Map() }
               this._assetEmittingSourceCache.set(source, cacheEntry)
             }
-
             if (targetFileGeneration !== undefined) {
               const writtenGeneration = cacheEntry.writtenTo.get(targetPath)
               if (writtenGeneration === targetFileGeneration) {
@@ -239,7 +273,6 @@ emitAssets(compilation, callback) {
                 return callback()
               }
             }
-
             let content
             if (typeof source.buffer === "function") {
               content = source.buffer()
@@ -251,7 +284,6 @@ emitAssets(compilation, callback) {
                 content = Buffer.from(bufferOrString, "utf8")
               }
             }
-
             cacheEntry.sizeOnlySource = new SizeOnlySource(content.length)
             compilation.updateAsset(file, cacheEntry.sizeOnlySource, { size: content.length })
 
@@ -275,7 +307,6 @@ emitAssets(compilation, callback) {
             if (!Buffer.isBuffer(content)) {
               content = Buffer.from(content, "utf8")
             }
-
             source.existsAt = targetPath
             source.emitted = true
             this.outputFileSystem.writeFile(targetPath, content, () => {

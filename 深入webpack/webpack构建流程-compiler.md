@@ -75,39 +75,23 @@ class Compiler extends Tapable {
 function Tapable () {
   this._pluginCompat = new SyncBailHook(["options"])
 
-  // 注册了两个回调
-  this._pluginCompat.tap(
-    {
-      name: "Tapable camelCase",
-      stage: 100
-    },
-    options => {
-      options.names.add(
-        options.name.replace(/[- ]([a-z])/g, (str, ch) => ch.toUpperCase())
-      )
+  this._pluginCompat.tap({ name: "Tapable camelCase", stage: 100 }, options => {
+    options.names.add(
+      options.name.replace(/[- ]([a-z])/g, (str, ch) => ch.toUpperCase())
+    )
+  })
+  this._pluginCompat.tap({ name: "Tapable this.hooks", stage: 200 }, options => {
+    let hook
+    for (const name of options.names) {
+      hook = this.hooks[name]
     }
-  )
-  this._pluginCompat.tap(
-    {
-      name: "Tapable this.hooks",
-      stage: 200
-    },
-    options => {
-      let hook
-      for (const name of options.names) {
-        hook = this.hooks[name]
-      }
-      if (hook !== undefined) {
-        const tapOpt = {
-          name: options.fn.name || "unnamed compat plugin",
-          stage: options.stage || 0
-        }
-        if (options.async) hook.tapAsync(tapOpt, options.fn)
-        else hook.tap(tapOpt, options.fn)
-        return true
-      }
+    if (hook !== undefined) {
+      const tapOpt = { name: options.fn.name || "unnamed compat plugin", stage: options.stage || 0 }
+      if (options.async) hook.tapAsync(tapOpt, options.fn)
+      else hook.tap(tapOpt, options.fn)
+      return true
     }
-  )
+  })
 }
 
 // 在plugin的apply方法内调用，将plugins收集到compiler的_plugins中
@@ -119,11 +103,7 @@ Tapable.prototype.plugin = util.deprecate(function plugin(name, fn) {
     }, this)
     return
   }
-  this._pluginCompat.call({
-    name: name,
-    fn: fn,
-    names: new Set([name])
-  })
+  this._pluginCompat.call({ name: name, fn: fn, names: new Set([name]) })
 }, "Tapable.plugin is deprecated. Use new API on `.hooks` instead")
 
 Tapable.prototype.apply = util.deprecate(function apply() {

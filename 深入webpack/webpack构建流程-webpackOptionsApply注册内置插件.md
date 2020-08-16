@@ -115,12 +115,60 @@ class SingleEntryPlugin {
 }
 ```
 
-`SingleEntryPlugin`又在`compilation`和`make`钩子上注册回调，接收`compilation`参数，分别调用`compilation.dependencyFactories.set`和`compilation.addEntry`。
-
+`SingleEntryPlugin`又在`compilation`和`make`钩子上注册回调，接收`compilation`参数，分别调用`compilation.dependencyFactories.set`和`compilation.addEntry`。关于`compilation`的这两个方法，后面再分析。
 
 ### LoaderPlugin
 ```js
-new LoaderPlugin().apply(compiler)
+class LoaderPlugin {
+	apply(compiler) {
+		compiler.hooks.compilation.tap("LoaderPlugin", (compilation, { normalModuleFactory }) => {
+			compilation.dependencyFactories.set(
+				LoaderDependency,
+				normalModuleFactory
+			)
+		})
+
+		compiler.hooks.compilation.tap("LoaderPlugin", compilation => {
+			compilation.hooks.normalModuleLoader.tap("LoaderPlugin", (loaderContext, module) => {
+				loaderContext.loadModule = (request, callback) => {
+					const dep = new LoaderDependency(request)
+					dep.loc = { name: request }
+					const factory = compilation.dependencyFactories.get(dep.constructor)
+					compilation.semaphore.release()
+					compilation.addModuleDependencies(module, [ { factory, dependencies: [dep] } ], true, "lm", true, () => {
+						compilation.semaphore.acquire(() => {
+							let source, map
+							const moduleSource = dep.module._source
+							if (moduleSource.sourceAndMap) {
+								const sourceAndMap = moduleSource.sourceAndMap()
+								map = sourceAndMap.map
+								source = sourceAndMap.source
+							} else {
+								map = moduleSource.map()
+								source = moduleSource.source()
+							}
+							if (dep.module.buildInfo.fileDependencies) {
+								for (const d of dep.module.buildInfo.fileDependencies) {
+									loaderContext.addDependency(d)
+								}
+							}
+							if (dep.module.buildInfo.contextDependencies) {
+								for (const d of dep.module.buildInfo.contextDependencies) {
+									loaderContext.addContextDependency(d)
+								}
+							}
+							return callback(null, source, map, dep.module)
+						})
+						}
+					)
+				}
+			})
+		})
+	}
+}
 ```
 
-`process`方法执行完，所有的回调都注册在了相应的钩子上，等待后续编译过程中钩子的触发。
+与`SingleEntryPlugin`中类似，`LoaderPlugin`在`compilation`钩子上注册了两个回调，且都接收`compilation`作为参数。两个回调方法中一个调用了`compilation.dependencyFactories`，另一个在`compilation.hooks.normalModuleLoader`钩子上继续注册了回调。
+
+### 总结
+`WebpackOptionsApply.process`方法执行完，通过将各种插件注册到`compiler`上来将所需要的回调都注册在了`compiler`相应不同构建阶段的钩子上，等待后续编译过程中钩子的触发来唤起这些回调。

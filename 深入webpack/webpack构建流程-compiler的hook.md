@@ -1,5 +1,4 @@
 ## compiler的hook
-<!-- webpack中最核心的负责编译的`compiler`和负责创建`bundles`的`compilation`都是`Tapable`的实例。 -->
 webpack本质是事件流机制，类似于发布订阅模式，实现这个的核心就是`Tapable`，而`Tapable`有两个重要组成：
 1. hook
 2. HookCodeFactory
@@ -750,35 +749,29 @@ webpack通过`tapable`这种巧妙的钩子设计很好的将实现与流程解�
 ```js
 function Tapable () {
   this._pluginCompat = new SyncBailHook(["options"])
-	this._pluginCompat.tap(
-		{ name: "Tapable camelCase", stage: 100 },
-		options => {
-			options.names.add(
-				options.name.replace(/[- ]([a-z])/g, (str, ch) => ch.toUpperCase())
-			)
-		}
-	)
-  this._pluginCompat.tap(
-    { name: "Tapable this.hooks", stage: 200 },
-    options => {
-      let hook
-      for (const name of options.names) {
-        hook = this.hooks[name];
-        if (hook !== undefined) {
-          break
-        }
-      }
+	this._pluginCompat.tap({ name: "Tapable camelCase", stage: 100 }, options => {
+		options.names.add(
+			options.name.replace(/[- ]([a-z])/g, (str, ch) => ch.toUpperCase())
+		)
+	})
+  this._pluginCompat.tap({ name: "Tapable this.hooks", stage: 200 }, options => {
+    let hook
+    for (const name of options.names) {
+      hook = this.hooks[name];
       if (hook !== undefined) {
-        const tapOpt = {
-          name: options.fn.name || "unnamed compat plugin",
-          stage: options.stage || 0
-        }
-        if (options.async) hook.tapAsync(tapOpt, options.fn)
-        else hook.tap(tapOpt, options.fn)
-        return true
+        break
       }
     }
-  )
+    if (hook !== undefined) {
+      const tapOpt = {
+        name: options.fn.name || "unnamed compat plugin",
+        stage: options.stage || 0
+      }
+      if (options.async) hook.tapAsync(tapOpt, options.fn)
+      else hook.tap(tapOpt, options.fn)
+      return true
+    }
+  })
 }
 
 Tapable.prototype.plugin = util.deprecate(function plugin(name, fn) {
@@ -788,11 +781,7 @@ Tapable.prototype.plugin = util.deprecate(function plugin(name, fn) {
 		}, this)
 		return
 	}
-	this._pluginCompat.call({
-		name: name,
-		fn: fn,
-		names: new Set([name])
-	})
+	this._pluginCompat.call({ name: name, fn: fn, names: new Set([name]) })
 })
 ```
 
