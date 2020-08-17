@@ -103,15 +103,15 @@ compiler = new Compiler(options.context)
 ```
 
 ### 3. 初始化complier的文件系统输入、输出、缓存以及监视文件系统
-这一步包括下一步挂载`plugin`仍属于实例化`compiler`的范畴，但是第三四步对`compiler`的实例化...
 ```js
 new NodeEnvironmentPlugin({
   infrastructureLogging: options.infrastructureLogging
 }).apply(compiler)
 ```
 
+这一步赋予了`compiler`对象文件存取的能力。
+
 ### 4. 注册开发者配置的plugin
-将`compiler`作为参数传入插件实现的`apply`方法，使插件可以监听`compiler`后续的所有事件
 
 ### 5. 触发environment、afterEnvironment钩子
 ```js
@@ -123,6 +123,8 @@ compiler.hooks.afterEnvironment.call()
 ```js
 compiler.options = new WebpackOptionsApply().process(options, compiler)
 ```
+
+这一步根据`options`注册大量webpack内置插件。
 
 ### 7. 如果有callback传入则通过run方法开启构建任务，否则仅返回compiler
 ```js
