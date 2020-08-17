@@ -171,4 +171,4 @@ class LoaderPlugin {
 与`SingleEntryPlugin`中类似，`LoaderPlugin`在`compilation`钩子上注册了两个回调，且都接收`compilation`作为参数。两个回调方法中一个调用了`compilation.dependencyFactories`，另一个在`compilation.hooks.normalModuleLoader`钩子上继续注册了回调。
 
 ### 总结
-`WebpackOptionsApply.process`方法执行完，通过将各种插件注册到`compiler`上来将所需要的回调都注册在了`compiler`相应不同构建阶段的钩子上，等待后续编译过程中钩子的触发来唤起这些回调。
+`WebpackOptionsApply.process`方法执行完，通过将各种插件注册到`compiler`上来将所需要的回调都注册在了`compiler`相应不同构建阶段的钩子（大部分是`compilation`钩子）上，等待后续编译过程中钩子的触发来唤起这些回调。

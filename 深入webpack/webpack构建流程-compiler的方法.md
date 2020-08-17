@@ -1,18 +1,19 @@
 ## compiler的方法
-在掌握了初始化`compiler`上的各种钩子及其机制之后，接下来的任务是学习与webpack构建流程相关的方法。
+在前文已经提到，webpack的核心功能是事件流的控制。在了解了`Tapable`的钩子机制以及通过大量插件在`compiler`上的相应钩子上注册回调后，你可能会问——每个插件应该监听哪些钩子、这些回调都是什么时候随着钩子触发的？
 
-开始之前，应该关心如下几点：
+要完全解答这个问题很难，因为webpack的构建过程中，会涉及到非常多的任务点。我们可以挑选完整构建流程中涉及到的几个核心对象和任务点，把webpack的构建流程讲清楚，当我们需要实现某个特定内容的时候，再去阅读对应的模块源码。
+
+回顾前文，我们已经知道`compiler`上的方法有两处来源：
+1. `Compiler`中，构建流程相关
+2. `Tapable`原型——`plugin`和`apply`，提供给插件使用
+
+这里需要分析的自然是在`Compiler`中定义的构建流程相关的方法，开始之前应该先思考如下几个问题：
 1. webpack的编译过程主要有哪些阶段
 2. webpack是如何从entry开始解析出整个依赖树的
 3. `loaders`是在何时被调用的
 4. 最终是如何知道要生成几个文件，以及每个文件的内容的
 
-`compiler`上的方法有两处来源：
-1. `Compiler`中，构建流程相关
-2. `Tapable`原型——`plugin`和`apply`，提供给插件使用
-
-重点分析`Compiler`中定义的构建流程相关的方法。
-
+带着这些问题来看：
 ```js
 class Compiler extends Tapable {
   constructor () {
@@ -39,12 +40,21 @@ class Compiler extends Tapable {
   purgeInputFileSystem() {}
   emitAssets(compilation, callback) {}
   compile() {}
+  // ...
 }
 ```
 
-![webpack构建流程](https://pic.downk.cc/item/5f33cb4d14195aa594ffd8b3.png)
+这里有几个关键步骤：
+1. `make`编译模块
+从入口文件出发，调用所有配置的`Loader`对模块进行翻译，再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理
+2. `build module`完成模块编译
+经过上面一步使用`Loade` 翻译完所有模块后，得到了每个模块被翻译后的最终内容以及它们之间的依赖关系
+3. `seal`输出资源
+根据入口和模块之间的依赖关系，组装成一个个包含多个模块的`Chunk`，再把每个`Chunk`M转换成一个单独的文件加入到输出列表，这步是可以修改输出内容的最后机会
+4. `emit`输出完成
+在确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统
 
-接下来我们来看一下`compiler`在构建的不同阶段用到的这些方法。
+![webpack构建流程](https://pic.downk.cc/item/5f33cb4d14195aa594ffd8b3.png)
 
 ### run方法
 ```js
@@ -338,3 +348,6 @@ emitAssets(compilation, callback) {
   })
 }
 ```
+
+### 总结
+
