@@ -171,4 +171,4 @@ class LoaderPlugin {
 与`SingleEntryPlugin`中类似，`LoaderPlugin`在`compilation`钩子上注册了两个回调，且都接收`compilation`作为参数。两个回调方法中一个调用了`compilation.dependencyFactories`，另一个在`compilation.hooks.normalModuleLoader`钩子上继续注册了回调，同样的，`compilation`的方法会在webpack的构建流程中分析。
 
 ### 总结
-`process`方法除了把`options`配置里的一些属性添加到`compiler`对象下，更主要的是根据`options`配置的不同，注册激活一些默认自带的插件和`resolverFactory.hooks`，其中大部分插件的作用是往 `compiler.hooks.compilation`,`compiler.hooks.thisCompilation`钩子上了回调，等待后续编译过程中钩子的触发来唤起这些回调。
+`process`方法除了把`options`配置里的一些属性添加到`compiler`对象下，更主要的是根据`options`配置的不同，注册一些默认自带的插件，其中大部分插件的作用是往`compiler.hooks.thisCompilation`、`compiler.hooks.compilation`、`compiler.hooks.make`钩子上了回调，等待后续编译过程中钩子的触发来唤起这些回调。

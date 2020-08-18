@@ -109,13 +109,8 @@ class Compilation extends Tapable {
     this.performance = options && options.performance;
     this.mainTemplate = new MainTemplate(this.outputOptions);
     this.chunkTemplate = new ChunkTemplate(this.outputOptions);
-    this.hotUpdateChunkTemplate = new HotUpdateChunkTemplate(
-      this.outputOptions
-    )
-    this.runtimeTemplate = new RuntimeTemplate(
-      this.outputOptions,
-      this.requestShortener
-    )
+    this.hotUpdateChunkTemplate = new HotUpdateChunkTemplate(this.outputOptions)
+    this.runtimeTemplate = new RuntimeTemplate(this.outputOptions, this.requestShortener)
     this.moduleTemplates = {
       javascript: new ModuleTemplate(this.runtimeTemplate, "javascript"),
       webassembly: new ModuleTemplate(this.runtimeTemplate, "webassembly")

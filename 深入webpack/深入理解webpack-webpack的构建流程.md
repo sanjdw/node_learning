@@ -195,7 +195,24 @@ createContextModuleFactory() {
 2. 将`compiler`的一些属性赋给`compilation`对象
 3. 依次触发了`compiler`的`thisCompilation`、`compilation`钩子
 
+和`Compiler`类似，`Compilation`也继承自`Tapable`，如果你不知道`compilation`是什么，它内部有哪些属性和方法，请看这里。
+
 当`compilation`实例创建完成之后，webpack的准备阶段已经完成，下一步是`modules`和`chunks`的生成阶段。
+
+在这里，我们先暂停总结一下`run`方法从开始执行到目前为止，`compiler`上几个钩子的触发顺序：
+1. `beforeRun`
+2. `run`
+3. `beforeCompile`
+4. `compile`
+5. `thisCompilation`、`compilation`
+6. `make`
+
+在前面我们已经提到过，`webpackOptionsApply.process`方法会根据`options`配置的不同，向`compiler`对象上注册大量内置插件，其中大部分插件是在`compiler.hooks.thisCompilation`、`compiler.hooks.compilation`、`compiler.hooks.make`钩子上注册回调。现在，我们就来分析这几个关键钩子上的回调都做了哪些事情。
+
+### thisCompilation、compilation钩子上的回调
+
+
+### make钩子上的回调
 
 ### emitAssets方法
 `emitAssets`负责构建资源的输出，其中`emitFiles`是具体输出文件的方法。
