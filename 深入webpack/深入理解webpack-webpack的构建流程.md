@@ -112,7 +112,7 @@ run(callback) {
 4. 最后就是关键的`compile`方法了，进入正式的编译阶段。
 
 ### compiler.compile
-`compile`方法内创建了一个`compilation`对象，`compilation`负责编译过程，它包含了构建环节所对应的方法，其内部保留了对`compiler`的引用：
+`compile`方法内创建了一个`compilation`对象，`compilation`负责构建过程，它包含了构建环节所对应的方法：
 ```js
 compile(callback) {
   // 创建compilation的参数
@@ -138,10 +138,10 @@ compile(callback) {
 1. 触发`beforeCompile`钩子
 2. 创建`compilation`的参数，并将其作为触发`compile`钩子的参数
 3. 创建`compilation`对象，并作为触发`make`钩子的参数
-4. `make`钩子之后依次调用`compilation`的`finish`、`seal`方法。
+4. `make`钩子之后依次调用`compilation`的`finish`、`seal`方法
 5. 在`compilation.seal()`完成构建结果的封装后，执行run方法中传入的`onCompiled`方法，主要用于构建资源的输出。
 
-当webpack以开发模式运行时，每检测到文件的变化，一个新的`compilation`对象将被创建。
+在这里，我们可以看到`compiler`和`compilation`的关系：`compiler.compile`方法创建了`compilation`对象。webpack以开发模式运行时，每当检测到文件的变化，`compiler.compile`方法都会被调用，一个新的`compilation`对象就会被创建。
 
 ### compilation的创建
 `compilation`实例通过`createCompilation`方法创建：

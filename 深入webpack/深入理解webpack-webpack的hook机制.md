@@ -743,7 +743,7 @@ compile(options) {
 
 到这里整一个`new SyncHook()`->`tap`->`call`的流程就结束了。主要的比较有趣的点在执行`call`的时候会进行缓存。
 
-webpack通过`tapable`这种巧妙的钩子设计很好的将实现与流程解耦开来。
+webpack通过`tapable`这种巧妙的钩子设计很好的将实现与构建流程解耦开来。
 
 ### _pluginCompat钩子的作用
 ```js
@@ -790,5 +790,3 @@ Tapable.prototype.plugin = util.deprecate(function plugin(name, fn) {
 2. 然后在`compiler.hooks`上寻找对应的钩子实例，并且调用`tap`方法真正注册的回调
 
 这么做的目的是什么？老版本webpack的插件的注册与现在有所不同，不是通过`compiler.hooks.**`注册回调的，这种方式兼容了老的webpack插件，将它们的回调注册到`compiler`对应的钩子上。
-
-### 总结

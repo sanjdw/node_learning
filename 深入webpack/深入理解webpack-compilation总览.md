@@ -1,4 +1,9 @@
-## compilation
+## compilation总览
+`compiler`对象包含了webpack环境所有的的配置信息，包含`loaders`，`plugins`这些信息，这个对象在`Webpack`启动时候被实例化，它是全局唯一的。在webpack的每个进程中只会创建一个`compiler`对象，它会创建构建对象`compilation`。
+
+而`compilation`对象包含了当前的模块资源、编译生成资源、变化的文件等。当webpack以开发模式运行时，每当检测到一个文件变化，一次新的`compilation`对象将被创建。
+
+`Compilation`类的定义结构与`Compiler`非常相似：
 ```js
 class Compilation extends Tapable {
   constructor(compiler) {
@@ -11,104 +16,22 @@ class Compilation extends Tapable {
       addEntry: new SyncHook(["entry", "name"]),
       failedEntry: new SyncHook(["entry", "name", "error"]),
       succeedEntry: new SyncHook(["entry", "name", "module"]),
-      dependencyReference: new SyncWaterfallHook([
-        "dependencyReference",
-        "dependency",
-        "module"
-      ]),
-      finishModules: new AsyncSeriesHook(["modules"]),
-      finishRebuildingModule: new SyncHook(["module"]),
-      unseal: new SyncHook([]),
-      seal: new SyncHook([]),
-      beforeChunks: new SyncHook([]),
-      afterChunks: new SyncHook(["chunks"]),
-      optimizeDependenciesBasic: new SyncBailHook(["modules"]),
-      optimizeDependencies: new SyncBailHook(["modules"]),
-      optimizeDependenciesAdvanced: new SyncBailHook(["modules"]),
-      afterOptimizeDependencies: new SyncHook(["modules"]),
-      optimize: new SyncHook([]),
-      optimizeModulesBasic: new SyncBailHook(["modules"]),
-      optimizeModules: new SyncBailHook(["modules"]),
-      optimizeModulesAdvanced: new SyncBailHook(["modules"]),
-      afterOptimizeModules: new SyncHook(["modules"]),
-
-      optimizeChunksBasic: new SyncBailHook(["chunks", "chunkGroups"]),
-      optimizeChunks: new SyncBailHook(["chunks", "chunkGroups"]),
-      optimizeChunksAdvanced: new SyncBailHook(["chunks", "chunkGroups"]),
-      afterOptimizeChunks: new SyncHook(["chunks", "chunkGroups"]),
-
-      optimizeTree: new AsyncSeriesHook(["chunks", "modules"]),
-      afterOptimizeTree: new SyncHook(["chunks", "modules"]),
-
-      optimizeChunkModulesBasic: new SyncBailHook(["chunks", "modules"]),
-      optimizeChunkModules: new SyncBailHook(["chunks", "modules"]),
-      optimizeChunkModulesAdvanced: new SyncBailHook(["chunks", "modules"]),
-      afterOptimizeChunkModules: new SyncHook(["chunks", "modules"]),
-      shouldRecord: new SyncBailHook([]),
-
-      reviveModules: new SyncHook(["modules", "records"]),
-      optimizeModuleOrder: new SyncHook(["modules"]),
-      advancedOptimizeModuleOrder: new SyncHook(["modules"]),
-      beforeModuleIds: new SyncHook(["modules"]),
-      moduleIds: new SyncHook(["modules"]),
-      optimizeModuleIds: new SyncHook(["modules"]),
-      afterOptimizeModuleIds: new SyncHook(["modules"]),
-      reviveChunks: new SyncHook(["chunks", "records"]),
-      optimizeChunkOrder: new SyncHook(["chunks"]),
-      beforeChunkIds: new SyncHook(["chunks"]),
-      optimizeChunkIds: new SyncHook(["chunks"]),
-      afterOptimizeChunkIds: new SyncHook(["chunks"]),
-      recordModules: new SyncHook(["modules", "records"]),
-      recordChunks: new SyncHook(["chunks", "records"]),
-      beforeHash: new SyncHook([]),
-      contentHash: new SyncHook(["chunk"]),
-      afterHash: new SyncHook([]),
-      recordHash: new SyncHook(["records"]),
-      record: new SyncHook(["compilation", "records"]),
-      beforeModuleAssets: new SyncHook([]),
-      shouldGenerateChunkAssets: new SyncBailHook([]),
-      beforeChunkAssets: new SyncHook([]),
-      additionalChunkAssets: new SyncHook(["chunks"]),
-      additionalAssets: new AsyncSeriesHook([]),
-      optimizeChunkAssets: new AsyncSeriesHook(["chunks"]),
-      afterOptimizeChunkAssets: new SyncHook(["chunks"]),
-      optimizeAssets: new AsyncSeriesHook(["assets"]),
-      afterOptimizeAssets: new SyncHook(["assets"]),
-      needAdditionalSeal: new SyncBailHook([]),
-      afterSeal: new AsyncSeriesHook([]),
-      chunkHash: new SyncHook(["chunk", "chunkHash"]),
-      moduleAsset: new SyncHook(["module", "filename"]),
-      chunkAsset: new SyncHook(["chunk", "filename"]),
-      assetPath: new SyncWaterfallHook(["filename", "data"]), // TODO MainTemplate
-      needAdditionalPass: new SyncBailHook([]),
-      childCompiler: new SyncHook([
-        "childCompiler",
-        "compilerName",
-        "compilerIndex"
-      ]),
-
-      log: new SyncBailHook(["origin", "logEntry"]),
       normalModuleLoader: new SyncHook(["loaderContext", "module"]),
-      optimizeExtractedChunksBasic: new SyncBailHook(["chunks"]),
-      optimizeExtractedChunks: new SyncBailHook(["chunks"]),
-      optimizeExtractedChunksAdvanced: new SyncBailHook(["chunks"]),
-      afterOptimizeExtractedChunks: new SyncHook(["chunks"])
+      // 其他钩子
     }
     this._pluginCompat.tap("Compilation", options => {})
-    this.name = undefined
+    // 通过compilation可以访问compiler
     this.compiler = compiler
-    this.resolverFactory = compiler.resolverFactory;
-    this.inputFileSystem = compiler.inputFileSystem;
-    this.requestShortener = compiler.requestShortener;
+    this.resolverFactory = compiler.resolverFactory
+    this.inputFileSystem = compiler.inputFileSystem
+    this.options = compiler.options
+    this.outputOptions = options && options.output
+    this.bail = options && options.bail
+    this.performance = options && options.performance
 
-    const options = compiler.options;
-    this.options = options;
-    this.outputOptions = options && options.output;
-    this.bail = options && options.bail;
-    this.profile = options && options.profile;
-    this.performance = options && options.performance;
-    this.mainTemplate = new MainTemplate(this.outputOptions);
-    this.chunkTemplate = new ChunkTemplate(this.outputOptions);
+    // template
+    this.mainTemplate = new MainTemplate(this.outputOptions)
+    this.chunkTemplate = new ChunkTemplate(this.outputOptions)
     this.hotUpdateChunkTemplate = new HotUpdateChunkTemplate(this.outputOptions)
     this.runtimeTemplate = new RuntimeTemplate(this.outputOptions, this.requestShortener)
     this.moduleTemplates = {
@@ -116,39 +39,18 @@ class Compilation extends Tapable {
       webassembly: new ModuleTemplate(this.runtimeTemplate, "webassembly")
     }
 
-    this.semaphore = new Semaphore(options.parallelism || 100)
-
     this.entries = []
-    this._preparedEntrypoints = []
     this.entrypoints = new Map()
     this.chunks = []
-    this.chunkGroups = []
-    this.namedChunkGroups = new Map()
-    this.namedChunks = new Map()
     this.modules = []
-    this._modules = new Map()
-    this.cache = null
     this.records = null
-    this.additionalChunkAssets = []
     this.assets = {}
-    this.assetsInfo = new Map()
-    this.errors = []
-    this.warnings = []
-    this.children = []
-    this.logging = new Map()
     this.dependencyFactories = new Map()
     this.dependencyTemplates = new Map()
     this.dependencyTemplates.set("hash", "")
-    this.childrenCounters = {}
-    this.usedChunkIds = null
-    this.usedModuleIds = null
-    this.fileTimestamps = undefined
-    this.contextTimestamps = undefined
-    this.compilationDependencies = undefined
-    this._buildingModules = new Map()
-    this._rebuildingModules = new Map()
-    this.emittedAssets = new Set()
+    // ...其他属性
   }
+
   addModule () {}
   buildModule () {}
   processModuleDependencies () {}
@@ -163,5 +65,39 @@ class Compilation extends Tapable {
   createHash () {}
   emitAsset () {}
   createChunkAssets () {}
+  // ...其他方法
 }
 ```
+
+可以看到，在实例化`compilation`过程中，`Compilation`做了以下工作：
+1. `hooks`对象上维护了大量`compilation`的生命周期钩子
+2. 定义了`entries`、`chunks`、`dependencyFactories`等模块相关的属性
+3. 定义了`addModule`、`buildModule`等模块处理相关的方法
+
+`compilation`上的`mainTemplate`、`chunkTemplate`等几个template属性需要注意，篇幅有限，这里仅分析`mainTemplate`。
+
+### MainTemplate
+```js
+class MainTemplate extends Tapable {
+  constructor(outputOptions) {
+		super();
+		this.outputOptions = outputOptions || {};
+		this.hooks = {
+			renderManifest: new SyncWaterfallHook(["result", "options"]),
+			modules: new SyncWaterfallHook(["modules", "chunk", "hash", "moduleTemplate", "dependencyTemplates"]),
+			moduleObj: new SyncWaterfallHook(["source", "chunk", "hash", "moduleIdExpression"]),
+			requireEnsure: new SyncWaterfallHook(["source", "chunk", "hash", "chunkIdExpression"]),
+      // ...其他钩子
+    }
+    this.hooks.startup.tap("MainTemplate", () => {})
+    this.hooks.render.tap("MainTemplate", () => {})
+    // ...
+    getRenderManifest(options) {}
+    render () {}
+  }
+}
+```
+
+可以看到，`MaintTemplate`也继承自`Tapable`，它创建的对象与`compiler`、`compilation`非常相像，它也有很多钩子和方法，钩子上被注册了回调。
+
+`compilation`对象上的这些template、template上的钩子、方法又有什么作用，同样的，这个问题也要到构建流程中去解答。
