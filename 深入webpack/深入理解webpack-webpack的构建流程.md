@@ -209,12 +209,41 @@ createContextModuleFactory() {
 
 在之前我们已经提到过，`webpackOptionsApply.process`方法会根据`options`配置的不同，向`compiler`对象上注册大量内置插件，其中大部分插件是在`compiler.hooks.thisCompilation`、`compiler.hooks.compilation`、`compiler.hooks.make`钩子上注册回调。现在，我们就来分析这几个关键钩子上的回调都做了哪些事情。
 
-### thisCompilation钩子的回调
-![](https://pic.downk.cc/item/5f3ca2bb14195aa5947d5060.jpg)
+### compiler.hooks.thisCompilation钩子的回调
+全局搜索`thisCompilation.tap`：
 
-### compilation钩子的回调
+![thisCompilation钩子的回调](https://pic.downk.cc/item/5f3ca2bb14195aa5947d5060.jpg)
 
-### make钩子上的回调
+之前已经提到过，与`compiler`一样，`compilation`对象上也有钩子。除了`compilation.hooks`，`compilation`对象还有几个template，而这几个template又和`compiler`、`compilation`类似也有各自的钩子。`thisCompilation`钩子触发时接收`compilation`、`params`作为参数：
+```js
+this.hooks.thisCompilation.call(compilation, params)
+```
+
+如此一来，`thisCompilation`钩子上注册的回调便可以访问到`compilation`，接着在`compilation`上做文章：
+1. 继续在`compilation`对象的钩子上注册回调
+2. 在`compilation.XXtemplate`的钩子上注册回调
+
+以上两类回调的具体功能，还要等后文解答。
+
+### compiler.hooks.compilation钩子的回调
+`compiler.hooks.compilation`钩子上的回调注册来自60余处：
+
+![compiler.hooks.compilation钩子的回调](https://pic.downk.cc/item/5f3eb55f14195aa59456a66e.jpg)
+
+同样的，`compilation`钩子触发的触发方式：
+```js
+this.hooks.compilation.call(compilation, params)
+```
+
+`compilation`钩子上注册的回调：
+1. 继续在`compilation`对象的钩子上注册回调
+2. `compilation.dependencyFactories.set()`
+
+回到`compilation`总览中：`compilation.dependencyFactories`是一个`Map`类型的变量，这里通过`dependencyFactories.set()`。
+
+### compiler.hooks.make钩子上的回调
+
+![make钩子的回调](https://pic.downk.cc/item/5f3eb7f114195aa594579f3f.jpg)
 
 ### emitAssets方法
 `emitAssets`负责构建资源的输出，其中`emitFiles`是具体输出文件的方法。
