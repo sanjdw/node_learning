@@ -80,13 +80,13 @@ class Compilation extends Tapable {
 ```js
 class MainTemplate extends Tapable {
   constructor(outputOptions) {
-		super();
-		this.outputOptions = outputOptions || {};
-		this.hooks = {
-			renderManifest: new SyncWaterfallHook(["result", "options"]),
-			modules: new SyncWaterfallHook(["modules", "chunk", "hash", "moduleTemplate", "dependencyTemplates"]),
-			moduleObj: new SyncWaterfallHook(["source", "chunk", "hash", "moduleIdExpression"]),
-			requireEnsure: new SyncWaterfallHook(["source", "chunk", "hash", "chunkIdExpression"]),
+    super();
+    this.outputOptions = outputOptions || {};
+    this.hooks = {
+      renderManifest: new SyncWaterfallHook(["result", "options"]),
+      modules: new SyncWaterfallHook(["modules", "chunk", "hash", "moduleTemplate", "dependencyTemplates"]),
+      moduleObj: new SyncWaterfallHook(["source", "chunk", "hash", "moduleIdExpression"]),
+      requireEnsure: new SyncWaterfallHook(["source", "chunk", "hash", "chunkIdExpression"]),
       // ...其他钩子
     }
     this.hooks.startup.tap("MainTemplate", () => {})
@@ -99,5 +99,32 @@ class MainTemplate extends Tapable {
 ```
 
 可以看到，`MaintTemplate`也继承自`Tapable`，它创建的对象与`compiler`、`compilation`非常相像，它也有很多钩子和方法，钩子上被注册了回调。
+
+### addEntry
+```js
+addEntry(context, entry, name, callback) {
+  this.hooks.addEntry.call(entry, name)
+  const slot = { name: name, request: null, module: null }
+
+  if (entry instanceof ModuleDependency) slot.request = entry.request
+  const idx = this._preparedEntrypoints.findIndex(slot => slot.name === name)
+  if (idx >= 0) {
+    this._preparedEntrypoints[idx] = slot
+  } else {
+    this._preparedEntrypoints.push(slot)
+  }
+  this._addModuleChain(context, entry, module => { this.entries.push(module) }, (module) => {
+    if (module) {
+      slot.module = module
+    } else {
+      const idx = this._preparedEntrypoints.indexOf(slot)
+      if (idx >= 0) this._preparedEntrypoints.splice(idx, 1)
+    }
+    this.hooks.succeedEntry.call(entry, name, module)
+    return callback(null, module)
+  })
+}
+```
+
 
 `compilation`对象上的这些template、template上的钩子、方法又有什么作用，同样的，这个问题也要到构建流程中去解答。

@@ -202,10 +202,12 @@ createContextModuleFactory() {
 在这里，我们先暂停总结一下`run`方法从开始执行到目前为止，`compiler`上几个钩子的触发顺序：
 1. `beforeRun`
 2. `run`
-3. `beforeCompile`
-4. `compile`
-5. `thisCompilation`、`compilation`
-6. `make`
+3. `normalModuleFactory`
+4. `contextModuleFactory`
+5. `beforeCompile`
+6. `compile`
+7. `thisCompilation`、`compilation`
+8. `make`
 
 在之前我们已经提到过，`webpackOptionsApply.process`方法会根据`options`配置的不同，向`compiler`对象上注册大量内置插件，其中大部分插件是在`compiler.hooks.thisCompilation`、`compiler.hooks.compilation`、`compiler.hooks.make`钩子上注册回调。现在，我们就来分析这几个关键钩子上的回调都做了哪些事情。
 
@@ -230,20 +232,37 @@ this.hooks.thisCompilation.call(compilation, params)
 
 ![compiler.hooks.compilation钩子的回调](https://pic.downk.cc/item/5f3eb55f14195aa59456a66e.jpg)
 
-同样的，`compilation`钩子触发的触发方式：
+回顾用于创建`compilation`对象所构建的参数：
+```js
+newCompilationParas() {
+  const params = {
+    normalModuleFactory: this.createNormalModuleFactory(),
+    contextModuleFactory: this.createContextModuleFactory(),
+    compilationDependencies: new Set()
+  }
+  return params
+}
+```
+
+参数为一个对象，它拥有三个属性：`contextModuleFactory`、`contextModuleFactory`、`compilationDependencies`，这个参数在触发`compilation`钩子时一同传入：
 ```js
 this.hooks.compilation.call(compilation, params)
 ```
 
-`compilation`钩子上注册的回调：
+`compilation`钩子上注册的回调做的事情主要分为三类：
 1. 继续在`compilation`对象的钩子上注册回调
-2. `compilation.dependencyFactories.set()`
+2. 在`compilation.dependencyFactories`中保存了各种模块工厂
+3. 通过`contextModuleFactory.hoos.parser`对象`for`方法创建`parser`阶段（遍历解`AST`）的钩子并将它们维护在`contextModuleFactory.hoos.parser._map`属性上。
 
-回到`compilation`总览中：`compilation.dependencyFactories`是一个`Map`类型的变量，这里通过`dependencyFactories.set()`。
+前文谈过`webpackOptionsApply.process`根据`options`为`compiler.hooks`上的各种钩子注册回调，等待构建流程中`compiler`的方法触发它们。同样的，`thisCompilation`、`compilation`钩子做的事情就是在`compilation`对象创建之后，在`compilation`的钩子上注册回调，等待后续构建过程中`compilation`的方法触发去它们。
 
 ### compiler.hooks.make钩子上的回调
 
 ![make钩子的回调](https://pic.downk.cc/item/5f3eb7f114195aa594579f3f.jpg)
+
+此类钩子的回调主要做了两件事情：
+1. `compilation.addEntry`
+2. `compilation.prefetch`
 
 ### emitAssets方法
 `emitAssets`负责构建资源的输出，其中`emitFiles`是具体输出文件的方法。
@@ -251,72 +270,13 @@ this.hooks.compilation.call(compilation, params)
 emitAssets(compilation, callback) {
   let outputPath
   const emitFiles = () => {
-    asyncLib.forEachLimit(
-      compilation.getAssets(),
-      15,
+    asyncLib.forEachLimit(compilation.getAssets(), 15,
       ({ name: file, source }, callback) => {
         let targetFile = file
         const queryStringIdx = targetFile.indexOf("?");
-        if (queryStringIdx >= 0) {
-          targetFile = targetFile.substr(0, queryStringIdx)
-        }
+        if (queryStringIdx >= 0) targetFile = targetFile.substr(0, queryStringIdx)
 
-        const writeOut = () => {
-          const targetPath = this.outputFileSystem.join(outputPath, targetFile)
-          if (this.options.output.futureEmitAssets) {
-            const targetFileGeneration = this._assetEmittingWrittenFiles.get(targetPath)
-            let cacheEntry = this._assetEmittingSourceCache.get(source)
-            if (cacheEntry === undefined) {
-              cacheEntry = { sizeOnlySource: undefined, writtenTo: new Map() }
-              this._assetEmittingSourceCache.set(source, cacheEntry)
-            }
-            if (targetFileGeneration !== undefined) {
-              const writtenGeneration = cacheEntry.writtenTo.get(targetPath)
-              if (writtenGeneration === targetFileGeneration) {
-                compilation.updateAsset(file, cacheEntry.sizeOnlySource, { size: cacheEntry.sizeOnlySource.size() })
-                return callback()
-              }
-            }
-            let content
-            if (typeof source.buffer === "function") {
-              content = source.buffer()
-            } else {
-              const bufferOrString = source.source()
-              if (Buffer.isBuffer(bufferOrString)) {
-                content = bufferOrString
-              } else {
-                content = Buffer.from(bufferOrString, "utf8")
-              }
-            }
-            cacheEntry.sizeOnlySource = new SizeOnlySource(content.length)
-            compilation.updateAsset(file, cacheEntry.sizeOnlySource, { size: content.length })
-
-            this.outputFileSystem.writeFile(targetPath, content, () => {
-              compilation.emittedAssets.add(file)
-              const newGeneration =
-                targetFileGeneration === undefined
-                  ? 1
-                  : targetFileGeneration + 1
-              cacheEntry.writtenTo.set(targetPath, newGeneration)
-              this._assetEmittingWrittenFiles.set(targetPath, newGeneration)
-              this.hooks.assetEmitted.callAsync(file, content, callback)
-            })
-          } else {
-            if (source.existsAt === targetPath) {
-              source.emitted = false
-              return callback()
-            }
-            let content = source.source()
-            if (!Buffer.isBuffer(content)) {
-              content = Buffer.from(content, "utf8")
-            }
-            source.existsAt = targetPath
-            source.emitted = true
-            this.outputFileSystem.writeFile(targetPath, content, () => {
-              this.hooks.assetEmitted.callAsync(file, content, callback)
-            })
-          }
-        }
+        const writeOut = () => { }
         if (targetFile.match(/\/|\\/)) {
           const dir = path.dirname(targetFile)
           this.outputFileSystem.mkdirp(this.outputFileSystem.join(outputPath, dir), writeOut)
@@ -329,8 +289,8 @@ emitAssets(compilation, callback) {
           return callback()
         })
       }
-    );
-  };
+    )
+  }
 
   this.hooks.emit.callAsync(compilation, () => {
     // 获取资源输出的路径
