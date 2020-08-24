@@ -1,21 +1,16 @@
-## webapck构建流程
-
+<!-- ## webapck方法总览 -->
 ![webpack构建流程](https://pic.downk.cc/item/5f2a98fe14195aa594f3cd3f.png)
 
-### 入口文件
-在`/webpack/lib/webpack.js`中定义了webpack方法：
+## webpack入口方法总览
+`/webpack/lib/webpack.js`中定义了webpack方法：
 ```js
 function webpack (options, callback) {
   /**
    *  1. options的校验以及规范化
 	 */
-  const webpackOptionsValidationErrors = validateSchema(
-    webpackOptionsSchema,
-    options
-  )
-  if (webpackOptionsValidationErrors.length) {
-    throw new WebpackOptionsValidationError(webpackOptionsValidationErrors)
-  }
+  const webpackOptionsValidationErrors = validateSchema(webpackOptionsSchema, options)
+  if (webpackOptionsValidationErrors.length) throw new WebpackOptionsValidationError(webpackOptionsValidationErrors)
+
   let compiler
   if (Array.isArray(options)) {
     compiler = new MultiCompiler(
@@ -42,11 +37,8 @@ function webpack (options, callback) {
      */
     if (options.plugins && Array.isArray(options.plugins)) {
       for (const plugin of options.plugins) {
-        if (typeof plugin === "function") {
-          plugin.call(compiler, compiler);
-        } else {
-          plugin.apply(compiler);
-        }
+        if (typeof plugin === "function") plugin.call(compiler, compiler)
+        else plugin.apply(compiler)
       }
     }
 
@@ -68,33 +60,23 @@ function webpack (options, callback) {
    * 7. 如果传入callback，通过compiler.run(callback)开启构建工作
    */
   if (callback) {
-    if (typeof callback !== "function") {
-      throw new Error("Invalid argument: callback");
-    }
-    if (
-      options.watch === true ||
-      (Array.isArray(options) && options.some(o => o.watch))
-    ) {
+    if (options.watch === true || (Array.isArray(options) && options.some(o => o.watch))) {
       const watchOptions = Array.isArray(options)
         ? options.map(o => o.watchOptions || {})
-        : options.watchOptions || {};
-      return compiler.watch(watchOptions, callback);
+        : options.watchOptions || {}
+      return compiler.watch(watchOptions, callback)
     }
-    compiler.run(callback);
+    compiler.run(callback)
   }
-  return compiler;
+  return compiler
 }
 ```
 
 ### 1. 校验以及初始化默认参数配置options
 ```js
-validateSchema(
-  webpackOptionsSchema,
-  options
-)
+validateSchema(webpackOptionsSchema, options)
 options = new WebpackOptionsDefaulter().process(options)
 ```
-
 
 ### 2. 实例化compiler
 `compiler`负责文件监听和启动编译，这一步通过`Compiler`构造函数初步实例化`compiler`：
@@ -124,7 +106,7 @@ compiler.hooks.afterEnvironment.call()
 compiler.options = new WebpackOptionsApply().process(options, compiler)
 ```
 
-这一步根据`options`注册大量webpack内置插件。
+这一步根据`options`注册大量webpack内置插件，本质是在`compiler`的钩子上注册回调。
 
 ### 7. 如果有callback传入则通过run方法开启构建任务，否则仅返回compiler
 ```js

@@ -31,13 +31,14 @@ class WebpackOptionsApply extends OptionsApply {
         throw new Error("Unsupported target '" + options.target + "'.")
     }
 
-    // 加载模块并触发entry-option事件流
+    // 注册EntryOptionPlugin并触发entryOption钩子
     new EntryOptionPlugin().apply(compiler)
     compiler.hooks.entryOption.call(options.context, options.entry)
 
+    new HarmonyModulesPlugin(options.module).apply(compiler)
     new CommonJsPlugin(options.module).apply(compiler)
     new LoaderPlugin().apply(compiler)
-    // ...在compiler上挂载了其他plugin
+    // ...注册其他plugin
 
     compiler.hooks.afterPlugins.call(compiler)
     // ...
@@ -86,7 +87,9 @@ class EntryOptionPlugin {
 }
 ```
 
-当`entryOption`钩子被触发时，会有入口插件将被注册，入口插件的类型取决于构建入口配置，若其为单入口时，有：
+`EntryOptionPlugin`根据配置搭配不同的`EntryPlugin`。通过`entry`配置进入的一共有3种类型——`SingleEntryPlugin`，`MultiEntryPlugin`和`DynamicEntryPlugin`。一般一个`compiler`只会注册一种`EntryPlugin`，这个`EntryPlugin`中有构建模块的入口，也就是`compilation`的入口。
+
+若其为单入口配置时，有：
 ```js
 new SingleEntryPlugin(context, entry, 'main').apply(compiler)
 ```
@@ -96,10 +99,8 @@ new SingleEntryPlugin(context, entry, 'main').apply(compiler)
 class SingleEntryPlugin {
   apply(compiler) {
     compiler.hooks.compilation.tap("SingleEntryPlugin", (compilation, { normalModuleFactory }) => {
-      compilation.dependencyFactories.set(
-        SingleEntryDependency,
-        normalModuleFactory
-      )
+      // SingleEntryDependency 需要使用的 Factory 是 normalModuleFactory
+      compilation.dependencyFactories.set(SingleEntryDependency, normalModuleFactory)
     })
 
     compiler.hooks.make.tapAsync("SingleEntryPlugin", (compilation, callback) => {
@@ -108,20 +109,25 @@ class SingleEntryPlugin {
       compilation.addEntry(context, dep, name, callback)
     })
   }
+
+  static createDependency(entry, name) {
+    const dep = new SingleEntryDependency(entry)
+    dep.loc = { name }
+    return dep
+  }
 }
 ```
 
-`SingleEntryPlugin`又在`compilation`和`make`钩子上注册回调，接收`compilation`参数，分别调用`compilation.dependencyFactories.set`和`compilation.addEntry`。关于`compilation`的这两个方法，将在webpack的构建流程中分析。
+`SingleEntryPlugin`又在`compilation`和`make`钩子上注册回调：
+1. 定义了`SingleEntryPlugin`的模块工厂
+2. `make`钩子上的回调`compilation.addEntry`方法，用于进入正式的编译阶段
 
 ### LoaderPlugin
 ```js
 class LoaderPlugin {
   apply(compiler) {
     compiler.hooks.compilation.tap("LoaderPlugin", (compilation, { normalModuleFactory }) => {
-      compilation.dependencyFactories.set(
-        LoaderDependency,
-        normalModuleFactory
-      )
+      compilation.dependencyFactories.set(LoaderDependency, normalModuleFactory)
     })
 
     compiler.hooks.compilation.tap("LoaderPlugin", compilation => {
@@ -164,7 +170,9 @@ class LoaderPlugin {
 }
 ```
 
-与`SingleEntryPlugin`中类似，`LoaderPlugin`在`compilation`钩子上注册了两个回调，且都接收`compilation`作为参数。两个回调方法中一个调用了`compilation.dependencyFactories`，另一个在`compilation.hooks.normalModuleLoader`钩子上继续注册了回调，同样的，`compilation`的方法会在webpack的构建流程中分析。
+与`SingleEntryPlugin`中类似，`LoaderPlugin`在`compilation`钩子上注册了两个回调：
+1. 一个定义了`LoaderDependency`的模块工厂
+2. 另一个在`compilation.hooks.normalModuleLoader`钩子上继续注册了回调
 
 ### 总结
 `process`方法除了把`options`配置里的一些属性添加到`compiler`对象下，更主要的是根据`options`配置的不同，注册一些默认自带的插件，其中大部分插件的作用是往`compiler.hooks.thisCompilation`、`compiler.hooks.compilation`、`compiler.hooks.make`钩子上了回调，等待后续编译过程中钩子的触发来唤起这些回调。

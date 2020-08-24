@@ -1,9 +1,9 @@
-## 实例化compiler
+## compiler总览
 ```js
 compiler = new Compiler(options.context)
 ```
 
-`compiler`对象上记录了完整的webpack环境信息，以便注册和插件调用。在webpack从启动到结束，`compiler`只会生成一次。
+`compiler`对象作为构建入口对象，负责解析的webpack配置，再将配置应用到`compilation`对象中。
 
 ### Compiler类
 `Compiler`模块是webpack的支柱引擎，它继承自`Tapable`类：

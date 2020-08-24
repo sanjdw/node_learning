@@ -67,7 +67,7 @@ less模块如下：
 </html>
 ```
 
-在bash中敲下webpack指令（或在通过`package.json`配置script脚本）启动webpack构建任务，在浏览器中访问`index.html`即可看到less-loader将`index.less`转为css后的打包的效果：
+在bash中敲下webpack指令（或通过在`package.json`配置的script指令）启动webpack构建任务，在浏览器中访问`index.html`即可看到less-loader将`index.less`转为css后的打包的效果：
 
 ![less-loader打包效果](https://pic.downk.cc/item/5f20012314195aa594e2c9be.jpg)
 
@@ -78,42 +78,42 @@ import { getOptions } from 'loader-utils'
 import {
   getLessOptions,
   getLessImplementation,
-} from './utils';
+} from './utils'
 
 function lessLoader(source) {
-  const options = getOptions(this);
+  const options = getOptions(this)
 
   // async 是webpack提供的返回转换后的content的异步方法
-  const callback = this.async();
-  const lessOptions = getLessOptions(this, options);
+  const callback = this.async()
+  const lessOptions = getLessOptions(this, options)
 
-  let data = source;
+  let data = source
 
   getLessImplementation(options.implementation)
     .render(data, lessOptions)
     .then(({ css, map, imports }) => {
       imports.forEach((item) => {
-        this.addDependency(path.normalize(item));
-      });
+        this.addDependency(path.normalize(item))
+      })
 
-      callback(null, css, typeof map === 'string' ? JSON.parse(map) : map);
+      callback(null, css, typeof map === 'string' ? JSON.parse(map) : map)
     })
 }
 
-export default lessLoader;
+export default lessLoader
 ```
 
 可以看到，less-loader内定义了一个`lessLoader`方法，在该方法内读取了为less-loader配置的参数、以及由less-loader处理的模块，由`getLessImplementation`处理模块并返回css。在这里，`getLessImplementation`是什么？
 ```js
 // utils.js
-import less from 'less';
+import less from 'less'
 
 function getLessImplementation(implementation) {
   if (typeof implementation !== 'undefined') {
-    return implementation;
+    return implementation
   }
 
-  return less;
+  return less
 }
 ```
 
@@ -161,7 +161,7 @@ module.exports = function (source) {
   console.log(options)
 
   const callback = this.async()
-  
+
   less
     .render(source, options)
     .then(({ css, map, imports }) => {
