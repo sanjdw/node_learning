@@ -4,18 +4,18 @@
 class NormalModuleFactory extends Tapable {
   constructor(context, resolverFactory, options) {
     super()
-		this.hooks = {
-			resolver: new SyncWaterfallHook(["resolver"]),
-			factory: new SyncWaterfallHook(["factory"]),
-			beforeResolve: new AsyncSeriesWaterfallHook(["data"]),
-			afterResolve: new AsyncSeriesWaterfallHook(["data"]),
-			createModule: new SyncBailHook(["data"]),
-			module: new SyncWaterfallHook(["module", "data"]),
-			createParser: new HookMap(() => new SyncBailHook(["parserOptions"])),
-			parser: new HookMap(() => new SyncHook(["parser", "parserOptions"])),
-			createGenerator: new HookMap(() => new SyncBailHook(["generatorOptions"])),
-			generator: new HookMap(() => new SyncHook(["generator", "generatorOptions"]))
-		}
+    this.hooks = {
+      resolver: new SyncWaterfallHook(["resolver"]),
+      factory: new SyncWaterfallHook(["factory"]),
+      beforeResolve: new AsyncSeriesWaterfallHook(["data"]),
+      afterResolve: new AsyncSeriesWaterfallHook(["data"]),
+      createModule: new SyncBailHook(["data"]),
+      module: new SyncWaterfallHook(["module", "data"]),
+      createParser: new HookMap(() => new SyncBailHook(["parserOptions"])),
+      parser: new HookMap(() => new SyncHook(["parser", "parserOptions"])),
+      createGenerator: new HookMap(() => new SyncBailHook(["generatorOptions"])),
+      generator: new HookMap(() => new SyncHook(["generator", "generatorOptions"]))
+    }
     this.ruleSet = new RuleSet(options.defaultRules.concat(options.rules))
 
     // 返回一个模块工厂
@@ -48,17 +48,17 @@ class NormalModuleFactory extends Tapable {
 ```js
 create (data, callback) {
   const dependencies = data.dependencies
-	const context = data.context || this.context
-	const resolveOptions = data.resolveOptions || EMPTY_RESOLVE_OPTIONS
-	const request = dependencies[0].request
-	const contextInfo = data.contextInfo || {}
-	this.hooks.beforeResolve.callAsync(
+  const context = data.context || this.context
+  const resolveOptions = data.resolveOptions || EMPTY_RESOLVE_OPTIONS
+  const request = dependencies[0].request
+  const contextInfo = data.contextInfo || {}
+  this.hooks.beforeResolve.callAsync(
     { contextInfo, resolveOptions, context, request, dependencies },
     result => {
-  		const factory = this.hooks.factory.call(null)
-  		factory(result, module => {
-  			callback(null, module)
-  		})
+      const factory = this.hooks.factory.call(null)
+      factory(result, module => {
+        callback(null, module)
+      })
     }
   )
 }

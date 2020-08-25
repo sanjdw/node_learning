@@ -112,7 +112,7 @@ run(callback) {
 4. 最后就是关键的`compile`方法了，进入正式的编译阶段。
 
 ### compiler.compile
-`compile`方法内创建了一个`compilation`对象，`compilation`负责具体的编译过程：
+`compile`方法内创建了一个`compilation`对象，由`compilation`负责具体的编译过程：
 ```js
 compile(callback) {
   // 创建compilation的参数
@@ -140,8 +140,6 @@ compile(callback) {
 3. 创建`compilation`对象，并作为触发`make`钩子的参数
 4. `make`钩子之后依次调用`compilation`的`finish`、`seal`方法
 5. 在`compilation.seal()`完成构建结果的封装后，执行run方法中传入的`onCompiled`方法，主要用于构建资源的输出
-
-在这里，我们可以看到`compiler`和`compilation`的关系：`compiler.compile`方法创建了`compilation`对象。
 
 ### compilation的创建
 `compilation`对象是后续构建流程中最重要的对象，它包含了一次构建过程中所有的数据，通过`createCompilation`方法创建：
@@ -252,7 +250,7 @@ this.hooks.compilation.call(compilation, params)
 `compilation`钩子上注册的回调做的事情主要分为三类：
 1. 继续在`compilation`对象的钩子上注册回调
 2. 在`compilation.dependencyFactories`中保存了各种模块工厂
-3. 通过`contextModuleFactory.hoos.parser`对象`for`方法创建`parser`阶段（遍历解`AST`）的钩子并将它们维护在`contextModuleFactory.hoos.parser._map`属性上
+3. 通过`contextModuleFactory.hoos.parser`对象`for`方法创建`parser`阶段（遍历`AST`）的钩子并将它们维护在`contextModuleFactory.hoos.parser._map`属性上
 
 前文谈过`webpackOptionsApply.process`根据`options`为`compiler.hooks`上的各种钩子注册回调，等待构建流程中`compiler`的方法触发它们。同样的，`thisCompilation`、`compilation`钩子做的事情就是在`compilation`对象创建之后，在`compilation`的钩子上注册回调，等待后续编译过程中`compilation`的方法触发去它们。
 
@@ -266,35 +264,26 @@ this.hooks.compilation.call(compilation, params)
 
 这两个方法本质上都是通过`_addModuleChain`分析入口文件，创建模块对象。
 
-### compiler.make
-`make`方法负责构建各个模块之间的内容。
-
 ### emitAssets方法
 `emitAssets`负责构建资源的输出，其中`emitFiles`是具体输出文件的方法。
 ```js
 emitAssets(compilation, callback) {
   let outputPath
   const emitFiles = () => {
-    asyncLib.forEachLimit(compilation.getAssets(), 15,
-      ({ name: file, source }, callback) => {
-        let targetFile = file
-        const queryStringIdx = targetFile.indexOf("?");
-        if (queryStringIdx >= 0) targetFile = targetFile.substr(0, queryStringIdx)
+    asyncLib.forEachLimit(compilation.getAssets(), 15, ({ name: file, source }, callback) => {
+      let targetFile = file
+      const queryStringIdx = targetFile.indexOf("?");
+      if (queryStringIdx >= 0) targetFile = targetFile.substr(0, queryStringIdx)
 
-        const writeOut = () => { }
-        if (targetFile.match(/\/|\\/)) {
-          const dir = path.dirname(targetFile)
-          this.outputFileSystem.mkdirp(this.outputFileSystem.join(outputPath, dir), writeOut)
-        } else {
-          writeOut()
-        }
-      },
-      () => {
-        this.hooks.afterEmit.callAsync(compilation, () => {
-          return callback()
-        })
-      }
-    )
+      const writeOut = () => { }
+      if (targetFile.match(/\/|\\/)) this.outputFileSystem.mkdirp(this.outputFileSystem.join(outputPath, path.dirname(targetFile)), writeOut)
+      else writeOut()
+    },
+    () => {
+      this.hooks.afterEmit.callAsync(compilation, () => {
+        return callback()
+      })
+    })
   }
 
   this.hooks.emit.callAsync(compilation, () => {
@@ -302,6 +291,39 @@ emitAssets(compilation, callback) {
     outputPath = compilation.getPath(this.outputPath)
     // 递归创建输出目录，并输出资源
     this.outputFileSystem.mkdirp(outputPath, emitFiles)
+  })
+}
+```
+
+### readRecords 读取构建记录
+```js
+readRecords (callback) {
+  this.inputFileSystem.stat(this.recordsInputPath, () => {
+    this.inputFileSystem.readFile(this.recordsInputPath, content => {
+      this.records = parseJson(content.toString("utf-8"))
+      return callback()
+    })
+  })
+}
+```
+
+### emitRecords输出构建记录
+```js
+emitAssets(compilation, callback) {
+  const idx1 = this.recordsOutputPath.lastIndexOf("/")
+  const idx2 = this.recordsOutputPath.lastIndexOf("\\")
+  let recordsOutputPathDirectory = null
+
+  if (idx1 > idx2) recordsOutputPathDirectory = this.recordsOutputPath.substr(0, idx1)
+  else if (idx1 < idx2) recordsOutputPathDirectory = this.recordsOutputPath.substr(0, idx2)
+
+  this.outputFileSystem.mkdirp(recordsOutputPathDirectory, () => {
+
+    this.outputFileSystem.writeFile(
+      this.recordsOutputPath,
+      JSON.stringify(this.records, undefined, 2),
+      callback
+    )
   })
 }
 ```

@@ -69,7 +69,7 @@ class Compilation extends Tapable {
   createHash () {}
   emitAsset () {}
   createChunkAssets () {}
-  // ...其他方法
+  // ...
 }
 ```
 
@@ -78,7 +78,7 @@ class Compilation extends Tapable {
 2. 定义了`entries`、`chunks`、`dependencyFactories`等模块相关的变量
 3. 定义了`addModule`、`buildModule`等模块相关的方法
 
-![dependency和module](https://user-gold-cdn.xitu.io/2019/4/25/16a527dcf6a1ff31)
+![dependency和module](https://pic.downk.cc/item/5f448289160a154a67f0862d.png)
 
 上面谈到了两个概念，`Dependency`(依赖)和`Module`（模块）。
 

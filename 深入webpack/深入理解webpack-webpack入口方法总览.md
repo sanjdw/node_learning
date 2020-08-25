@@ -43,21 +43,13 @@ function webpack (options, callback) {
     }
 
     /**
-     * 5. 触发environment、afterEnvironment钩子
-     */
-    compiler.hooks.environment.call()
-    compiler.hooks.afterEnvironment.call()
-
-    /**
-     * 6. 根据option配置注册大量内置插件
+     * 5. 根据option配置注册大量内置插件
      */
     compiler.options = new WebpackOptionsApply().process(options, compiler)
-  } else {
-    throw new Error("Invalid argument: options")
   }
 
   /**
-   * 7. 如果传入callback，通过compiler.run(callback)开启构建工作
+   * 6. 如果传入callback，通过compiler.run(callback)开启构建工作
    */
   if (callback) {
     if (options.watch === true || (Array.isArray(options) && options.some(o => o.watch))) {
@@ -95,31 +87,22 @@ new NodeEnvironmentPlugin({
 
 ### 4. 注册开发者配置的plugin
 
-### 5. 触发environment、afterEnvironment钩子
-```js
-compiler.hooks.environment.call()
-compiler.hooks.afterEnvironment.call()
-```
-
-### 6. 根据option配置注册各种插件
+### 5. 根据option配置注册各种插件
 ```js
 compiler.options = new WebpackOptionsApply().process(options, compiler)
 ```
 
 这一步根据`options`注册大量webpack内置插件，本质是在`compiler`的钩子上注册回调。
 
-### 7. 如果有callback传入则通过run方法开启构建任务，否则仅返回compiler
+### 6. 如果有callback传入则通过run方法开启构建任务，否则仅返回compiler
 ```js
 if (callback) {
-  if (
-  options.watch === true ||
-      (Array.isArray(options) && options.some(o => o.watch))
-    ) {
-      const watchOptions = Array.isArray(options)
-        ? options.map(o => o.watchOptions || {})
-        : options.watchOptions || {};
-      return compiler.watch(watchOptions, callback);
-    }
-  compiler.run(callback);
+  if (options.watch === true || (Array.isArray(options) && options.some(o => o.watch))) {
+    const watchOptions = Array.isArray(options)
+      ? options.map(o => o.watchOptions || {})
+      : options.watchOptions || {}
+    return compiler.watch(watchOptions, callback)
+  }
+  compiler.run(callback)
 }
 ```

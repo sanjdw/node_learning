@@ -2,23 +2,23 @@
 
 ```js
 class NormalModule extends Module {
-	constructor({type, request, userRequest, rawRequest, loaders, resource, matchResource, parser, generator, resolveOptions}) {
+  constructor({type, request, userRequest, rawRequest, loaders, resource, matchResource, parser, generator, resolveOptions}) {
     super(type, getContext(resource));
 
-		this.request = request
-		this.userRequest = userRequest
-		this.rawRequest = rawRequest
-		this.binary = type.startsWith("webassembly")
-		this.parser = parser
-		this.generator = generator
-		this.resource = resource;
-		this.matchResource = matchResource
-		this.loaders = loaders
-		if (resolveOptions !== undefined) this.resolveOptions = resolveOptions
+    this.request = request
+    this.userRequest = userRequest
+    this.rawRequest = rawRequest
+    this.binary = type.startsWith("webassembly")
+    this.parser = parser
+    this.generator = generator
+    this.resource = resource;
+    this.matchResource = matchResource
+    this.loaders = loaders
+    if (resolveOptions !== undefined) this.resolveOptions = resolveOptions
 
-		this.error = null
-		this._source = null
-		this._buildHash = ""
+    this.error = null
+    this._source = null
+    this._buildHash = ""
   }
   createLoaderContext () {}
   getCurrentLoader () {}
@@ -31,33 +31,33 @@ class NormalModule extends Module {
 ### build 方法
 ```js
 build(options, compilation, resolver, fs, callback) {
-	this.built = true
-	this._source = null
-	this._ast = null
-	this._buildHash = ""
-	this.buildMeta = {}
+  this.built = true
+  this._source = null
+  this._ast = null
+  this._buildHash = ""
+  this.buildMeta = {}
 
   return this.doBuild(options, compilation, resolver, fs, () => {
-		this._cachedSources.clear()
+    this._cachedSources.clear()
 
-		const handleParseResult = result => {
-			this._lastSuccessfulBuildMeta = this.buildMeta
-			this._initBuildHash(compilation)
-			return callback()
-		}
+    const handleParseResult = result => {
+      this._lastSuccessfulBuildMeta = this.buildMeta
+      this._initBuildHash(compilation)
+      return callback()
+    }
 
-		 // 这里会将source转为 AST，递归分析出所有的依赖
-		const result = this.parser.parse(
-			this._ast || this._source.source(),
-			{ current: this, module: this, compilation: compilation, options: options },
-			(result) => {
-				handleParseResult(result)
-			}
-		)
-		if (result !== undefined) {
-			handleParseResult(result)
-		}
-	})
+      // 这里会将source转为 AST，递归分析出所有的依赖
+    const result = this.parser.parse(
+      this._ast || this._source.source(),
+      { current: this, module: this, compilation: compilation, options: options },
+      (result) => {
+        handleParseResult(result)
+      }
+    )
+    if (result !== undefined) {
+      handleParseResult(result)
+    }
+  })
 }
 ```
 
@@ -65,7 +65,7 @@ build(options, compilation, resolver, fs, callback) {
 ```js
 doBuild(options, compilation, resolver, fs, callback) {
   const loaderContext = this.createLoaderContext(resolver, options, compilation, fs)
-  // 运行配置文件中配置的loader，比如babel-loader，然后返回处理完毕后的源码
+  // 运行配置文件中配置的loader，比如babel-loader，然后返回处理完毕后的源码(JS)
   runLoaders(
     { resource: this.resource, loaders: this.loaders, context: loaderContext, readResource: fs.readFile.bind(fs) },
     result => {

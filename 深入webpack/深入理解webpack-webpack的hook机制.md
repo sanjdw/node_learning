@@ -1,4 +1,4 @@
-## compiler的hook
+## webpack的hook机制
 webpack本质是事件流机制，类似于发布订阅模式，实现这个的核心就是`Tapable`，而`Tapable`有两个重要组成：
 1. hook
 2. HookCodeFactory
@@ -265,8 +265,8 @@ _resetCompilation() {
 ```
 
 这里有两个问题：
-1. 一是`_call`/`_callAsync`/`_promise`方法没有直接被定义在原型上，而是采用属性拦截器的方式？
-2. 二是`call`/`callAsync`/`promise`等方法为什么不直接在子类中实现，而是采用这种通过在`Hook`中调用子类的`compile`的方式生成，且在注册回调、拦截器时重新赋值？
+2. 一是`call`/`callAsync`/`promise`等方法为什么不直接在子类中实现，而是原型对象的属性拦截器方式定义？
+3. 二是钩子上的这些方法为什么要在注册回调、拦截器时重新赋值？
 
 简单的说是因为插件彼此有着联系，所以用了这么多类型的钩子来控制这些联系，一个钩子上每次有新的回调或拦截器被注册时，就要重新排布回调和拦截器的调用顺序，因此需要重写`call`方法，并通过属性拦截器将生成`call`的方法记录在`_call`上。这个逻辑后面还会再次讲到，不能理解的话暂时先记住。
 
@@ -402,9 +402,6 @@ class HookCodeFactory {
     instance._x = options.taps.map(t => t.fn)
   }
 
-  /**
-   * @param {{ type: "sync" | "promise" | "async", taps: Array<Tap>, interceptors: Array<Interceptor> }} options
-   */
   init(options) {
     this.options = options
     this._args = options.args.slice()
@@ -536,14 +533,7 @@ class HookCodeFactory {
     return code
   }
 
-  callTapsSeries({
-    onError,
-    onResult,
-    resultReturns,
-    onDone,
-    doneReturns,
-    rethrowIfPossible
-  }) {
+  callTapsSeries({onError, onResult, resultReturns, onDone, doneReturns, rethrowIfPossible}) {
     if (this.options.taps.length === 0) return onDone()
     const firstAsync = this.options.taps.findIndex(t => t.type !== "sync")
     const somethingReturns = resultReturns || doneReturns || false
@@ -580,119 +570,9 @@ class HookCodeFactory {
     return code
   }
 
-  callTapsLooping({ onError, onDone, rethrowIfPossible }) {
-    if (this.options.taps.length === 0) return onDone()
-    const syncOnly = this.options.taps.every(t => t.type === "sync")
-    let code = ""
-    if (!syncOnly) {
-      code += "var _looper = () => {\n"
-      code += "var _loopAsync = false;\n"
-    }
-    code += "var _loop;\n"
-    code += "do {\n"
-    code += "_loop = false;\n"
-    for (let i = 0; i < this.options.interceptors.length; i++) {
-      const interceptor = this.options.interceptors[i]
-      if (interceptor.loop) {
-        code += `${this.getInterceptor(i)}.loop(${this.args({
-          before: interceptor.context ? "_context" : undefined
-        })});\n`
-      }
-    }
-    code += this.callTapsSeries({
-      onError,
-      onResult: (i, result, next, doneBreak) => {
-        let code = ""
-        code += `if(${result} !== undefined) {\n`
-        code += "_loop = true;\n"
-        if (!syncOnly) code += "if(_loopAsync) _looper();\n"
-        code += doneBreak(true)
-        code += `} else {\n`
-        code += next()
-        code += `}\n`
-        return code
-      },
-      onDone:
-        onDone &&
-        (() => {
-          let code = ""
-          code += "if(!_loop) {\n"
-          code += onDone()
-          code += "}\n"
-          return code
-        }),
-      rethrowIfPossible: rethrowIfPossible && syncOnly
-    })
-    code += "} while(_loop);\n"
-    if (!syncOnly) {
-      code += "_loopAsync = true;\n"
-      code += "};\n"
-      code += "_looper();\n"
-    }
-    return code
-  }
+  callTapsLooping({ onError, onDone, rethrowIfPossible }) { }
 
-  callTapsParallel({ onError, onResult, onDone, rethrowIfPossible, onTap = (i, run) => run() }) {
-    if (this.options.taps.length <= 1) {
-      return this.callTapsSeries({
-        onError,
-        onResult,
-        onDone,
-        rethrowIfPossible
-      })
-    }
-    let code = ""
-    code += "do {\n"
-    code += `var _counter = ${this.options.taps.length};\n`
-    if (onDone) {
-      code += "var _done = () => {\n"
-      code += onDone()
-      code += "};\n"
-    }
-    for (let i = 0; i < this.options.taps.length; i++) {
-      const done = () => {
-        if (onDone) return "if(--_counter === 0) _done();\n"
-        else return "--_counter;"
-      }
-      const doneBreak = skipDone => {
-        if (skipDone || !onDone) return "_counter = 0;\n"
-        else return "_counter = 0;\n_done();\n"
-      }
-      code += "if(_counter <= 0) break;\n"
-      code += onTap(
-        i,
-        () =>
-          this.callTap(i, {
-            onError: error => {
-              let code = ""
-              code += "if(_counter > 0) {\n"
-              code += onError(i, error, done, doneBreak)
-              code += "}\n"
-              return code
-            },
-            onResult:
-              onResult &&
-              (result => {
-                let code = ""
-                code += "if(_counter > 0) {\n"
-                code += onResult(i, result, done, doneBreak)
-                code += "}\n"
-                return code
-              }),
-            onDone:
-              !onResult &&
-              (() => {
-                return done()
-              }),
-            rethrowIfPossible
-          }),
-        done,
-        doneBreak
-      )
-    }
-    code += "} while(false);\n"
-    return code
-  }
+  callTapsParallel({ onError, onResult, onDone, rethrowIfPossible, onTap = (i, run) => run() }) { }
 
   args({ before, after } = {}) {
     let allArgs = this._args
@@ -739,54 +619,6 @@ compile(options) {
 
 接着是`create`方法，这里通过`new Function`来创建`call`/`callAsync`/`promise`的静态脚本。现在可以再次回答前文的问题——钩子的触发回调的方法为什么要通过这种方式生成，而不是写在类中：因为钩子需要实现区别于普通定于发布模式的特性，钩子的回调之间可能还有依赖关系，而在声明钩子时回调还没有被注册，因此需要在注册回调时通过`compile`的方式重新生成。
 
-由于我们的代码比较简单，生成出来的代码就非常简单了。主要的逻辑就是获取`this._x`里的第一个函数并传入参数执行。如果我们在`call`之前再通过`tap`注册一个回调。那么生成的代码中也会对应的获取`_x[1]`来执行第二个注册的回调函数。
-
 到这里整一个`new SyncHook()`->`tap`->`call`的流程就结束了。主要的比较有趣的点在执行`call`的时候会进行缓存。
 
 webpack通过`tapable`这种巧妙的钩子设计很好的将实现与构建流程解耦开来。
-
-### _pluginCompat钩子的作用
-```js
-function Tapable () {
-  this._pluginCompat = new SyncBailHook(["options"])
-	this._pluginCompat.tap({ name: "Tapable camelCase", stage: 100 }, options => {
-		options.names.add(
-			options.name.replace(/[- ]([a-z])/g, (str, ch) => ch.toUpperCase())
-		)
-	})
-  this._pluginCompat.tap({ name: "Tapable this.hooks", stage: 200 }, options => {
-    let hook
-    for (const name of options.names) {
-      hook = this.hooks[name];
-      if (hook !== undefined) {
-        break
-      }
-    }
-    if (hook !== undefined) {
-      const tapOpt = {
-        name: options.fn.name || "unnamed compat plugin",
-        stage: options.stage || 0
-      }
-      if (options.async) hook.tapAsync(tapOpt, options.fn)
-      else hook.tap(tapOpt, options.fn)
-      return true
-    }
-  })
-}
-
-Tapable.prototype.plugin = util.deprecate(function plugin(name, fn) {
-	if (Array.isArray(name)) {
-		name.forEach(function(name) {
-			this.plugin(name, fn)
-		}, this)
-		return
-	}
-	this._pluginCompat.call({ name: name, fn: fn, names: new Set([name]) })
-})
-```
-
-`Tapable`实例化`compiler`时定义了一个`_pluginCompat`，这是一个同步保险钩子，并且注册了两个回调，在执行`compiler.plugin`的时候触发了钩子从而执行这两个回调：
-1. 将传入的插件名`camelize`化
-2. 然后在`compiler.hooks`上寻找对应的钩子实例，并且调用`tap`方法真正注册的回调
-
-这么做的目的是什么？老版本webpack的插件的注册与现在有所不同，不是通过`compiler.hooks.**`注册回调的，这种方式兼容了老的webpack插件，将它们的回调注册到`compiler`对应的钩子上。
