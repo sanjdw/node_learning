@@ -23,4 +23,10 @@
 
 好了，到这里，`Transfer-Encoding`可以登场了。`HTTP 1.1`引入分块传输编码传输编码，把数据分解成一系列数据块，并以多个块发送给客户端，通过响应头`Transfer-Encoding: chunked`，来通知浏览器响应传输使用的是分块传输编码，这样就不需要`Content-Length`了。
 
+如果一个HTTP消息头的`Transfer-Encoding`值为`chunked`，那么，消息体由数量未定的块组成，并以最后一个大小为**0**的块为结束：
+1. 每一个非空的块都以该块包含数据的字节数（字节数以十六进制表示）开始，跟随一个`CRLF`，然后是数据本身，最后块`CRLF`结束。
+2. 最后一块是单行，由块大小（0），以及CRLF。
+
+![chunked](https://pic.downk.cc/item/5f50b1ec160a154a672fffed.jpg)
+
 > `HTTP/2`中已经不支持`Transfer-Encodin`这一格式了，因为其本身提供了更加高级的流机制来实现类似功能。
