@@ -107,6 +107,16 @@ addEntry(context, entry, name, callback) {
 3. 生成chunk
 4. 最后将所有加载模块的语法替换成`webpack_require`来模拟模块化操作
 
+### compilation钩子的触发顺序
+1. addEntry
+2. this.semaphore.acquire => moduleFactory.create
+  - normalModule.hooks.beforeResolve
+  - normalModule.hooks.factory生成factory
+  - normalModule.hooks.resolver => 生成resolver
+  - 调用生成的resolver，normalModule.hooks.afterResolve
+  - createdModule = moduleFactory.hooks.createModule.call(result)
+  - moduleFactory.hooks.module(createdModule)
+
 ### _addModuleChain
 `_addModuleChain`的作用将入口文件转化为一个module：
 ```js
