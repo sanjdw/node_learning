@@ -70,6 +70,10 @@ validateSchema(webpackOptionsSchema, options)
 options = new WebpackOptionsDefaulter().process(options)
 ```
 
+规范化后的options：
+
+![options](https://pic.downk.cc/item/5f58f555160a154a674438c3.jpg)
+
 ### 2. 实例化compiler
 `compiler`负责文件监听和启动编译，这一步通过`Compiler`构造函数初步实例化`compiler`：
 ```js
@@ -83,7 +87,7 @@ new NodeEnvironmentPlugin({
 }).apply(compiler)
 ```
 
-这一步赋予了`compiler`对象文件存取的能力。
+这一步赋予了`compiler`对象文件读写的能力。
 
 ### 4. 注册开发者配置的plugin
 
@@ -94,7 +98,7 @@ compiler.options = new WebpackOptionsApply().process(options, compiler)
 
 这一步根据`options`注册大量webpack内置插件，本质是在`compiler`的钩子上注册回调。
 
-### 6. 如果有callback传入则通过run方法开启构建任务，否则仅返回compiler
+### 6. 如果有callback传入则通过run方法开启构建任务，否则返回compiler对象
 ```js
 if (callback) {
   if (options.watch === true || (Array.isArray(options) && options.some(o => o.watch))) {
