@@ -33,7 +33,7 @@ class CleanWebpackPlugin {
 
     if (this.cleanOnceBeforeBuildPatterns.length !== 0) {
       if (hooks) {
-        // 在compiler的emit钩子上注册clean-webpack-plugin回调
+        // 在compiler的emit钩子上注册clean-webpack-plugin任务
         hooks.emit.tap('clean-webpack-plugin', compilation => {
           this.handleInitial(compilation);
         });
@@ -50,7 +50,7 @@ class CleanWebpackPlugin {
     }
 
     if (hooks) {
-      // compiler的done钩子上注册回调
+      // compiler的done钩子上注册任务
       hooks.done.tap('clean-webpack-plugin', stats => {
         this.handleDone(stats);
       });
@@ -88,6 +88,6 @@ class CleanWebpackPlugin {
 }
 ```
 
-可以看到，`CleanWebpackPlugin`在`apply`方法内为`compiler`的生命周期钩子`done`注册了回调，而`complier.hooks.done`钩子的声明及触发是在`compiler`的初始化阶段就定义好了的。
+可以看到，`CleanWebpackPlugin`在`apply`方法内为`compiler`的生命周期钩子`done`注册了任务，而`complier.hooks.done`钩子的声明及触发是在`compiler`的初始化阶段就定义好了的。
 
 这样，当`compiler.hooks.done`钩子触发时，插件内定义的`handleDone`方法便得以执行，清空构建输出目录下的文件，这也正是`clean-webpack-plugin`插件的核心功能。

@@ -1,5 +1,4 @@
 ## NormalModuleFactory
-
 ```js
 class NormalModuleFactory extends Tapable {
   constructor(context, resolverFactory, options) {

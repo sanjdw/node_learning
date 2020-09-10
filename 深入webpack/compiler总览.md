@@ -94,11 +94,11 @@ Tapable.prototype.apply = util.deprecate(function apply() {
 }, "Tapable.apply is deprecated. Call apply on the plugin directly instead")
 ```
 
-`Tapable`在实例化`compiler`时定义了一个`_pluginCompat`，这是一个同步保险钩子，并且注册了两个回调，在执行`compiler.plugin`的时候触发了钩子从而执行这两个回调：
+`Tapable`在实例化`compiler`时定义了一个`_pluginCompat`，这是一个同步保险钩子，并且注册了两个任务，在执行`compiler.plugin`的时候触发了钩子从而执行这两个任务：
 1. 将传入的插件名`camelize`化
-2. 然后在`compiler.hooks`上寻找对应的钩子实例，并且调用`tap`方法真正注册的回调
+2. 然后在`compiler.hooks`上寻找对应的钩子实例，并且调用`tap`方法真正注册的任务
 
-这样操作的原因是，老版本webpack的插件的注册与现在有所不同，不是通过`compiler.hooks.**`注册回调的，这种方式兼容了老的webpack插件，将它们的回调注册到`compiler`对应的钩子上。
+这样操作的原因是，老版本webpack的插件的注册与现在有所不同，不是通过`compiler.hooks.**`注册任务的，这种方式兼容了老的webpack插件，将它们的任务注册到`compiler`对应的钩子上。
 
 ### run 方法
 ### compiler方法

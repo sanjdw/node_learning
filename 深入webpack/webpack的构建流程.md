@@ -1,5 +1,5 @@
 ## webpack的构建流程
-在前文已经提到，webpack的核心功能是事件流的控制。在了解了webpack的`hook`机制以及`webpackOptionsApply`注册的大量插件之后，你可能会问——各个插件是如何确定应该监听哪些钩子、这些注册的回调都是什么时候随着钩子触发的？
+在前文已经提到，webpack的核心功能是事件流的控制。在了解了webpack的`hook`机制以及`webpackOptionsApply`注册的大量插件之后，你可能会问——各个插件是如何确定应该监听哪些钩子、这些注册的任务都是什么时候随着钩子触发的？
 
 要完全解答这个问题，就需要知道webpack的构建流程，这其中涉及了非常多的任务点。我们可以挑选完整构建流程中涉及到的几个核心对象和任务点，把webpack的构建流程讲清楚，当我们需要实现某个特定内容的时候，再去阅读对应的模块源码。开始之前应该先思考如下几个问题：
 1. webpack的编译过程主要有哪些阶段
@@ -106,8 +106,8 @@ run(callback) {
 ```
 
 先忽略`onCompiled`方法，`compiler.run`做了以下工作：
-1. 触发`beforeRun`钩子，在这之前`NodeEnvironmentPlugin`在此钩子上注册回调。
-2. `beforeRun`钩子之后是`run`钩子，`CachePlugin`在此钩子上注册过个回调。这里对钩子上的`compiler`钩子上注册的回调暂不展开分析。
+1. 触发`beforeRun`钩子，在这之前`NodeEnvironmentPlugin`已经在此钩子上注册任务。
+2. `beforeRun`钩子之后是`run`钩子，`CachePlugin`在此钩子上注册过个任务。这里对钩子上的`compiler`钩子上注册的任务暂不展开分析。
 3. 接着是`readRecords`方法，该方法用于读取之前的records，这里的records指的是一些数据片段，用于储存多次构建过程中的`module`的标识。
 4. 最后就是关键的`compile`方法了，进入正式的编译阶段。
 
@@ -207,28 +207,28 @@ createContextModuleFactory() {
 7. `thisCompilation`、`compilation`
 8. `make`
 
-在之前我们已经提到过，`webpackOptionsApply.process`方法会根据`options`配置的不同，向`compiler`对象上注册大量内置插件，其中大部分插件是在`compiler.hooks.thisCompilation`、`compiler.hooks.compilation`、`compiler.hooks.make`钩子上注册回调。现在，我们就来分析这几个关键钩子上的回调都做了哪些事情。
+在之前我们已经提到过，`webpackOptionsApply.process`方法会根据`options`配置的不同，向`compiler`对象上注册大量内置插件，其中大部分插件是在`compiler.hooks.thisCompilation`、`compiler.hooks.compilation`、`compiler.hooks.make`钩子上注册任务。现在，我们就来分析这几个关键钩子上的任务都做了哪些事情。
 
-### compiler.hooks.thisCompilation钩子的回调
+### compiler.hooks.thisCompilation钩子的任务
 全局搜索`thisCompilation.tap`：
 
-![thisCompilation钩子的回调](https://pic.downk.cc/item/5f3ca2bb14195aa5947d5060.jpg)
+![thisCompilation钩子的任务](https://pic.downk.cc/item/5f3ca2bb14195aa5947d5060.jpg)
 
 之前已经提到过，与`compiler`一样，`compilation`对象上也有钩子。除了`compilation.hooks`，`compilation`对象还有几个template，而这几个template又和`compiler`、`compilation`类似也有各自的钩子。`thisCompilation`钩子触发时接收`compilation`、`params`作为参数：
 ```js
 this.hooks.thisCompilation.call(compilation, params)
 ```
 
-如此一来，`thisCompilation`钩子上注册的回调便可以访问到`compilation`，接着在`compilation`上做文章：
-1. 继续在`compilation`对象的钩子上注册回调
-2. 在`compilation.XXtemplate`的钩子上注册回调
+如此一来，`thisCompilation`钩子上注册的任务便可以访问到`compilation`，接着在`compilation`上做文章：
+1. 继续在`compilation`对象的钩子上注册任务
+2. 在`compilation.XXtemplate`的钩子上注册任务
 
-以上两类回调的具体功能，还要等后文解答。
+以上两类任务的具体功能，还要等后文解答。
 
-### compiler.hooks.compilation钩子的回调
-`compiler.hooks.compilation`钩子上的回调注册来自60余处：
+### compiler.hooks.compilation钩子的任务
+`compiler.hooks.compilation`钩子上的任务注册来自60余处：
 
-![compiler.hooks.compilation钩子的回调](https://pic.downk.cc/item/5f3eb55f14195aa59456a66e.jpg)
+![compiler.hooks.compilation钩子的任务](https://pic.downk.cc/item/5f3eb55f14195aa59456a66e.jpg)
 
 回顾用于创建`compilation`对象所构建的参数：
 ```js
@@ -247,16 +247,16 @@ newCompilationParas() {
 this.hooks.compilation.call(compilation, params)
 ```
 
-`compilation`钩子上注册的回调做的事情主要分为三类：
-1. 继续在`compilation`对象的钩子上注册回调
+`compilation`钩子上注册的任务做的事情主要分为三类：
+1. 继续在`compilation`对象的钩子上注册任务
 2. 在`compilation.dependencyFactories`中保存了各种模块工厂
 3. 通过`contextModuleFactory.hoos.parser`对象`for`方法创建`parser`阶段（遍历`AST`）的钩子并将它们维护在`contextModuleFactory.hoos.parser._map`属性上
 
-前文谈过`webpackOptionsApply.process`根据`options`为`compiler.hooks`上的各种钩子注册回调，等待构建流程中`compiler`的方法触发它们。同样的，`thisCompilation`、`compilation`钩子做的事情就是在`compilation`对象创建之后，在`compilation`的钩子上注册回调，等待后续编译过程中`compilation`的方法触发去它们。
+前文谈过`webpackOptionsApply.process`根据`options`为`compiler.hooks`上的各种钩子注册任务，等待构建流程中`compiler`的方法触发它们。同样的，`thisCompilation`、`compilation`钩子做的事情就是在`compilation`对象创建之后，在`compilation`的钩子上注册任务，等待后续编译过程中`compilation`的方法触发去它们。
 
-### compiler.hooks.make钩子上的回调
+### compiler.hooks.make钩子上的任务
 
-![make钩子的回调](https://pic.downk.cc/item/5f3eb7f114195aa594579f3f.jpg)
+![make钩子的任务](https://pic.downk.cc/item/5f3eb7f114195aa594579f3f.jpg)
 
 从`make`钩子触发开始，`compilation`对象中定义的方法的得以执行：
 1. `compilation.addEntry`

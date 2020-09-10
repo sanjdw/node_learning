@@ -61,7 +61,7 @@ class WebpackOptionsApply extends OptionsApply {
 这里拎出两处插件分析：`EntryOptionPlugin`和`LoaderPlugin`。
 
 ### EntryOptionPlugin
-在`EntryOptionPlugin`内可以发现它在`entryOption`钩子上注册了回调：
+在`EntryOptionPlugin`内可以发现它在`entryOption`钩子上注册了任务：
 ```js
 const itemToPlugin = (context, item, name) => {
   if (Array.isArray(item)) {
@@ -118,9 +118,9 @@ class SingleEntryPlugin {
 }
 ```
 
-`SingleEntryPlugin`又在`compilation`和`make`钩子上注册回调：
+`SingleEntryPlugin`又在`compilation`和`make`钩子上注册任务：
 1. 定义了`SingleEntryPlugin`的模块工厂
-2. `make`钩子上的回调`compilation.addEntry`方法，用于进入正式的编译阶段
+2. `make`钩子上的任务`compilation.addEntry`方法，用于进入正式的编译阶段
 
 ### LoaderPlugin
 ```js
@@ -170,9 +170,9 @@ class LoaderPlugin {
 }
 ```
 
-与`SingleEntryPlugin`中类似，`LoaderPlugin`在`compilation`钩子上注册了两个回调：
+与`SingleEntryPlugin`中类似，`LoaderPlugin`在`compilation`钩子上注册了两个任务：
 1. 一个定义了`LoaderDependency`的模块工厂
-2. 另一个在`compilation.hooks.normalModuleLoader`钩子上继续注册了回调
+2. 另一个在`compilation.hooks.normalModuleLoader`钩子上继续注册了任务
 
 ### 总结
-`process`方法除了把`options`配置里的一些属性添加到`compiler`对象下，更主要的是根据`options`配置的不同，注册一些默认自带的插件，其中大部分插件的作用是往`compiler.hooks.thisCompilation`、`compiler.hooks.compilation`、`compiler.hooks.make`钩子上了回调，等待后续编译过程中钩子的触发来唤起这些回调。
+`process`方法除了把`options`配置里的一些属性添加到`compiler`对象下，更主要的是根据`options`配置的不同，注册一些默认自带的插件，其中大部分插件的作用是往`compiler.hooks.thisCompilation`、`compiler.hooks.compilation`、`compiler.hooks.make`钩子上了任务，等待后续编译过程中钩子的触发来唤起这些任务。

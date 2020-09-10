@@ -1,5 +1,4 @@
 ## Normalmodule
-
 ```js
 class NormalModule extends Module {
   constructor({type, request, userRequest, rawRequest, loaders, resource, matchResource, parser, generator, resolveOptions}) {

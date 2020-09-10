@@ -22,4 +22,4 @@ class MainTemplate extends Tapable {
 }
 ```
 
-可以看到，`MaintTemplate`也继承自`Tapable`，它创建的对象与`compiler`、`compilation`非常相像，它也有很多钩子和方法，钩子上被注册了回调。
+可以看到，`MaintTemplate`也继承自`Tapable`，它创建的对象与`compiler`、`compilation`非常相像，它也有很多钩子和方法，钩子上被注册了任务。

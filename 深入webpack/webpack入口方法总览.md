@@ -96,7 +96,7 @@ new NodeEnvironmentPlugin({
 compiler.options = new WebpackOptionsApply().process(options, compiler)
 ```
 
-这一步根据`options`注册大量webpack内置插件，本质是在`compiler`的钩子上注册回调。
+这一步根据`options`注册大量webpack内置插件，本质是在`compiler`的钩子上注册任务。
 
 ### 6. 如果有callback传入则通过run方法开启构建任务，否则返回compiler对象
 ```js

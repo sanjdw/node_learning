@@ -5,24 +5,24 @@ webpack本质是事件流机制，类似于发布订阅模式，实现这个的�
 
 在分析`compiler`的实例化过程后，我们已经知道，`compiler`实例上有两处`hook`：生命周期相关钩子`compiler.hooks`和`compiler._pluginCompat`。
 
-`Tapable`的核心功能就是一系列注册回调之间的执行流控制，比如注册了在一个钩子上注册三个回调，可以控制它们是并发的，或者是同步依次执行的，又或者其中一个出错后，后面的回调就不执行了。为此，`Tapable`实现了以下钩子：
+`Tapable`的核心功能就是一系列注册任务之间的执行流控制，比如注册了在一个钩子上注册三个任务，可以控制它们是并发的，或者是同步依次执行的，又或者其中一个出错后，后面的任务就不执行了。为此，`Tapable`实现了以下钩子：
 
 ![Tapable Hooks](https://pic.downk.cc/item/5f2fb91814195aa594d2c25b.jpg)
 
 `Tapable`的钩子大致可以分为两类：
 ### 同步钩子
-1. `SyncHook`：串同步行，不关心回调方法的返回，在触发钩子之后，会按照注册的先后顺序依次执行回调
-2. `SyncBailHook`：同步串行，如果当前回调方法有返回值，则跳过剩下未执行的回调方法
-3. `SyncWaterfallHook`：同步串行，前一个回调方法的返回值作为参数传递给下一个回调
-4. `SyncLoopHook`：同步串行，如果当前回调有返回值，则继续执行这个回调方法，否则执行后续的回调方法
+1. `SyncHook`：串同步行，不关心任务方法的返回，在触发钩子之后，会按照注册的先后顺序依次执行任务
+2. `SyncBailHook`：同步串行，如果当前任务方法有返回值，则跳过剩下未执行的任务方法
+3. `SyncWaterfallHook`：同步串行，前一个任务方法的返回值作为参数传递给下一个任务
+4. `SyncLoopHook`：同步串行，如果当前任务有返回值，则继续执行这个任务方法，否则执行后续的任务方法
 
 ### 异步钩子
-1. `AsyncParallelHook`：异步并行，不关心回调方法的返回
-2. `AsyncParallelBailHook`：异步并行，如果当前回调方法有返回值，则跳过剩下未执行的回调方法
-3. `AsyncSeriesHook`：异步串行，不关心回调方法的参数
-4. `AsyncSeriesBailHook`：异步串行，回调方法的参数不为空，就会直接执行callAsync等触发函数绑定的回调函数
+1. `AsyncParallelHook`：异步并行，不关心任务方法的返回
+2. `AsyncParallelBailHook`：异步并行，如果当前任务方法有返回值，则跳过剩下未执行的任务方法
+3. `AsyncSeriesHook`：异步串行，不关心任务方法的参数
+4. `AsyncSeriesBailHook`：异步串行，任务方法的参数不为空，就会直接执行callAsync等触发函数绑定的任务函数
 5. `AsyncSeriesLoopHook`：异步串行
-6. `AsyncSeriesWaterfallHook`：异步串行，前一个回调方法的返回值作为参数传递给下一个回调
+6. `AsyncSeriesWaterfallHook`：异步串行，前一个任务方法的返回值作为参数传递给下一个任务
 
 ### Hook类
 上面提到的所有钩子都继承自`Hook`：
@@ -32,7 +32,7 @@ class Hook {
     // 实例化钩子时参数处理为数组类型
     if (!Array.isArray(args)) args = []
     this._args = args
-    // 维护在钩子上注册的回调任务
+    // 维护在钩子上注册的任务任务
     this.taps = []
 
     // 拦截器列表
@@ -61,13 +61,13 @@ class Hook {
     })
   }
 
-  // 注册回调
+  // 注册任务
   tap(options, fn) {
     if (typeof options === "string") options = { name: options }
     options = Object.assign({ type: "sync", fn: fn }, options)
     options = this._runRegisterInterceptors(options)
 
-    // 将回调加塞到taps中
+    // 将任务加塞到taps中
     this._insert(options)
   }
 
@@ -85,7 +85,7 @@ class Hook {
     this._insert(options)
   }
 
-  // 在将回调任务加塞进taps之前，遍历拦截器interceptors列表处理回调任务
+  // 在将任务任务加塞进taps之前，遍历拦截器interceptors列表处理任务任务
   _runRegisterInterceptors(options) {
     for (const interceptor of this.interceptors) {
       if (interceptor.register) {
@@ -102,7 +102,7 @@ class Hook {
     // 向interceptors加塞拦截器
     this.interceptors.push(Object.assign({}, interceptor))
 
-    // 为已经添加到taps中的回调任务进行拦截处理
+    // 为已经添加到taps中的任务任务进行拦截处理
     if (interceptor.register) {
       for (let i = 0; i < this.taps.length; i++)
         this.taps[i] = interceptor.register(this.taps[i])
@@ -116,8 +116,8 @@ class Hook {
     this.promise = this._promise
   }
 
-  // 加塞回调任务
-  // 通过options中的before、stage来对当前注册的回调进行优先级的配置
+  // 加塞任务任务
+  // 通过options中的before、stage来对当前注册的任务进行优先级的配置
   _insert(item) {
     this._resetCompilation()
     let before
@@ -179,12 +179,12 @@ Object.defineProperties(Hook.prototype, {
 ```
 
 总结一下，`Hook`类做了以下几件事情：
-1. 定义回调队列`hook.taps`、拦截器队列`taps.interceptors`等属性
+1. 定义任务队列`hook.taps`、拦截器队列`taps.interceptors`等属性
 2. 定义了抽象方法`compile`，需要在子类中去重写它，用于生成触发钩子的方法：`call`、`callAsync`、`promise`
-3. 定义了三种在钩子上注册回调的方法：`tap`、`tapAsync`、`tapPromise`
+3. 定义了三种在钩子上注册任务的方法：`tap`、`tapAsync`、`tapPromise`
 4. 在原型`Hook.prototype`上添加了`_call`、`_promise`、`_callAsync`方法
 
-我们知道，`Hook`需要实现不同类型的钩子——同步、异步、串行、并行等特性，而留意`tap`、`tapAsync`、`tapPromise`可以发现，这三个注册回调方法大致类似，只是推入`taps`的回调的参数略有不同（`options.type`不同），那么不同钩子的特性显然就要依赖触发钩子回调的方法`call`、`callAsync`、`promise`去实现了。
+我们知道，`Hook`需要实现不同类型的钩子——同步、异步、串行、并行等特性，而留意`tap`、`tapAsync`、`tapPromise`可以发现，这三个注册任务方法大致类似，只是推入`taps`的任务的参数略有不同（`options.type`不同），那么不同钩子的特性显然就要依赖触发钩子任务的方法`call`、`callAsync`、`promise`去实现了。
 
 回顾`Hook`的代码，我们发现`Hook`上并未直接定义`call`、`callAsync`、`promise`方法，而是让它们指向了下划线开头的同名函数：
 ```js
@@ -255,7 +255,7 @@ this._call = function lazyCompileHook(...args) {
 
 这意味着，第一次通过`_call`调用钩子的这个`call`方法，是通过`_createCall` -> `compile`生成的。后面再调用钩子的`call`方法，就不要通过`_call`了，因为第一次调用`call`的同时重写了`call`。
 
-再次回到`Hook`中，在注册回调的方法`tap`/`tapAsync`/`tapPromise`以及注册拦截器的`intercept`方法中，发现它们都会调用`_resetCompilation`：
+再次回到`Hook`中，在注册任务的方法`tap`/`tapAsync`/`tapPromise`以及注册拦截器的`intercept`方法中，发现它们都会调用`_resetCompilation`：
 ```js
 _resetCompilation() {
   this.call = this._call
@@ -266,9 +266,9 @@ _resetCompilation() {
 
 这里有两个问题：
 2. 一是`call`/`callAsync`/`promise`等方法为什么不直接在子类中实现，而是原型对象的属性拦截器方式定义？
-3. 二是钩子上的这些方法为什么要在注册回调、拦截器时重新赋值？
+3. 二是钩子上的这些方法为什么要在注册任务、拦截器时重新赋值？
 
-简单的说是因为插件彼此有着联系，所以用了这么多类型的钩子来控制这些联系，一个钩子上每次有新的回调或拦截器被注册时，就要重新排布回调和拦截器的调用顺序，因此需要重写`call`方法，并通过属性拦截器将生成`call`的方法记录在`_call`上。这个逻辑后面还会再次讲到，不能理解的话暂时先记住。
+简单的说是因为插件彼此有着联系，所以用了这么多类型的钩子来控制这些联系，一个钩子上每次有新的任务或拦截器被注册时，就要重新排布任务和拦截器的调用顺序，因此需要重写`call`方法，并通过属性拦截器将生成`call`的方法记录在`_call`上。这个逻辑后面还会再次讲到，不能理解的话暂时先记住。
 
 ### 以SyncBailHook为例
 ```js
@@ -290,7 +290,7 @@ class SyncBailHookCodeFactory extends HookCodeFactory {
 const factory = new SyncBailHookCodeFactory()
 
 class SyncBailHook extends Hook {
-  // 禁止使用注册异步回调方法
+  // 禁止使用注册异步任务方法
   tapAsync() {
     throw new Error("tapAsync is not supported on a SyncBailHook")
   }
@@ -307,8 +307,8 @@ class SyncBailHook extends Hook {
 ```
 
 在这里，正如前文已经提到的，我们发现子类中确实没有重写父类的`call`/`callAsync`/`promise`方法：
-1. 钩子触发回调的方法通过`Hook`的`_createCall`调用子类的`compile`生成
-2. 钩子根据各自的需要继承了父类`Hook`的注册回调方法同时禁用了部分不支持的注册回调的方法
+1. 钩子触发任务的方法通过`Hook`的`_createCall`调用子类的`compile`生成
+2. 钩子根据各自的需要继承了父类`Hook`的注册任务方法同时禁用了部分不支持的注册任务的方法
 
 需要关注的是子类的`compiler`方法：
 ```js
@@ -615,9 +615,9 @@ compile(options) {
 }
 ```
 
-这里再次遇到了`Hook`构造函数中的`_x`，现在我们知道它是什么了——执行钩子的工厂类实例的`setup`方法时，在钩子上注册的回调会被全部推入钩子的`_x`数组中。
+这里再次遇到了`Hook`构造函数中的`_x`，现在我们知道它是什么了——执行钩子的工厂类实例的`setup`方法时，在钩子上注册的任务会被全部推入钩子的`_x`数组中。
 
-接着是`create`方法，这里通过`new Function`来创建`call`/`callAsync`/`promise`的静态脚本。现在可以再次回答前文的问题——钩子的触发回调的方法为什么要通过这种方式生成，而不是写在类中：因为钩子需要实现区别于普通定于发布模式的特性，钩子的回调之间可能还有依赖关系，而在声明钩子时回调还没有被注册，因此需要在注册回调时通过`compile`的方式重新生成。
+接着是`create`方法，这里通过`new Function`来创建`call`/`callAsync`/`promise`的静态脚本。现在可以再次回答前文的问题——钩子的触发任务的方法为什么要通过这种方式生成，而不是写在类中：因为钩子需要实现区别于普通定于发布模式的特性，钩子的任务之间可能还有依赖关系，而在声明钩子时任务还没有被注册，因此需要在注册任务时通过`compile`的方式重新生成。
 
 到这里整一个`new SyncHook()`->`tap`->`call`的流程就结束了。主要的比较有趣的点在执行`call`的时候会进行缓存。
 

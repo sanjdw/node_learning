@@ -15,7 +15,6 @@ new SingleEntryPlugin('path/to/project', './src/index.js', 'main').apply(compile
 ![SingleEntryPlugin实例](https://pic.downk.cc/item/5f590b57160a154a674dd369.jpg)
 
 而`SingleEntryPlugin`会在`compiler.hooks.make`钩子上注册任务：
-
 ```js
 class SingleEntryPlugin {
   constructor(context, entry, name) {
