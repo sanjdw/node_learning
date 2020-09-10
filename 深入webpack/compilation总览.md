@@ -15,32 +15,19 @@ class Compilation extends Tapable {
     this.hooks = {
       buildModule: new SyncHook(["module"]),
       rebuildModule: new SyncHook(["module"]),
-      failedModule: new SyncHook(["module", "error"]),
-      succeedModule: new SyncHook(["module"]),
       addEntry: new SyncHook(["entry", "name"]),
-      failedEntry: new SyncHook(["entry", "name", "error"]),
-      succeedEntry: new SyncHook(["entry", "name", "module"]),
       normalModuleLoader: new SyncHook(["loaderContext", "module"]),
-      // 其他钩子
+      // ...
     }
-    this._pluginCompat.tap("Compilation", options => {})
-    // 通过compilation可以访问compiler
     this.compiler = compiler
     this.resolverFactory = compiler.resolverFactory
     this.inputFileSystem = compiler.inputFileSystem
     this.options = compiler.options
-    this.outputOptions = options && options.output
-    this.bail = options && options.bail
-    this.performance = options && options.performance
 
     // template 用于渲染 chunk 对象，得到最终代码的模板
     this.mainTemplate = new MainTemplate(this.outputOptions)
     this.chunkTemplate = new ChunkTemplate(this.outputOptions)
     this.runtimeTemplate = new RuntimeTemplate(this.outputOptions, this.requestShortener)
-    this.moduleTemplates = {
-      javascript: new ModuleTemplate(this.runtimeTemplate, "javascript"),
-      webassembly: new ModuleTemplate(this.runtimeTemplate, "webassembly")
-    }
 
     this.entries = []
     this.chunks = []  // 记录所有chunk
@@ -206,22 +193,6 @@ buildModule(module, optional, origin, dependencies, thisCallback) {
   this.hooks.buildModule.call(module)
   // 调用模块对象的build方法，在ModuleFactory中定义
   module.build(this.options, this, this.resolverFactory.get("normal", module.resolveOptions), this.inputFileSystem, () => {
-    const errors = module.errors
-    for (let indexError = 0; indexError < errors.length; indexError++) {
-      const err = errors[indexError]
-      err.origin = origin
-      err.dependencies = dependencies
-      if (optional) this.warnings.push(err)
-      else this.errors.push(err)
-    }
-
-    const warnings = module.warnings
-    for (let indexWarning = 0; indexWarning < warnings.length; indexWarning++) {
-      const war = warnings[indexWarning]
-      war.origin = origin
-      war.dependencies = dependencies
-      this.warnings.push(war)
-    }
     const originalMap = module.dependencies.reduce((map, v, i) => {
       map.set(v, i)
       return map
@@ -273,7 +244,7 @@ class Semaphore {
 }
 ```
 
-这里借鉴了多线程中使用信号量（Semaphore）对资源进行控制的概念，任务的并发数是在初始化`compilation`时就定义过的：
+这里借鉴了多线程中使用信号量（Semaphore）对资源进行控制的概念，任务的并发数是在初始化`compilation`时就定义的：
 ```js
 this.semaphore = new Semaphore(options.parallelism || 100)
 ```

@@ -50,50 +50,9 @@ class Compiler extends Tapable {
 ```js
 run(callback) {
   if (this.running) return callback(new ConcurrentCompilationError())
-  const finalCallback = (stats) => {
-    this.running = false
-    if (callback !== undefined) return callback(stats)
-  }
-  const startTime = Date.now()
   this.running = true
 
-  const onCompiled = (compilation) => {
-    if (this.hooks.shouldEmit.call(compilation) === false) {
-      // stats包含了本次构建过程中的一些数据信息
-      const stats = new Stats(compilation)
-      stats.startTime = startTime
-      stats.endTime = Date.now()
-      this.hooks.done.callAsync(stats, () => {
-        return finalCallback(stats)
-      })
-      return
-    }
-
-    // 调用compiler.emitAssets输出资源
-    this.emitAssets(compilation, ()) => {
-      if (compilation.hooks.needAdditionalPass.call()) {
-        compilation.needAdditionalPass = true
-        const stats = new Stats(compilation)
-        stats.startTime = startTime
-        stats.endTime = Date.now()
-        this.hooks.done.callAsync(stats, () => {
-          this.hooks.additionalPass.callAsync(() => {
-            this.compile(onCompiled)
-          })
-        })
-        return
-      }
-      // 输出records
-      this.emitRecords(()) => {
-        const stats = new Stats(compilation);
-        stats.startTime = startTime
-        stats.endTime = Date.now()
-        this.hooks.done.callAsync(stats, () => {
-          return finalCallback(stats)
-        })
-      })
-    })
-  }
+  const onCompiled = (compilation) => {}
 
   this.hooks.beforeRun.callAsync(this, () => {
     this.hooks.run.callAsync(this, () => {
@@ -144,56 +103,14 @@ compile(callback) {
 ### compilation的创建
 `compilation`对象是后续构建流程中最重要的对象，它包含了一次构建过程中所有的数据，通过`createCompilation`方法创建：
 ```js
-newCompilationParams() {
-  const params = {
-    normalModuleFactory: this.createNormalModuleFactory(),
-    contextModuleFactory: this.createContextModuleFactory(),
-    compilationDependencies: new Set()
-  }
-  return params
-}
-
-createCompilation() {
-  return new Compilation(this)
-}
-
-newCompilation(params) {
-  const compilation = this.createCompilation()
-  // 继承了compiler的一些属性
-  compilation.fileTimestamps = this.fileTimestamps
-  compilation.contextTimestamps = this.contextTimestamps
-  compilation.name = this.name
-  compilation.records = this.records
-  compilation.compilationDependencies = params.compilationDependencies
-  // 触发compile的thisCompilation、compilation钩子
-  this.hooks.thisCompilation.call(compilation, params)
-  this.hooks.compilation.call(compilation, params)
-  return compilation
-}
-
-createNormalModuleFactory() {
-  const normalModuleFactory = new NormalModuleFactory(
-    this.options.context,
-    this.resolverFactory,
-    this.options.module || {}
-  )
-  this.hooks.normalModuleFactory.call(normalModuleFactory)
-  return normalModuleFactory
-}
-
-createContextModuleFactory() {
-  const contextModuleFactory = new ContextModuleFactory(this.resolverFactory)
-  this.hooks.contextModuleFactory.call(contextModuleFactory)
-  return contextModuleFactory
-}
+const params = this.newCompilationParams()
+const compilation = this.newCompilation(params)
 ```
 
 `createCompilation`内部：
 1. 接收`compiler`作为参数，调用了构造函数`Compilation`来初始化`compilation`对象
 2. 将`compiler`的一些属性赋给`compilation`对象
 3. 依次触发了`compiler`的`thisCompilation`、`compilation`钩子
-
-和`Compiler`一样，`Compilation`也继承自`Tapable`，如果你不知道`compilation`是什么，它内部有哪些属性和方法，请看这里。
 
 当`compilation`实例创建完成之后，webpack的准备阶段已经完成，下一步是`modules`和`chunks`的生成阶段。
 
@@ -230,7 +147,7 @@ this.hooks.thisCompilation.call(compilation, params)
 
 ![compiler.hooks.compilation钩子的任务](https://pic.downk.cc/item/5f3eb55f14195aa59456a66e.jpg)
 
-回顾用于创建`compilation`对象所构建的参数：
+回顾用于创建`compilation`对象所构建的参数`params`：
 ```js
 newCompilationParas() {
   const params = {
@@ -242,9 +159,15 @@ newCompilationParas() {
 }
 ```
 
-参数为一个对象，它拥有三个属性：`contextModuleFactory`、`contextModuleFactory`、`compilationDependencies`，这个参数在触发`compilation`钩子时一同传入：
+参数为一个对象，它拥有三个属性：`contextModuleFactory`、`contextModuleFactory`、`compilationDependencies`：
+
+![params](https://pic.downk.cc/item/5f59db20160a154a67a8740a.jpg)
+
+`params`作为触发`compilation`、`make`钩子的参数：
 ```js
 this.hooks.compilation.call(compilation, params)
+// ...
+this.hooks.compile.call(params)
 ```
 
 `compilation`钩子上注册的任务做的事情主要分为三类：
@@ -278,12 +201,7 @@ emitAssets(compilation, callback) {
       const writeOut = () => { }
       if (targetFile.match(/\/|\\/)) this.outputFileSystem.mkdirp(this.outputFileSystem.join(outputPath, path.dirname(targetFile)), writeOut)
       else writeOut()
-    },
-    () => {
-      this.hooks.afterEmit.callAsync(compilation, () => {
-        return callback()
-      })
-    })
+    }
   }
 
   this.hooks.emit.callAsync(compilation, () => {

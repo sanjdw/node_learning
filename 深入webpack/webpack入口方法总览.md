@@ -78,7 +78,10 @@ options = new WebpackOptionsDefaulter().process(options)
 `compiler`负责文件监听和启动编译，这一步通过`Compiler`构造函数初步实例化`compiler`：
 ```js
 compiler = new Compiler(options.context)
+compiler.options = options
 ```
+
+![compiler](https://pic.downk.cc/item/5f59cfbf160a154a67a435e8.jpg)
 
 ### 3. 初始化complier的文件系统输入、输出、缓存以及监视文件系统
 ```js
