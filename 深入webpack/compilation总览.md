@@ -74,6 +74,7 @@ class Compilation extends Tapable {
 ### addEntry方法
 ```js
 addEntry(context, entry, name, callback) {
+  // addEntry钩子上没有任务
   this.hooks.addEntry.call(entry, name)
 
   this._addModuleChain(
@@ -94,18 +95,18 @@ addEntry(context, entry, name, callback) {
 3. 生成chunk
 4. 最后将所有加载模块的语法替换成`webpack_require`来模拟模块化操作
 
-### compilation钩子的触发顺序
-1. addEntry
+<!-- ### compilation钩子的触发顺序 -->
+<!-- 1. addEntry
 2. this.semaphore.acquire => moduleFactory.create
   - normalModule.hooks.beforeResolve
   - normalModule.hooks.factory生成factory
   - normalModule.hooks.resolver => 生成resolver
   - 调用生成的resolver，normalModule.hooks.afterResolve
   - createdModule = moduleFactory.hooks.createModule.call(result)
-  - moduleFactory.hooks.module(createdModule)
+  - moduleFactory.hooks.module(createdModule) -->
 
 ### _addModuleChain
-`_addModuleChain`的作用将入口文件转化为一个module：
+`_addModuleChain`的作用是将入口文件转化为一个module：
 ```js
 _addModuleChain(context, dependency, onModule, callback) {
   // 获取模块工厂
@@ -120,11 +121,7 @@ _addModuleChain(context, dependency, onModule, callback) {
         context: context,
         dependencies: [dependency]
       },
-      // module：由moduleFactory.create创建返回
       module => {
-        // 缓存module——addModule内部：
-        // 1. this._modules.set(identifier, module); 对于normalModule来说identifier就是 module.request，即文件的绝对路径
-        // 2. this.modules.push(module)
         const addModuleResult = this.addModule(module)
         module = addModuleResult.module
 
@@ -136,22 +133,21 @@ _addModuleChain(context, dependency, onModule, callback) {
           this.processModuleDependencies(module, () => { callback(null, module) })
         }
 
-        if (addModuleResult.build) {
-          this.buildModule(module, false, null, null, () => {
-            this.semaphore.release()
-            // module build完成，依赖收集完毕，开始处理依赖的module
-            afterBuild()
-          })
-        } else {
+        this.buildModule(module, false, null, null, () => {
           this.semaphore.release()
-          this.waitForBuildingFinished(module, afterBuild)
-        }
+          // module build完成，依赖收集完毕，开始处理依赖的module
+          afterBuild()
+        })
       })
   })
 }
 ```
 
-`compilation.dependencyFactories`在`compilation`创建后触发`thisCompilation`、`compilation`钩子时已经被设置过。`_addModuleChain`方法中取出`Dependency`对应的模块工厂创建模块，
+- 使用`Dependency`对应的模块工厂创建`module`对象
+- `addModule`缓存`module`
+- 执行`addEntry`调用`_addModuleChain`提供的：`module => { this.entries.push(module) }`，将`modules`推入`entries`
+- `buildModule`构建模块
+
 
 ### addModule
 ```js
@@ -163,6 +159,7 @@ addModule (module, cacheGroup) {
   const cacheName = (cacheGroup || "m") + identifier
   if (this.cache) this.cache[cacheName] = module
 
+  // 对于normalModule来说identifier是module.request，即文件的绝对路径
   this._modules.set(identifier, module)
   this.modules.push(module)
   return {
@@ -174,8 +171,11 @@ addModule (module, cacheGroup) {
 }
 ```
 
+主要工作是缓存`module`，将`module`推入`compilation.modules`队列和`compilations._modules`Map中，对于上一步创建的`module`经过`addModule`后：
+![addModule](https://pic.downk.cc/item/5f5b2d0f160a154a676599ad.jpg)
+
 ### buildModule
-下面的操作是对module进行build。包括调用`loader`处理源文件，使用`acorn`生成`AST`。
+下面的操作是对`module`进行构建，包括调用`loader`处理源文件，使用`acorn`生成`AST`：
 ```js
 buildModule(module, optional, origin, dependencies, thisCallback) {
   let callbackList = this._buildingModules.get(module)
@@ -183,15 +183,12 @@ buildModule(module, optional, origin, dependencies, thisCallback) {
 
   this._buildingModules.set(module, (callbackList = [thisCallback]))
 
-  const callback = err => {
+  const callback = () => {
     this._buildingModules.delete(module);
-    for (const cb of callbackList) {
-      cb(err)
-    }
   }
 
   this.hooks.buildModule.call(module)
-  // 调用模块对象的build方法，在ModuleFactory中定义
+  // 调用模块对象的build方法
   module.build(this.options, this, this.resolverFactory.get("normal", module.resolveOptions), this.inputFileSystem, () => {
     const originalMap = module.dependencies.reduce((map, v, i) => {
       map.set(v, i)
