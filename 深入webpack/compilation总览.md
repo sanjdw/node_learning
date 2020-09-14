@@ -143,11 +143,9 @@ _addModuleChain(context, dependency, onModule, callback) {
 }
 ```
 
-- 使用`Dependency`对应的模块工厂创建`module`对象
-- `addModule`缓存`module`
-- 执行`addEntry`调用`_addModuleChain`提供的：`module => { this.entries.push(module) }`，将`modules`推入`entries`
-- `buildModule`构建模块
-
+- 使用`Dependency`对应的`moduleFactory`创建`module`对象
+- `addModule`缓存`module`到`compilation.modules`、`compilation._modules`，推入`compilation.entries`
+- 通过`buildModule`构建模块
 
 ### addModule
 ```js
@@ -175,7 +173,7 @@ addModule (module, cacheGroup) {
 ![addModule](https://pic.downk.cc/item/5f5b2d0f160a154a676599ad.jpg)
 
 ### buildModule
-下面的操作是对`module`进行构建，包括调用`loader`处理源文件，使用`acorn`生成`AST`：
+下面的操作是对`module`对象进行构建，包括调用`loader`处理源文件，使用`acorn`生成`AST`：
 ```js
 buildModule(module, optional, origin, dependencies, thisCallback) {
   let callbackList = this._buildingModules.get(module)
@@ -204,6 +202,11 @@ buildModule(module, optional, origin, dependencies, thisCallback) {
   })
 }
 ```
+
+通过`module`的`build`方法：
+
+``
+
 
 ### 编译队列控制 —— Semaphore
 ```js
