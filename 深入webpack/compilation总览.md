@@ -60,28 +60,30 @@ class Compilation extends Tapable {
 }
 ```
 
-可以看到，在实例化`compilation`过程中，`Compilation`做了以下工作：
+在实例化`compilation`过程中，`Compilation`做了以下工作：
 1. `compilation.hooks`上维护了大量编译阶段相关的钩子
 2. 定义了`entries`、`chunks`、`dependencyFactories`等模块相关的变量
-3. 定义了`addModule`、`buildModule`等模块相关的方法
+3. 定义了`addModule`、`buildModule`等处理模块相关的方法
 
-![dependency和module](https://pic.downk.cc/item/5f448289160a154a67f0862d.png)
+在`compiler`章节中讲到过，`compiler.compile`方法执行时会创建`compilation`对象并它触发`compiler.hooks.make`钩子上注册的任务。对于单入口配置，`compiler.hooks.make`钩子上有如下任务被注册：
+```js
+compiler.hooks.make.tapAsync("SingleEntryPlugin", (compilation, callback) => {
+  const { entry, name, context } = this;
+  const dep = SingleEntryPlugin.createDependency(entry, name);
+  compilation.addEntry(context, dep, name, callback);
+})
+```
 
-上面谈到了两个概念，`Dependency`(依赖)和`Module`（模块）。
-
-被依赖的文件首先会被会先作为`Dependency`对象，而后再转为`Module`对象。`dependencyFactories`用来记录不同的`Dependency`应该使用哪一个`ModuleFacotry`去生成`Module`。
-
-### addEntry方法
+通过`addEntry`方法进入正式的模块编译阶段：
 ```js
 addEntry(context, entry, name, callback) {
-  // addEntry钩子上没有任务
   this.hooks.addEntry.call(entry, name)
 
   this._addModuleChain(
     context,
     entry,
     module => { this.entries.push(module) },
-    (module) => {
+    module => {
       this.hooks.succeedEntry.call(entry, name, module)
       return callback(null, module)
     }
@@ -89,32 +91,21 @@ addEntry(context, entry, name, callback) {
 }
 ```
 
-`addEntry`调用`_addModuleChain`，从入口点分析模块及其依赖的模块，创建这些模块对象，开始编译模块，这之后的工作可以总结为：
-1. 选择文件对应的loader加载模块，然后通过`acorn`解析经过loeader处理后的源文件为抽象语法树`AST`，遍历分析出模块所依赖的所有模块
-2. 根据文件的依赖关系逐个解析依赖模块并重复上述过程
-3. 生成chunk
-4. 最后将所有加载模块的语法替换成`webpack_require`来模拟模块化操作
-
-<!-- ### compilation钩子的触发顺序 -->
-<!-- 1. addEntry
-2. this.semaphore.acquire => moduleFactory.create
-  - normalModule.hooks.beforeResolve
-  - normalModule.hooks.factory生成factory
-  - normalModule.hooks.resolver => 生成resolver
-  - 调用生成的resolver，normalModule.hooks.afterResolve
-  - createdModule = moduleFactory.hooks.createModule.call(result)
-  - moduleFactory.hooks.module(createdModule) -->
+- 触发`compilation.hooks.addEntry`钩子
+- 用`_addModuleChain`方法从入口文件开始进行模块的创建、构建
+- 将根据入口文件创建的模块推入`compilation.entries`
 
 ### _addModuleChain
-`_addModuleChain`的作用是将入口文件转化为一个module：
+`_addModuleChain`的作用是从入口文件开始进行模块的创建、构建工作：
 ```js
 _addModuleChain(context, dependency, onModule, callback) {
-  // 获取模块工厂
+  // 获取模块工厂实例
   const Dep = dependency.constructor
   const moduleFactory = this.dependencyFactories.get(Dep)
 
+  // 并行任务队列 Semaphore
   this.semaphore.acquire(() => {
-    // 使用模块工厂创建模块对象
+    // 使用模块工厂对象创建模块对象
     moduleFactory.create(
       {
         contextInfo: { issuer: "", compiler: this.compiler.name },
@@ -143,11 +134,12 @@ _addModuleChain(context, dependency, onModule, callback) {
 }
 ```
 
-- 使用`Dependency`对应的`moduleFactory`创建`module`对象
-- `addModule`缓存`module`到`compilation.modules`、`compilation._modules`，推入`compilation.entries`
-- 通过`buildModule`构建模块
+- 读出`compilation.dependencyFactories`记录的`Dependency`对应的模块工厂实例`moduleFactory`，通过`moduleFactory.create`方法**创建**模块`module`
+- 调用`addModule`缓存`module`到`compilation.modules`、`compilation._modules`，推入`compilation.entries`
+- 通过`buildModule(module)`进行模块的**构建**
+- 另外模块的解析构建工作是通过编译队列`Semaphore`进行并发的控制
 
-### addModule
+### addModule 缓存模块
 ```js
 addModule (module, cacheGroup) {
   const identifier = module.identifier()
@@ -172,7 +164,7 @@ addModule (module, cacheGroup) {
 主要工作是缓存`module`，将`module`推入`compilation.modules`队列和`compilations._modules`Map中，对于上一步创建的`module`经过`addModule`后：
 ![addModule](https://pic.downk.cc/item/5f5b2d0f160a154a676599ad.jpg)
 
-### buildModule
+### buildModule 构建模块
 下面的操作是对`module`对象进行构建，包括调用`loader`处理源文件，使用`acorn`生成`AST`：
 ```js
 buildModule(module, optional, origin, dependencies, thisCallback) {
@@ -205,49 +197,6 @@ buildModule(module, optional, origin, dependencies, thisCallback) {
 
 通过`module`的`build`方法：
 
-``
-
-
-### 编译队列控制 —— Semaphore
-```js
-class Semaphore {
-  constructor(available) {
-    // 最大并发数
-    this.available = available
-    this.waiters = []
-    this._continue = this._continue.bind(this)
-  }
-
-  acquire(callback) {
-    if (this.available > 0) {
-      this.available--
-      callback()
-    } else {
-      this.waiters.push(callback)
-    }
-  }
-
-  release() {
-    this.available++
-    if (this.waiters.length > 0) process.nextTick(this._continue)
-  }
-
-  _continue() {
-    if (this.available > 0) {
-      if (this.waiters.length > 0) {
-        this.available--
-        const callback = this.waiters.pop()
-        callback()
-      }
-    }
-  }
-}
-```
-
-这里借鉴了多线程中使用信号量（Semaphore）对资源进行控制的概念，任务的并发数是在初始化`compilation`时就定义的：
-```js
-this.semaphore = new Semaphore(options.parallelism || 100)
-```
 
 ### seal
 webpack通过`seal`钩子对构建后的结果进行封装，逐次对每个`module`和`chunk`进行整理，生成编译后的源码、合并、拆分、生成 hash。这是我们在开发时进行代码优化和功能添加的关键环节。

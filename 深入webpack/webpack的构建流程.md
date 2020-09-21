@@ -38,13 +38,7 @@ class Compiler extends Tapable {
 }
 ```
 
-`compiler`对象上暴露的方法涉及到webpack构建流程的几个关键步骤：
-1. `make`编译模块：从入口文件出发，调用所有配置的`Loader`对模块进行翻译，再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理
-2. `build module`完成模块编译：经过上面一步使用`Loade` 翻译完所有模块后，得到了每个模块被翻译后的最终内容以及它们之间的依赖关系
-3. `seal`输出资源：根据入口和模块之间的依赖关系，组装成一个个包含多个模块的`Chunk`，再把每个`Chunk`M转换成一个单独的文件加入到输出列表，这步是可以修改输出内容的最后机会
-4. `emit`输出完成：在确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统
 
-![webpack构建流程](https://pic.downk.cc/item/5f33cb4d14195aa594ffd8b3.png)
 
 ### compiler.run
 ```js
@@ -52,7 +46,7 @@ run(callback) {
   if (this.running) return callback(new ConcurrentCompilationError())
   this.running = true
 
-  const onCompiled = (compilation) => {}
+  const onCompiled = compilation => {}
 
   this.hooks.beforeRun.callAsync(this, () => {
     this.hooks.run.callAsync(this, () => {
@@ -64,7 +58,7 @@ run(callback) {
 }
 ```
 
-先忽略`onCompiled`方法，`compiler.run`做了以下工作：
+`compiler.run`做了以下工作：
 1. 触发`beforeRun`钩子，在这之前`NodeEnvironmentPlugin`已经在此钩子上注册任务。
 2. `beforeRun`钩子之后是`run`钩子，`CachePlugin`在此钩子上注册过个任务。这里对钩子上的`compiler`钩子上注册的任务暂不展开分析。
 3. 接着是`readRecords`方法，该方法用于读取之前的records，这里的records指的是一些数据片段，用于储存多次构建过程中的`module`的标识。

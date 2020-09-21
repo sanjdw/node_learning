@@ -1,12 +1,4 @@
-## compiler总览
-```js
-compiler = new Compiler(options.context)
-```
-
-`compiler`对象作为构建入口对象，负责解析的webpack配置，再将配置应用到`compilation`对象中。
-
-### Compiler类
-`Compiler`模块是webpack的支柱引擎，它继承自`Tapable`类：
+`Compiler`模块是webpack的支柱引擎，它继承自`Tapable`类，`compiler`对象作为构建入口对象，负责解析的webpack配置，再将配置应用到`compilation`对象中：
 ```js
 class Compiler extends Tapable {
   constructor () {
@@ -49,9 +41,9 @@ class Compiler extends Tapable {
 从上面的`Compiler`定义中，可以看到`compiler`在实例化时的几个关键点：
 1. 定义了`complier.hooks`，用它维护了`compiler`生命周期相关的钩子，它们会在构建工作的不同阶段通过`compiler`的`run`、`emitAssets`、`compile`等方法触发
 3. 定义了`compiler.resolvers`，`resolvers`负责在文件系统中寻找指定路径的文件
-4. 定义了`run`、`watch`、`emitAssets`、`compile`等一系列构建流程中使用的方法，这些方法的具体实现在这里暂时不做讨论，会在后面分析它们
+4. 定义了`run`、`watch`、`emitAssets`、`compile`等一系列构建流程中使用的方法
 
-### Tapable类
+#### 0. Tapable
 ```js
 function Tapable () {
   this._pluginCompat = new SyncBailHook(["options"])
@@ -98,114 +90,113 @@ Tapable.prototype.apply = util.deprecate(function apply() {
 1. 将传入的插件名`camelize`化
 2. 然后在`compiler.hooks`上寻找对应的钩子实例，并且调用`tap`方法真正注册的任务
 
-这样操作的原因是，老版本webpack的插件的注册与现在有所不同，不是通过`compiler.hooks.**`注册任务的，这种方式兼容了老的webpack插件，将它们的任务注册到`compiler`对应的钩子上。
+老版本webpack的插件的注册与现在有所不同，不是通过`compiler.hooks.**`注册任务的，这种方式兼容了老的webpack插件，将它们的任务注册到`compiler`对应的钩子上。
 
-### run 方法
-### compiler方法
+___
+`compiler`对象上暴露的方法涉及到webpack构建流程的几个关键步骤：
+1. `run`
+1. `make`编译模块：从入口文件出发，调用所有配置的`Loader`对模块进行翻译，再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理
+2. `build module`完成模块编译：经过上面一步使用`Loade`翻译完所有模块后，得到了每个模块被翻译后的最终内容以及它们之间的依赖关系
+3. `seal`输出资源：根据入口和模块之间的依赖关系，组装成一个个包含多个模块的`Chunk`，再把每个`Chunk`M转换成一个单独的文件加入到输出列表，这步是可以修改输出内容的最后机会
+4. `emit`输出完成：在确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统
 
-### watch方法
+![webpack构建流程](https://pic.downk.cc/item/5f33cb4d14195aa594ffd8b3.png)
+
+### 1. run 方法
 ```js
-watch(watchOptions, handler) {
+run(callback) {
+  if (this.running) return callback(new ConcurrentCompilationError())
   this.running = true
-  this.watchMode = true
-  this.fileTimestamps = new Map()
-  this.contextTimestamps = new Map()
-  this.removedFiles = new Set()
-  return new Watching(this, watchOptions, handler)
+
+  const onCompiled = compilation => {
+    this.emitAssets(compilation, () => {
+      this.emitRecords(() => {
+        this.hooks.done.callAsync()
+      })
+    })
+  }
+
+  this.hooks.beforeRun.callAsync(this, () => {
+    this.hooks.run.callAsync(this, () => {
+      this.readRecords(() => {
+        this.compile(onCompiled)
+      })
+    })
+  })
 }
 ```
 
-### Watching
+`compiler.run`做了以下工作：
+1. 定义`onCompiled`回调，处理模块解析完成后的工作
+2. 触发`beforeRun`钩子、`run`钩子
+3. 最后就是关键的`compile`方法了，进入正式的模块编译阶段，接收`onCompiled`回调，在模块解析完成后执行`onCompiled`。
+
+### 2. compile方法
+`compile`方法内创建了一个`compilation`对象，由`compilation`负责具体的编译过程：
 ```js
-class Watching {
-  constructor(compiler, watchOptions, handler) {
-    this.startTime = null
-    this.invalid = false
-    this.handler = handler
-    this.callbacks = []
-    this.closed = false
-    this.suspended = false
-    this.watchOptions = Object.assign({}, watchOptions)
-    this.watchOptions.aggregateTimeout = this.watchOptions.aggregateTimeout || 200
-    this.compiler = compiler
-    this.running = true
-    this.compiler.readRecords(() => {
-      this._go()
-    })
-  }
-
-  _go() {
-    this.startTime = Date.now()
-    this.running = true
-    this.invalid = false
-    this.compiler.hooks.watchRun.callAsync(this.compiler, () => {
-      const onCompiled = compilation => {
-        this.compiler.emitAssets(compilation, () => {
-          this.compiler.emitRecords(() => {
-            if (compilation.hooks.needAdditionalPass.call()) {
-              compilation.needAdditionalPass = true
-
-              const stats = new Stats(compilation)
-              stats.startTime = this.startTime
-              stats.endTime = Date.now()
-              this.compiler.hooks.done.callAsync(stats, () => {
-                this.compiler.hooks.additionalPass.callAsync(() => {
-                  this.compiler.compile(onCompiled)
-                })
-              });
-              return
-            }
-            return this._done(null, compilation)
+compile(callback) {
+  // 创建compilation的参数
+  const params = this.newCompilationParams()
+  this.hooks.beforeCompile.callAsync(params, () => {
+    this.hooks.compile.call(params)
+    const compilation = this.newCompilation(params)
+    this.hooks.make.callAsync(compilation, () => {
+      compilation.finish(() => {
+        compilation.seal(() => {
+          // seal完成即编译过程完成
+          this.hooks.afterCompile.callAsync(compilation, () => {
+            return callback(compilation)
           })
         })
-      }
-      this.compiler.compile(onCompiled)
+      })
     })
-  }
+  })
+}
+```
 
-  _getStats(compilation) {}
+这里的主要工作：
+1. 创建用于构造`compilation`的参数`parmas`
+2. 用`parmas`作为参数触发`beforeCompile`钩子
+3. 用`parmas`作为参数触发`compile`钩子
+3. 创建`compilation`对象
+4. 用`compilation`作为参数触发`make`钩子
+4. 触发`make`钩子
 
-  _done(err, compilation) {
-    this.running = false
-    const stats = compilation ? this._getStats(compilation) : null
-    this.compiler.hooks.done.callAsync(stats, () => {
-      this.handler(null, stats)
-      if (!this.closed) this.watch(Array.from(compilation.fileDependencies), Array.from(compilation.contextDependencies), Array.from(compilation.missingDependencies))
-      for (const cb of this.callbacks) cb()
-      this.callbacks.length = 0
-    })
-  }
+通过在`make`钩子上注册的任务，后面进行模块的解析、构建工作，这块内容在`compilation`模块中分析。
 
-  watch(files, dirs, missing) {
-    this.pausedWatcher = null;
-    this.watcher = this.compiler.watchFileSystem.watch(
-      files,
-      dirs,
-      missing,
-      this.startTime,
-      this.watchOptions,
-      (fileTimestamps, contextTimestamps, removedFiles) => {
-        this.pausedWatcher = this.watcher
-        this.watcher = null
-        this.compiler.fileTimestamps = fileTimestamps
-        this.compiler.contextTimestamps = contextTimestamps
-        this.compiler.removedFiles = removedFiles
-        if (!this.suspended) this._invalidate()
+### 3. emitAssets
+```js
+emitAssets(compilation, callback) {
+  let outputPath
+  const emitFiles = () => {
+    asyncLib.forEachLimit(
+      compilation.getAssets(),
+      15,
+      ({ name: file, source }, callback) => {
+        let targetFile = file
+        const writeOut = () => {}
+
+        if (targetFile.match(/\/|\\/)) {
+          const dir = path.dirname(targetFile);
+          this.outputFileSystem.mkdirp(
+            this.outputFileSystem.join(outputPath, dir),
+            writeOut
+          );
+        } else {
+          writeOut()
+        }
       },
-      (fileName, changeTime) => {
-        this.compiler.hooks.invalid.call(fileName, changeTime)
+      () => {
+        this.hooks.afterEmit.callAsync(compilation, () => {
+          return callback()
+        });
       }
-    )
-  }
+    );
+  };
 
-  invalidate(callback) {}
-
-  _invalidate() {}
-
-  suspend() {}
-
-  resume() {}
-
-  close(callback) {}
+  this.hooks.emit.callAsync(compilation, () => {
+    outputPath = compilation.getPath(this.outputPath)
+    this.outputFileSystem.mkdirp(outputPath, emitFiles)
+  })
 }
 ```
