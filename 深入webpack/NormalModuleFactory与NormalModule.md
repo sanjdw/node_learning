@@ -187,4 +187,4 @@ doBuild(options, compilation, resolver, fs, callback) {
 }
 ```
 
-`doBuild`主要作用是选择合适的`loader`去加载`resource`，转换为js模块，再返回转换后的文件以便后续继续处理
+`doBuild`主要作用是选择合适的`loader`去加载`resource`，转换为js模块，再返回转换后的文件以便后续继续处理。

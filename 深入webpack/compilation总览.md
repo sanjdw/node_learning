@@ -134,17 +134,27 @@ _addModuleChain(context, dependency, onModule, callback) {
 }
 ```
 
-- 读出`compilation.dependencyFactories`记录的`Dependency`对应的模块工厂实例`moduleFactory`，通过`moduleFactory.create`方法**创建**模块`module`
-- 调用`addModule`缓存`module`到`compilation.modules`、`compilation._modules`，推入`compilation.entries`
+- 读出`compilation.dependencyFactories`记录的`Dependency`对应的模块工厂实例`moduleFactory`——通过`moduleFactory.create`方法**创建**模块`module`：
+
+![module](https://pic.downk.cc/item/5f6b814d160a154a67f89f5e.jpg)
+
+- 调用`addModule`将创建的`module`缓存到`compilation.modules`、`compilation._modules`中，此外入口模块会被推入`compilation.entries`
 - 通过`buildModule(module)`进行模块的**构建**
-- 另外模块的解析构建工作是通过编译队列`Semaphore`进行并发的控制
+- 另外模块的解析构建工作是通过编译队列`Semaphore`进行并发的控制，每当一个模块完成构建后：
+  - 释放信号量去执行缓存队列的下一个模块解析任务
+  - `processModuleDependencies`递归处理依赖的`module`
 
 ### addModule 缓存模块
 ```js
 addModule (module, cacheGroup) {
   const identifier = module.identifier()
   const alreadyAddedModule = this._modules.get(identifier)
-  if (alreadyAddedModule) return { module: alreadyAddedModule, issuer: false, build: false, dependencies: false }
+  if (alreadyAddedModule) return {
+    module: alreadyAddedModule,
+    issuer: false,
+    build: false,
+    dependencies: false
+  }
 
   const cacheName = (cacheGroup || "m") + identifier
   if (this.cache) this.cache[cacheName] = module
@@ -161,11 +171,13 @@ addModule (module, cacheGroup) {
 }
 ```
 
-主要工作是缓存`module`，将`module`推入`compilation.modules`队列和`compilations._modules`Map中，对于上一步创建的`module`经过`addModule`后：
+主要工作是缓存`module`，将`module`推入`compilation.modules`队列和`compilations._modules`中，经过`addModule`后：
 ![addModule](https://pic.downk.cc/item/5f5b2d0f160a154a676599ad.jpg)
 
+到目前为止的工作是创建`module`并将其保存到`compilation`中去，以便在后续的打包生成`chunk`时使用它们；紧接着是调用`buildModule`进入模块的构建阶段。
+
 ### buildModule 构建模块
-下面的操作是对`module`对象进行构建，包括调用`loader`处理源文件，使用`acorn`生成`AST`：
+下面的操作是对创建好的`module`进行构建工作，包括调用`loader`处理源文件，使用`acorn`生成`AST`：
 ```js
 buildModule(module, optional, origin, dependencies, thisCallback) {
   let callbackList = this._buildingModules.get(module)
@@ -179,24 +191,208 @@ buildModule(module, optional, origin, dependencies, thisCallback) {
 
   this.hooks.buildModule.call(module)
   // 调用模块对象的build方法
-  module.build(this.options, this, this.resolverFactory.get("normal", module.resolveOptions), this.inputFileSystem, () => {
-    const originalMap = module.dependencies.reduce((map, v, i) => {
-      map.set(v, i)
-      return map
-    }, new Map())
-    module.dependencies.sort((a, b) => {
-      const cmp = compareLocations(a.loc, b.loc)
-      if (cmp) return cmp
-      return originalMap.get(a) - originalMap.get(b)
-    })
-    this.hooks.succeedModule.call(module)
-    return callback()
-  })
+  module.build(
+    this.options,
+    this,
+    this.resolverFactory.get("normal", module.resolveOptions),
+    this.inputFileSystem,
+    () => {
+      const originalMap = module.dependencies.reduce((map, v, i) => {
+        map.set(v, i)
+        return map
+      }, new Map())
+      module.dependencies.sort((a, b) => {
+        const cmp = compareLocations(a.loc, b.loc)
+        if (cmp) return cmp
+        return originalMap.get(a) - originalMap.get(b)
+      })
+      this.hooks.succeedModule.call(module)
+      return callback()
+    }
+  )
 }
 ```
 
-通过`module`的`build`方法：
+以上，`module`是通过`moduleFactory.create`创建的，`module`的构建是通过`module.build`完成的。这两块内容将在模块工厂类`NormalModuleFactory`和模块类`NormalModule`章节中分析。
 
+### processModuleDependencies 递归处理依赖的模块
+```js
+processModuleDependencies(module, callback) {
+  const dependencies = new Map()
+
+  const addDependency = dep => {
+    const resourceIdent = dep.getResourceIdentifier()
+    if (resourceIdent) {
+      const factory = this.dependencyFactories.get(dep.constructor)
+
+      let innerMap = dependencies.get(factory)
+      if (innerMap === undefined) dependencies.set(factory, (innerMap = new Map()))
+        
+      let list = innerMap.get(resourceIdent)
+      if (list === undefined) innerMap.set(resourceIdent, (list = []))
+      list.push(dep)
+    }
+  }
+
+  const addDependenciesBlock = block => {
+    if (block.dependencies) iterationOfArrayCallback(block.dependencies, addDependency)
+
+    if (block.blocks) iterationOfArrayCallback(block.blocks, addDependenciesBlock)
+      
+    if (block.variables) iterationBlockVariable(block.variables, addDependency)
+  }
+
+  addDependenciesBlock(module)
+
+  const sortedDependencies = []
+
+  for (const pair1 of dependencies) {
+    for (const pair2 of pair1[1]) {
+      sortedDependencies.push({
+        factory: pair1[0],
+        dependencies: pair2[1]
+      })
+    }
+  }
+
+  this.addModuleDependencies(
+    module,
+    sortedDependencies,
+    this.bail,
+    null,
+    true,
+    callback
+  )
+}
+```
+
+### addModuleDependencies
+```js
+addModuleDependencies(
+  module,
+  dependencies,
+  bail,
+  cacheGroup,
+  recursive,
+  callback
+) {
+  const start = this.profile && Date.now()
+  const currentProfile = this.profile && {}
+
+  asyncLib.forEach(
+    dependencies,
+    (item, callback) => {
+      const dependencies = item.dependencies
+
+      const errorAndCallback = err => {
+        err.origin = module
+        err.dependencies = dependencies
+        this.errors.push(err)
+        if (bail) callback(err)
+        else callback()
+      }
+      const warningAndCallback = err => {
+        err.origin = module
+        this.warnings.push(err)
+        callback()
+      }
+
+      const semaphore = this.semaphore
+      semaphore.acquire(() => {
+        const factory = item.factory
+        factory.create(
+          {
+            contextInfo: {
+              issuer: module.nameForCondition && module.nameForCondition(),
+              compiler: this.compiler.name
+            },
+            resolveOptions: module.resolveOptions,
+            context: module.context,
+            dependencies: dependencies
+          },
+          (err, dependentModule) => {
+            let afterFactory
+
+            const isOptional = () => {
+              return dependencies.every(d => d.optional)
+            }
+
+            const errorOrWarningAndCallback = err => {
+              if (isOptional()) return warningAndCallback(err)
+              else return errorAndCallback(err)
+            }
+
+            if (!dependentModule) {
+              semaphore.release()
+              return process.nextTick(callback)
+            }
+
+            const iterationDependencies = depend => {
+              for (let index = 0; index < depend.length; index++) {
+                const dep = depend[index]
+                dep.module = dependentModule
+                dependentModule.addReason(module, dep)
+              }
+            }
+
+            const addModuleResult = this.addModule(
+              dependentModule,
+              cacheGroup
+            )
+            dependentModule = addModuleResult.module
+            iterationDependencies(dependencies)
+
+            const afterBuild = () => {
+              if (recursive && addModuleResult.dependencies) {
+                this.processModuleDependencies(dependentModule, callback)
+              } else {
+                return callback()
+              }
+            }
+
+            if (addModuleResult.issuer) {
+              if (currentProfile) dependentModule.profile = currentProfile
+
+              dependentModule.issuer = module
+            } else {
+              if (this.profile) {
+                if (module.profile) {
+                  const time = Date.now() - start
+                  if (
+                    !module.profile.dependencies ||
+                    time > module.profile.dependencies
+                  ) {
+                    module.profile.dependencies = time
+                  }
+                }
+              }
+            }
+
+            if (addModuleResult.build) {
+              this.buildModule(
+                dependentModule,
+                isOptional(),
+                module,
+                dependencies,
+                () => {
+                  semaphore.release()
+                  afterBuild()
+                }
+              )
+            } else {
+              semaphore.release()
+              this.waitForBuildingFinished(dependentModule, afterBuild)
+            }
+          }
+        )
+      })
+    },
+    () => {
+      return process.nextTick(callback)
+    }
+  )
+}
+```
 
 ### seal
 webpack通过`seal`钩子对构建后的结果进行封装，逐次对每个`module`和`chunk`进行整理，生成编译后的源码、合并、拆分、生成 hash。这是我们在开发时进行代码优化和功能添加的关键环节。
