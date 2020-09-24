@@ -162,7 +162,9 @@ compile(callback) {
 4. 用`compilation`作为参数触发`make`钩子
 4. 触发`make`钩子
 
-通过在`make`钩子上注册的任务，后面进行模块的解析、构建工作，这块内容在`compilation`模块中分析。
+通过触发在`make`钩子上注册的任务，开启进行真正的编译流程，这块内容在`compilation`模块中分析。
+
+创建`params`参数涉及的模块工厂会在模块的创建、构建中一同分析。
 
 ### 3. emitAssets
 ```js

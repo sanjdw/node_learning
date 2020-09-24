@@ -121,7 +121,9 @@ _addModuleChain(context, dependency, onModule, callback) {
 
         const afterBuild = () => {
           // 递归处理依赖
-          this.processModuleDependencies(module, () => { callback(null, module) })
+          this.processModuleDependencies(module, () => {
+            callback(null, module)
+          })
         }
 
         this.buildModule(module, false, null, null, () => {
