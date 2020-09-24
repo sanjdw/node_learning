@@ -237,11 +237,7 @@ processModuleDependencies(module, callback) {
   }
 
   const addDependenciesBlock = block => {
-    if (block.dependencies) iterationOfArrayCallback(block.dependencies, addDependency)
-
-    if (block.blocks) iterationOfArrayCallback(block.blocks, addDependenciesBlock)
-      
-    if (block.variables) iterationBlockVariable(block.variables, addDependency)
+    iterationOfArrayCallback(block.dependencies, addDependency)
   }
 
   addDependenciesBlock(module)
@@ -286,19 +282,6 @@ addModuleDependencies(
     (item, callback) => {
       const dependencies = item.dependencies
 
-      const errorAndCallback = err => {
-        err.origin = module
-        err.dependencies = dependencies
-        this.errors.push(err)
-        if (bail) callback(err)
-        else callback()
-      }
-      const warningAndCallback = err => {
-        err.origin = module
-        this.warnings.push(err)
-        callback()
-      }
-
       const semaphore = this.semaphore
       semaphore.acquire(() => {
         const factory = item.factory
@@ -317,11 +300,6 @@ addModuleDependencies(
 
             const isOptional = () => {
               return dependencies.every(d => d.optional)
-            }
-
-            const errorOrWarningAndCallback = err => {
-              if (isOptional()) return warningAndCallback(err)
-              else return errorAndCallback(err)
             }
 
             if (!dependentModule) {
