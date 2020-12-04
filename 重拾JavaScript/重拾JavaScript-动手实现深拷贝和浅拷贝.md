@@ -133,7 +133,7 @@ console.log(copy)
 ```js
 function deepCopy (source, map = new Map()) {
   const type = Object.prototype.toString.apply(source).toLowerCase().slice(8, -1)
-  if (source === 'null') {
+  if (source === null) {
     // typeof null === 'object'需要单独处理
     return null
   } else if (typeof source !== 'object') {
