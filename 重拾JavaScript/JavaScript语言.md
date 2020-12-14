@@ -1,22 +1,24 @@
 本文从以下三个角度总结个人对于JavaScript语言的理解认识：
 
 ## 动态弱类型语言
-> 动态/静态类型，指的是声明一个变量之后，它是否可以存储（指向）不同类型的变量
+> 1. 动态/静态类型，指的是声明一个变量之后，它是否可以存储（指向）不同类型的变量
 
 在JavaScript中可以通过`var`/`let`等关键字声明变量:
 ```js
 var name = 'test'
 name = 123
 ```
+
 变量在声明之初时并不确定类型，初始值为字符串类型之后可以赋值为其他类型，这就是JavaScript的动态类型特性。
 
 而对于静态类型语言，以Java为例，声明变量时需要通过指定类型或标识符声明变量:
 ```java
 int age = 12;
 ```
+
 如果尝试为变量`age`赋值为其他类型值，则编译出错。
 
-> ### 弱/强类型，指的是是否允许不兼容的类型进行运算
+> 2. 弱/强类型，指的是是否允许不同类型数据进行运算
 
 在JavaScript中允许不同数据类型的变量共同运算：
 ```js
@@ -26,11 +28,13 @@ var b = age - '1'
 var c = age + '1'
 // 121
 ```
+
 不同类型变量在运算时会进行隐式类型转换，这就是JavaScript的弱类型特性。而对于强类型语言，以Python为例：
 ```py
 age = 12
 b = age - '1'
 ```
+
 不同类型数据间进行运算会出错：
 ```
 TypeError: unsupported operand type(s) for -: 'int' and 'str'
@@ -66,6 +70,8 @@ console.log(1)
 
 **HTML5** 制定了Web Worker标准，为JavaScript创造了多线程环境，允许JavaScript主线程创建Worker线程，将一些任务分配给Worker线程运行。在主线程运行的同时，Worker线程在后台运行，互不干扰。这样的好处是一些计算密集型、高延迟的任务，被Worker线程承担，主线程（负责UI以及交互）的运行就会更加流畅。
 
+但是对于`JavaScript`语言本身来说它仍是运行在单线程上的，`Web Worker`只是浏览器（宿主环境）提供的一个能力／API，换言之，**JavaScript是单线程的，但是JavaScript的执行环境不是**。
+
 ### 3. Node.js的“多线程”
 对于Node.js，其JavaScript执行线程（开发者编写的JavaScript代码）是单线程的，而Node.js进程是多线程的。要了解Nodejs.js进程有哪些线程，需要先了解Node.js内部架构：
 
@@ -100,10 +106,7 @@ Node.js启动后将会创建V8实例，V8实例本身是多线程的：
 早期的IE浏览器就是单进程架构，从IE8开始其进程架构变成多进程，Firefox经过从Firefox 48到56共9个版本的迭代，逐步的完善了其多进程架构，而Chrome一开始就是基于多进程架构。
 
 下图为Chrome的进程架构：
-
 ![多进程浏览器架构](https://pic.downk.cc/item/5e63b26a98271cb2b8f79903.png)
-
-有关浏览器的工作原理，会写在另外一篇笔记里。
 
 ___
 ### 参考
@@ -112,4 +115,3 @@ ___
 3. [虚拟机随谈：解释器，树遍历解释器，基于栈与基于寄存器](https://www.iteye.com/blog/rednaxelafx-492667)
 4. [JavaScript是如何执行的](https://segmentfault.com/a/1190000020438413)
 5. [理解Node.js中的“多线程”](https://zhuanlan.zhihu.com/p/74879045)
-6. [浏览器进程架构的演化](https://zhuanlan.zhihu.com/p/96957235)
