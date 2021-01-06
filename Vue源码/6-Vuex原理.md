@@ -8,6 +8,7 @@ Vuex的核心就是`store`（仓库）。“store”就是一个容器，它包�
 
 与普通的Vue插件一样，Vuex也实现了静态方法`install`：
 ```js
+// vuex/src/store.js
 function install (_Vue) {
   if (Vue && _Vue === Vue) {
     console.error(
@@ -20,9 +21,10 @@ function install (_Vue) {
 }
 ```
 
-做了Vuex安装校验，将传入的`Vue`传给`applyMixin`：
+在做了Vuex安装的校验之后，将传入的`Vue`传给`applyMixin`：
 ```js
-var applyMixin = function (Vue) {
+// vuex/src/mixin.js
+function applyMixin (Vue) {
   var version = Number(Vue.version.split('.')[0])
   // 兼容1.0版本
   if (version >= 2) {
@@ -51,3 +53,5 @@ var applyMixin = function (Vue) {
   }
 }
 ```
+
+
