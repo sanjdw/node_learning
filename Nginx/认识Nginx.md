@@ -9,8 +9,7 @@ Nginx作为一个轻量级的HTTP服务器，能够很好地应对高并发的HT
 如上图所示，在客户端与服务端通信的架构中，Nginx作为HTTP服务器，可以将服务器文件系统的静态文件（HTML、图片等）通过HTTP协议响应给客户端；而对于动态资源请求，Nginx将请求交给**应用服务器**处理。
 
 ### 反向代理服务器
-互联网应用大多基于CS架构，即client端和server
-端，代理就是在client端和server端之间的服务器，称为代理服务器。
+互联网应用大多基于CS架构，即client端和server端，代理就是在client端和server端之间的服务器，称为代理服务器。
 
 > 正向代理隐藏真实的客户端，反向代理隐藏真实的服务端。
 
@@ -19,10 +18,9 @@ Nginx作为一个轻量级的HTTP服务器，能够很好地应对高并发的HT
 在上图中，客户端的请求经过代理向外发出，响应也由代理接收返回，这就是正向代理，平时翻墙的梯子可以理解为正向代理服务器。
 
 而反向代理则代理的是服务器而不是客户：
-
 ![反向代理](https://pic.downk.cc/item/5e6cba9be83c3a1e3a3642ea.jpg)
 
-客户端发往服务端的请求，首先进入代理服务器，代理服务器将请求代理到真正处理请求的服务器上，Nginx就是扮演这个反向服务器的角色的。
+客户端发往服务端的请求，首先进入代理服务器，代理服务器将请求代理到真正处理请求的服务器上，Nginx大多数场景下扮演的就是这个反向服务器的角色。
 
 反向代理有两个好处：
 - 安全：使用反向代理后，客户端无法通过请求直接访问真正提供服务的服务器，请求首先经过Nginx，而Nginx可以将危险或没有权限的请求过滤掉。
@@ -30,12 +28,21 @@ Nginx作为一个轻量级的HTTP服务器，能够很好地应对高并发的HT
 - 负载均衡：通过各种调度算法机制将来自客户端的请求分发给真实的服务器，以减轻对单个服务器的负载压力。
 
 ### 前端眼里的Nginx
-### 1. 解决跨域
+#### 1. 解决跨域
+```nginx
+server {
+  listen 8000;
 
-___
-### 2. 图片处理
+  location /proxy/api/ {
+    proxy_pass http://cross-origin.com/api/ # 真正跨域的域名
+  }
+}
+```
+
+前端发往`http://8000/proxy/api/*`的请求会被转发到`http://cross-origin/api/*`上。
+
+#### 2. 图片处理
 前端项目的开发中，经常会有对图片尺寸、品质处理的需要，依赖[ngx_http_image_filter_module](http://nginx.org/en/docs/http/ngx_http_image_filter_module.html)模块，Nginx可以搭建图片处理服务，下面是一个Nginx配置图片尺寸裁剪的demo：
-
 ```nginx
 server {
   listen 80;
@@ -58,7 +65,7 @@ server {
 ![338w_500h](https://pic.downk.cc/item/5e6cf613e83c3a1e3a5ba2d2.jpg)
 
 ___
-### 3. 静态资源缓存
+#### 3. 静态资源缓存
 ```nginx
 {
   # add_header Cache-Control no-store; 禁用缓存
@@ -68,9 +75,8 @@ ___
 ```
 
 ___
-### 4. 适配PC端与移动端
-为更好提升移动端的用户体验，在PC端站点之外，互联网公司一般都会单独开发一个给移动端用户访问的站点。当用户用移动终端访问PC站点，自动跳转到m站点。
-
+#### 4. 适配PC端与移动端
+为更好提升移动端的用户体验，在PC端站点之外，互联网公司一般都会单独开发一个给移动端用户访问的站点。当用户用移动终端访问PC站点，自动跳转到m站点：
 ```nginx
 location / {
   # 移动、pc设备适配
@@ -82,12 +88,12 @@ location / {
   }
 }
 ```
-在移动设备上访问[猫眼电影的PC端站点(https://maoyan.com/)](https://maoyan.com/)会跳转到[http://maoyan.com/](http://maoyan.com/)。
+
+在移动设备上访问[猫眼电影的PC端站点(https://maoyan.com/)](https://maoyan.com/)会跳转到http://maoyan.com/。
 
 ___
-### 5. Gzip压缩
-Gzip是文件压缩程序的简称。Nginx可以利用gzip压缩，来减小返回给客户端的静态资源的HTTP响应的体积，提高传输速率。
-
+#### 5. Gzip压缩
+Gzip是文件压缩程序的简称。Nginx可以利用gzip压缩，来减小返回给客户端的静态资源的HTTP响应的体积，提高传输速率：
 ```nginx
 # 开启gzip压缩
 gzip on;
@@ -108,18 +114,15 @@ Content-Encoding: gzip
 ```
 告诉浏览器对获得的资源做解压缩处理。
 
-两类文件资源不建议启用Gzip压缩：
-
+两类文件资源不建议启用Gzip压缩：、
 1. **图片类型资源 (还有视频文件)**
-
     图片如jpg、png文件本身就会有压缩，所以gzip压缩前和压缩后体积不会有太大区别，所以开启Gzip反而会浪费资源。
 
 2. **大文件资源**
-  
     会消耗大量cpu资源，且不一定有明显的效果。
 
 ___
-### 6. 合并请求
+#### 6. 合并请求
 借助淘宝开发的第三方模块[nginx-http-concat](https://github.com/alibaba/nginx-http-concat)。
 
 ___
