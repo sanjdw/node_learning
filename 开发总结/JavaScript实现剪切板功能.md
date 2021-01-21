@@ -1,5 +1,4 @@
-之前写过一个这样的功能：通过点击图片旁的`“复制”`按钮，将图片链接比如 
-
+之前写过一个这样的功能：通过点击图片旁的`“复制”`按钮，将图片链接比如：
 ```
 http://p0.meituan.net/moviesh/6d6b2a44e3d59d0472e82624c5c256aa10334.png
 ```
@@ -14,7 +13,6 @@ http://p0.meituan.net/moviesh/6d6b2a44e3d59d0472e82624c5c256aa10334.png
 > 当`HTML`文档切换到 [**设计模式**](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/designMode) 时，`document`会暴露`execCommand`方法，该方法允许运行命令来控制可编辑内容区域（如`input`元素或设置了`contentEditable`属性的元素等）。
 
 好吧，读起来确实很绕口，继续往下读，语法：
-
 ```js
 bool = document.execCommand(aCommandName, [,aShowDefaultUI, [,aValueArgument]])
 ```
@@ -36,7 +34,6 @@ cmd /c "echo off | clip"
 ```
 
 然后在浏览器控制台中run：
-
 ```js
 document.execCommand('copy')
 ```
@@ -46,7 +43,6 @@ document.execCommand('copy')
 如果你用鼠标选中了浏览器页面中的一段文本内容后再执行```document.execCommand('copy')```，会发现选中的文本内容已经被放到了系统剪切板中。
 
 回到需求本身，我们希望利用`document.execCommand('copy')`去将指定的内容放到剪切板，而不是手动选中文本，那么可以借用input：
-
 ```js
 // html
 <button id='btn'>点我复制</button>
@@ -85,7 +81,6 @@ copy('http://p0.meituan.net/moviesh/6d6b2a44e3d59d0472e82624c5c256aa10334.png')
 - 调用`document.execCommand('copy')`指令
 
 `copy`事件返回一个`ClipboardEven`事件对象，该对象拥有`clipboardData`方法。
-
 ```js
 const target = document.getElementById('box')
 target.addEventListener('copy', function(event) {
@@ -96,7 +91,6 @@ target.addEventListener('copy', function(event) {
 
 ### 补充
 此外，chrome 66新增了 `Async Clipboard` API，
-
 ```js
 navigator.clipboard.writeText('需要复制的文本')
 ```
