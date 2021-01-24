@@ -116,7 +116,44 @@ console.log(222) // 仍然可以执行
 
 上面代码中，如果函数`f`执行出错，会被`catch`捕获，程序会继续向下执行。
 
+值得注意的是，`try...catch`无法捕获语法错误：
+![try catch无法捕获语法错误](https://img.imgdb.cn/item/600bb54c3ffa7d37b397d55b.jpg)
+
+好在，语法错误在开发阶段就可以被发现，所以我们一般也不需要对语法错误使用`try...catch`。
+
 #### 2.3 异步异常
+除了语法错误，异步任务中抛出的异常也无法被`try...catch`捕获：
+![异步异常](https://img.imgdb.cn/item/600bb4ee3ffa7d37b397ae3a.jpg)
+
+知道事件循环、栈的概念的话，这个就很好理解——定时器注册的回调执行时`try...catch`上下文已经被销毁了。
+
+Promise异常：
+![Promise异常](https://img.imgdb.cn/item/600d1c103ffa7d37b33cf99e.jpg)
+
+**`try catch`无法捕获Promise内部抛出的异常**，Promise内部异常通过`promise.catch`进行捕获：
+![Promise异常捕获](https://img.imgdb.cn/item/600d20fb3ffa7d37b33ef095.jpg)
+
+所以，对于异步任务，Promise内的异常使用`Promise.catch`进行异常，而异步回调比如定时器则可以将回调的逻辑通过`try...catch`包裹：
+```js
+try {
+  setTimeout(function () {
+    a()
+  }, 1000)
+} catch (err) {
+  console.log('这里不会执行')
+}
+// 改写为
+setTimeout(function () {
+  try {
+    a()
+  } catch (err) {
+    console.log('这里可以捕获到' err)
+  }
+}, 1000)
+```
+
+### 总结
+这里大概总结了JavaScript的`Error`对象和几种基于Error的子类，同步异常和异步异常的捕获策略。
 
 ### 参考
 1. [错误处理机制](https://javascript.ruanyifeng.com/grammar/error.html)
