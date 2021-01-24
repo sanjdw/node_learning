@@ -157,4 +157,3 @@ setTimeout(function () {
 
 ### 参考
 1. [错误处理机制](https://javascript.ruanyifeng.com/grammar/error.html)
-2. [如何优雅处理前端异常？](http://jartto.wang/2018/11/20/js-exception-handling/)
