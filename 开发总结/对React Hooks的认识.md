@@ -2,9 +2,23 @@
 
 相较于Class组件，React官方更加提倡函数式组件，至于为什么，我暂时还不能很好的回答，不过这里有一些讨论——[为什么 React 现在要推行函数式组件，用 class 不好吗？](https://www.zhihu.com/question/343314784)
 
-而`Hooks`是辅助函数式组件的的工具，它使函数式组件有了状态，弱化了生命周期的概念。
+而`Hooks`正是React辅助函数式组件的工具，它使函数式组件有了状态，弱化了生命周期的概念。
 
+### 1. useState
+#### 1.1 什么时候使用useState
+#### 1.2 如何使用useState
 
+#### 1.3 useState的注意点
+
+### useRef
+
+### useReducer
+
+### useMemo
+
+### useCallback
+
+### useContext
 
 Class组件的思维方式是维护生命周期，而hook则是处理依赖关系。
 
