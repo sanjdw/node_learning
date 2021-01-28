@@ -1,16 +1,14 @@
-### 引子
 我们都知道，JavaScript从诞生之日起就是一门单线程、非阻塞的脚本语言。这是由其最初的用途决定的：与浏览器交互。
 
-单线程意味着JavaScript代码在执行的任何时候，都只有一个主线程来处理所有的任务。
+- 单线程意味着JavaScript代码在执行的任何时刻，都只有一个主线程来处理所有的任务。
+- 而非阻塞则是指，当需要执行一项**异步任务**时，主线程会挂起（`pending`）这个异步任务，之后在异步任务返回结果时再去执行相应的回调。
 
-而非阻塞则是指，当需要执行一项异步任务时，主线程会挂起（`pending`）这个异步任务，之后在异步任务返回结果时再去执行相应的回调。
-
-而浏览器、Node.js通过各自的事件循环`Event Loop`机制来实现异步非阻塞。
+浏览器、Node.js通过各自的事件循环`Event Loop`机制来实现JavaScript的单线程异步非阻塞特性。
 
 ### 1. Event loop
 
 ![Event Loop](https://pic.downk.cc/item/5fd10e873ffa7d37b38933dd.png)
-1. 所有同步任务都在主线程上执行，形成一个**执行栈**（`execution context stack`）。
+1. 所有同步任务都在主线程上执行，形成一个**执行栈**。
 2. 主线程之外，还存在**任务队列**(`task queue`)。那么任务队列存放的是什么呢——每一个异步任务有了运行结果，就会在**任务队列**之中放置一个**事件**。
 3. 当**执行栈**中的所有同步任务执行完毕时，**JavaScript引擎**就会读取**任务队列**，看看里面有哪些事件。那些对应的异步任务，于是结束等待状态，**对应的回调**进入执行栈，得以执行。
 4. 主线程不断重复上面的第三步
@@ -20,19 +18,21 @@
 - setTimeout/setInterval
 - setImediate（Node.js支持、部分浏览器支持）
 - messageChannel
-- requestAnimationFrame（浏览器支持）
+- requestAnimationFrame（浏览器）
 - I/O
-- UI rendering
+- UI rendering（浏览器）
 
 `microTask`：
 - Promise
-- mutationObserver
-- queueMicrotask
-- process.nextTick（Node.js支持)
+- mutationObserver（浏览器）
+- queueMicrotask（浏览器）
+- process.nextTick（Node.js)
 
 ### 3. 浏览器环境的Event loop
 
+
 ### 4. Node环境的Event loop
+
 
 
 ___
