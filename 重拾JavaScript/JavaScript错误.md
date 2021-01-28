@@ -130,7 +130,7 @@ console.log(222) // 仍然可以执行
 Promise异常：
 ![Promise异常](https://img.imgdb.cn/item/600d1c103ffa7d37b33cf99e.jpg)
 
-**`try catch`无法捕获Promise内部抛出的异常**，Promise内部异常通过`promise.catch`进行捕获：
+**`try catch`无法捕获Promise内部抛出的异常**，Promise内部异常需要通过`promise.catch`进行捕获：
 ![Promise异常捕获](https://img.imgdb.cn/item/600d20fb3ffa7d37b33ef095.jpg)
 
 所以，对于异步任务，Promise内的异常使用`Promise.catch`进行异常，而异步回调比如定时器则可以将回调的逻辑通过`try...catch`包裹：
