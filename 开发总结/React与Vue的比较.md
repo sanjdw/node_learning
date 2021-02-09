@@ -25,7 +25,7 @@ Vue内置了指令、filter、computed、状态依赖收集等很多特性，而
 
 另一方面，在实际的项目开发场景中，使用React的话，同样的业务功能不同的开发人员有不同的实现。从这个角度来讲，基于Vue开发的代码可维护性更高（我是这样觉得的，在帮别人改bug时代码中的业务逻辑更容易抓住）。
 
-看到有这样一个比方——React是手动挡，Vue是自动挡，大概可以总结React和Vue的不同之处。
+看到有这样一个比方——**React是手动挡，Vue是自动挡**，我想大概可以巧妙地总结React和Vue的不同之处。
 
 ### 参考
 1. [对比其他框架-Vuejs.org](https://cn.vuejs.org/v2/guide/comparison.html)
