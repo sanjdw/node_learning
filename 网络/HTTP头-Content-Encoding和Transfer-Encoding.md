@@ -18,7 +18,9 @@
 上文已经讲到到，`Content-Encoding`通常用于对实体内容进行压缩编码，目的是优化传输。而`Transfer-Encoding`则是用来改变报文的格式，它不会减小传输体积的大小，反而会使传输的体积增大。在介绍`Transfer-Encoding`之前，先来看`Content-Length`。
 
 #### 2.1 Content-Length
-我们知道HTTP运行在TCP连接之上，而TCP的三次握手连接机制导致TCP连接的创建成本较高。为了尽可能的提高HTTP性能，`HTTP/1.1`规定所有连接都必须是持久的，除非显式地在头部加上`Connection: close`。持久连接特性的引入带来了另外一个问题——在`HTTP/1.1`之前，一个HTTP响应完成时服务端会通过响应头部的`Connection: close`通知客户端HTTP响应完成了，但在`Connection: close`不存在了的情况下，**客户端该如何判断一个HTTP响应是否结束了？**
+我们知道HTTP运行在TCP连接之上，而TCP的三次握手连接机制导致TCP连接的创建成本较高。为了尽可能的提高HTTP性能，`HTTP/1.1`规定所有连接都必须是持久的，除非显式地在头部加上`Connection: close`。
+
+持久连接特性的引入带来了另外一个问题——在`HTTP/1.1`之前，一个HTTP响应完成时服务端会通过响应头部的`Connection: close`通知客户端HTTP响应完成了，但在`Connection: close`不存在了的情况下，**客户端该如何判断一个HTTP响应是否结束了？**
 
 答案就是`Content-Length`——服务端在响应资源前计算好资源的体积大小，将它放到响应头的`Content-Length`中，客户端可以通过它判断出响应实体是否结束。
 
@@ -33,4 +35,5 @@
 
 ![chunked](https://pic.downk.cc/item/5f50b1ec160a154a672fffed.jpg)
 
-> 在HTTP/2中，`Transfer-Encoding`已经被弃用了，因为HTTP/2本身提供了更加高级的流机制来实现类似功能。
+
+注：在HTTP/2中，`Transfer-Encoding`已经被弃用了，因为HTTP/2本身提供了更加高级的流机制来实现类似功能。
