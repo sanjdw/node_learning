@@ -1,4 +1,4 @@
-关于CSS3的过渡和动画，很早之前需求开发中使用过，文章也零零散散地看过，上午开发中需要实现一个过渡的效果，想了半天又忘了实现的具体写法，再查了一遍文档才回想起来。现在想来最初在用的时候也只是应付需求，所以针对CSS3的`transition`和`animation`整理了这篇笔记。
+关于CSS3的过渡和动画，很早之前需求开发中使用过，文章也零零散散地看过。最近在工作碰到一个需要实现过渡的效果的需求，想了半天又忘了实现的具体写法，再查了一遍文档才回想起来。现在想来最初在用的时候也只是应付需求，所以针对CSS3的`transition`和`animation`整理了这篇笔记。
 
 在CSS3之前，动画都是靠动图、flash动画以及JavaScript实现的，比如JavaScript动画：
 ```js
@@ -7,13 +7,13 @@ setTimeout(funcntion() {
 }, 300)
 ```
 
-JavaScript动画有以下缺点：
-- 由于JavaScript线程运行在渲染进程中，而渲染进程中还有GUI渲染线程、JavaScript线程、事件触发线程、定时触发器线程、异步HTTP请求线程等。其中GUI渲染线程与JS引擎线程是互斥的，可能导致JavaScript线程阻塞，从而造成丢帧的情况
+JavaScript动画有两个比较明显的缺点：
+- 由于JavaScript线程运行在渲染进程中，而渲染进程中还有GUI渲染线程、JavaScript线程、事件触发线程、定时触发器线程、异步HTTP请求线程等。其中GUI渲染线程与JS引擎线程是互斥的，可能被JavaScript线程阻塞，从而造成丢帧的情况
 - 代码复杂度较高，维护性较差
 
-而flash动画制作成本又比较高，CSS3中引入了`transition`（过渡）和`animation`（动画）的概念，开发者可以用它来取代图像动画、flash动画以及部分JavaScript实现的动画效果。
+而flash动画制作成本又比较高，因此CSS3中引入了`transition`（过渡）和`animation`（动画），开发者可以用它来取代图像动画、flash动画以及部分JavaScript实现的动画效果。
 
-### transition过渡
+### 1. transition过渡
 在引入`transition`概念之前，CSS是没有时间轴的——CSS的属性值的变化是**立刻生效**的，比如改变了某个元素的背景色、增大了某个块级元素的width，是可以马上看到相应的变化的。
 ```css
 .img {
@@ -26,7 +26,7 @@ JavaScript动画有以下缺点：
 
 在上面的CSS效果下，设置的图片宽度在鼠标hover上时马上由200px变成300px。
 
-#### 1. 基本使用
+##### 1.1 基本使用
 `transition`提供了一种在**改变CSS属性时控制动画速度**的方法，它可以使这样的CSS属性值的改变不是立即完成，而是呈现出从一种状态变成另一种状态的过程：
 ```css
 .img {
@@ -54,9 +54,9 @@ JavaScript动画有以下缺点：
   - cubic-bezier函数：自定义速度模式，可以借助[第三方工具](https://cubic-bezier.com/)来定制。
 - transition-delay: 过渡效果从何时开始
 
-在使用简写时，第一个可以解析为时间的值会被赋值给`transition-duration`，第二个赋值给`transition-delay`。
+在使用简写时，第一个可以解析为时间的值会被赋值给`transition-duration`，第二个可以解析为时间的值会被赋值给`transition-delay`。
 
-### 2. 触发transition的方式
+##### 1.2 触发transition的方式
 ```css
 .box {
   width: 200px;
@@ -94,7 +94,7 @@ JavaScript动画有以下缺点：
   })
   ```
 
-### 3. 局限
+##### 1.3 局限
 `transition`用法简单，但是使用场景有限：
 - 需要事件触发
 - `transition`是一次性的，不能重复发生，除非一再触发
@@ -103,10 +103,10 @@ JavaScript动画有以下缺点：
   1. 支持`transition`的CSS属性列表见[这里](https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_animated_properties)
   2. 支持`transition`的CSS属性的属性值必须设置为绝对值：比如，不能让height从`0px`过渡到`auto`，因为浏览器不能计算中间过渡值。
 
-### animation动画
+### 2. animation动画
 `animation`弥补了`transition`使用场景有限的缺点。
 
-#### 1. 基本使用
+###### 2.1 基本使用
 首页需要为动画指定一个周期的持续时间、动画名称：
 ```css
 div {
@@ -131,7 +131,7 @@ img:hover {
 }
 ```
 
-#### 2. animation-fill-mode
+##### 2.2 animation-fill-mode
 动画结束以后，会立刻从结束状态还原到起始状态。如果想让动画保持在结束状态，需要使用`animation-fill-mode`属性：
 ```css
 img:hover {
@@ -144,7 +144,7 @@ img:hover {
 - `backwords`，回到动画第一帧的状态
 - `both`：根据`animation-direction`（下文会提到）轮流应用`forwards`和`backwards`规则
 
-#### 3. animation-direction
+##### 2.3 animation-direction
 动画循环播放时，每个周期结束都是从结束状态跳回到起始状态开始下一个周期的动画。`animation-direction`属性，可以改变这种行为，默认值为`normal`：
 ```css
 div:hover {
@@ -169,7 +169,7 @@ div:hover {
 
 ![animation-direction](https://pic.downk.cc/item/5ed4c4ccc2a9a83be5e78112.png)
 
-#### 4. animation各项属性
+##### 2.4 animation各项属性
 与`transition`一样，`animation`既可以简写也可以分成各个单独的属性：
 ```css
 div {
@@ -186,7 +186,7 @@ div {
 }
 ```
 
-#### 5. keyframes写法
+##### 2.5 keyframes写法
 `keyframes`定义动画的的写法则比较自由：
 ```css
 @keyframes rainbow {
@@ -202,10 +202,10 @@ div {
 }
 ```
 
-#### 6. steps功能
+##### 2.6 steps功能
 上面实现的从一个状态向另一个状态的过渡动画，是平滑过渡。`steps`函数可以实现分步过渡。
 
-### animation-play-state
+##### 2.7 animation-play-state
 此外，我们还可以通过`animation-play-state`属性控制动画运行还是暂停：
 ```css
 div {
@@ -226,13 +226,12 @@ div:hover {
 ### 硬件加速
 CSS3硬件加速又叫做`GPU加速`，是利用GPU进行渲染，减少CPU操作的一种优化方案。由于GPU中的transform等CSS属性不会触发repaint，所以能大大提高网页的性能。
 
-___
 ### 总结
-#### CSS3动画的缺点：
+##### CSS3动画的缺点：
 - CSS运行过程控制较弱，无法附加事件回调
 - 对于一些复杂的动画，如果用CSS3实现，则会导致CSS代码冗长
 
-#### 优点：
+##### 优点：
 - 占用的内存更小，运行更加流畅
 - 可以强制使用硬件加速（通过GPU来提高动画性能）
 - 对于帧速表现不好的低版本浏览器，CSS3动画可以做到自然降级，而JavaScript则需要撰写额外代码
