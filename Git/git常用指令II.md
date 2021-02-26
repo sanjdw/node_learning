@@ -16,7 +16,7 @@ git diff feature/20200831 master
 ```
 
 ### 绕过eslint commit
-下午在项目中新开了一个测试分支，只是用来分析小程序业务代码的运行流程的，想要`push`后回家看一下，由于项目配置了`eslint`检查，通过`--no-verify`参数绕过：
+下午在项目中新开了一个测试分支，只是用来分析小程序业务代码的运行流程的，想要`push`后回家看一下，由于项目配置了`eslint`检查，着急`push`无法通过检查，需要通过加上`--no-verify`参数绕过：
 ```bash
 git commit -m 'style: ****' --no-verify
 ```
