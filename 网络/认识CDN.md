@@ -19,4 +19,4 @@ ___
 ### 参考
 1. [面向前端的CDN原理介绍](https://github.com/renaesop/blog/issues/1)
 2. [cname记录是什么？他存在的意义是什么？](https://www.zhihu.com/question/22916306)
-3. [说一下CDN原理]https://juejin.im/post/5ef153cc51882565901ea744?utm_source=gold_browser_extension
+3. [说一下CDN原理](https://juejin.im/post/5ef153cc51882565901ea744)

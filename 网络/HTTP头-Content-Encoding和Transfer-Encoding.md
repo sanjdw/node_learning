@@ -35,5 +35,4 @@
 
 ![chunked](https://pic.downk.cc/item/5f50b1ec160a154a672fffed.jpg)
 
-
 注：在HTTP/2中，`Transfer-Encoding`已经被弃用了，因为HTTP/2本身提供了更加高级的流机制来实现类似功能。
