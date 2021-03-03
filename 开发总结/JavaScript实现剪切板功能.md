@@ -99,8 +99,8 @@ navigator.clipboard.writeText('需要复制的文本')
 
 ___
 ### 参考：
-- [富文本原理了解一下？](https://juejin.im/post/5cfe4e8a6fb9a07ec63b09a4)
-- [JavaScript赋值内容到剪切板](https://github.com/axuebin/articles/issues/26)
-- [javascript execCommand,复文本框神器](https://blog.csdn.net/gertyy/article/details/65936318)
-- [How do I copy to the clipboard in JavaScript?](https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript)
-- [前端er怎样操作剪切复制以及禁止复制+破解等](https://juejin.im/post/5b66993ee51d451924734c35)
+1. [富文本原理了解一下？](https://juejin.im/post/5cfe4e8a6fb9a07ec63b09a4)
+2. [JavaScript赋值内容到剪切板](https://github.com/axuebin/articles/issues/26)
+3. [javascript execCommand,复文本框神器](https://blog.csdn.net/gertyy/article/details/65936318)
+4. [How do I copy to the clipboard in JavaScript?](https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript)
+5. [前端er怎样操作剪切复制以及禁止复制+破解等](https://juejin.im/post/5b66993ee51d451924734c35)
