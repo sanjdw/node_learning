@@ -13,7 +13,7 @@ class LRUCache {
   }
 
   get (key) {
-    if (this.cache(key) !== undefined) {
+    if (this.cache[key] !== undefined) {
       const value = this.cache[key]
       this._removeKey(key)
       this.keys.push(key)
@@ -33,7 +33,7 @@ class LRUCache {
         // 超出最大缓存空间，需要将队列第一个移出
         const _key = this.keys[0]
         this._removeKey(_key)
-        this.cache[_key] = null
+        delete this.cache[_key]
       }
       this.cache[key] = value
       this.keys.push(key)
@@ -68,7 +68,7 @@ class DoubleLinkedList {
     this.size = 0
   }
 
-  // 节点本身不在链表中
+  // 节点本身不在链表中，将结点置为链表头
   addHead (node) {
     if (this.head) {
       this.head.prev = node
@@ -80,13 +80,13 @@ class DoubleLinkedList {
     this.size++
   }
 
-  // 删除尾结点
-  deleteTail () {
+  // 删除链表尾结点
+  removeTail () {
     const tail = this.tail
 
     if (tail) {
       // 倒数第二个节点
-      const _tail = tail.pre
+      const _tail = tail.prev
 
       if (_tail) {
         _tail.next = null
@@ -96,16 +96,29 @@ class DoubleLinkedList {
       }
       this.size--
     }
+
+    return tail
   }
 
-  // 节点本身在链表中
+  // 节点本身在链表中，将结点移到链表头
   moveToHead (node) {
-    // node已经是头节点
+    // node已经是头节点，不作任何处理
     if (node === this.head) return
 
-    node.pre = null
-    this.head.pre = node
+    // 如果是尾结点，需要重置尾结点，这里容易忽略！
+    if (node === this.tail) {
+      this.tail = node.prev
+    }
+
+    node.prev.next = node.next
+    
+    if (node.next) {
+      node.next.prev = node.prev
+    }
+
+    node.prev = null
     node.next = this.head
+    this.head.prev = node
     this.head = node
   }
 }
@@ -135,8 +148,8 @@ class LRUCache {
       this.keys.moveToHead(node)
     } else {
       if (this.capacity === this.keys.size) {
-        this.cache[this.keys.tail.key] = null
-        this.keys.deleteTail()
+        delete this.cache[this.keys.tail.key]
+        this.keys.removeTail()
       }
 
       const node = new Node(key, value)
