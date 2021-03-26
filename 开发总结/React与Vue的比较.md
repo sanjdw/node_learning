@@ -1,4 +1,4 @@
-年底组里新的项目开始倾向React技术栈，业务的开发过程中也在不断思考比较，使得我想尝试回答这个面试中常见的问题——React和Vue各有哪些特点？
+年底组里新的项目开始转向使用React技术栈，业务的开发过程中也在不断思考比较，使得我想尝试回答这个面试中常见的问题——React和Vue各有哪些特点？
 
 React和Vue有很多相似之处，它们都有：
 - 使用Virtual DOM
@@ -8,7 +8,11 @@ React和Vue有很多相似之处，它们都有：
 ### 组件
 React的思路是`HTML in JavaScript`，提倡使用jSX定义组件。
 
-Vue提倡模板+JavaScript+CSS的组合模式呈现组件（Vue中也可以借助Babel Preset JSX使用JSX），视图、行为与表现相分离，这一点与传统web开发者熟悉的模板契合度更高。
+Vue提倡模板+JavaScript+CSS的组合模式呈现组件（当然Vue中也可以借助Babel Preset JSX使用JSX），视图、行为与表现相分离，这一点与传统web开发者熟悉的模板契合度更高。
+
+逻辑复用
+
+React在15.5版本之后废弃了`createClass`，
 
 ### 渲染
 在React中，一个组件的状态发生变化时，会导致该组件及其子组件的重新渲染，需要开发者自己去处理避免不必要的渲染：
