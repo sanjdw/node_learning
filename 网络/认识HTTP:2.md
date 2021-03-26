@@ -1,34 +1,48 @@
 ### 1. HTTP/1.X 的缺陷
 #### 1.1 TCP连接复用问题
 TCP连接无法复用会导致每次请求要经历TCP的三次握手和慢启动，三次握手在高延迟的场景下影响较明显，慢启动则对文件类大请求影响较大。
-- HTTP/1.0 传输数据时，每一次通讯都要重新建立TCP连接
-- HTTP/1.1 加入了`Keep-alive`使得TCP连接可以被复用，但是在处理多个请求时，第二个请求要等到第一个请求响应完成才能**发起**；虽然HTTP/1.1规范中又规定了`Pipelining`来试图解决这个问题——一个支持持久连接的客户端可以在一个TCP连接中发送多个请求（不需要等待任意请求的响应），收到请求的服务器必须按照请求收到的顺序发送响应：
+- HTTP/1.0 传输数据时，每一次通信都要建立TCP连接
+- HTTP/1.1 加入了`Keep-alive`使得TCP连接可以被复用，但是在处理多个请求时，第二个请求要等到第一个请求响应完成才能**发起**；虽然HTTP/1.1规范中又规定了`Pipelining`来试图解决这个问题——一个支持持久连接的客户端可以在一个TCP连接中发送多个请求（不需要等待任意请求的响应），**服务端必须按照请求收到的顺序发送响应**：
   ![Pipelining](https://img.imgdb.cn/item/601acd383ffa7d37b3132c15.jpg)
 
   但是在实践中有诸多问题：
   - 一些代理服务器不能正确处理HTTP Pipelining
   - 正确的流水线的实现很复杂
-  - 队头阻塞问题 
+  - 队头阻塞问题
 
-  因此现代浏览器默认是不开启HTTP pipelining的。
+  因此现代浏览器默认是不开启`HTTP pipelining`的。
 
 #### 1.2 队头阻塞（HOLB）
-HOLB（Head of line blocking）问题是HTTP/2之前的HTTP协议缺陷的一个最大体现。如图，假设在一个TCP连接上有5个HTTP请求同时发出：
+HOLB（Head of line blocking）问题是HTTP协议在HTTP/2版本之前缺陷的一个最大表现。如图，假设在一个TCP连接上有5个HTTP请求同时发出：
 ![HOLB](https://img.imgdb.cn/item/601983313ffa7d37b3971eae.jpg)
 
-- 如果没有开启pipelining，在请求1没有收到响应之前，后续的请求只能排队，请求2，3，4，5只能等请求1的响应回来之后才能逐个发出
-- 如果开启pipelining，由于服务器应该按照收到请求的顺序返回结果，如果服务器在处理请求1时花费了大量时间，那么后面所有的请求都需要等着请求1结束才能响应
+- 如果没有开启`pipelining`，在请求1没有收到响应之前，后续的请求只能排队，请求2，3，4，5只能等请求1的响应回来之后才能逐个发出
+- 即使开启了`pipelining`，由于服务端需要请求按照的顺序依次响应结果请求，如果服务器在处理请求1时花费了大量时间，那么后面所有的请求都需要再请求1被处理完后才能得到处理
 
-可见Pipelining只能**解决部分**HOLB问题。
+可见`Pipelining`只能**解决部分**HOLB问题。
 
 #### 1.3 协议开销
-在HTTP/1.x中，HTTP header里携带的内容过大，并且每次请求时header中的内容基本不怎么变化，在一定程度上增加了传输的成本，
+在HTTP/1.x中，HTTP报文由三个部分组成：
+- `start line`（请求行或状态行）
+- `header`（请求头或响应头）
+- `body`
+
+如图所示为HTTP/1.x的一个**请求**报文格式：
+![HTTP报文格式](https://img.imgdb.cn/item/6036785c5f4313ce259900de.png)
+
+HTTP/1.x的报文是基于**ASCII文本**的，文本协议具有可读性强的优点。文本协议的可读性是以增加额外字符（比如XML的闭合标、JSON的大括号冒号等）为代价的，这毫无疑问会造成**数据冗余**，并且信息接收方为了从文本数据中提取出信息，还需要按照协议规范进行词法分析、文法分析等工作。
+
+另一方面，HTTP头携带的内容过大，许多固定字段（如`User Agent`、`Cookie`、`Accept`）是基本不怎么变化的，这在一定程度上也会造成传输的成本的浪费。
 
 #### 1.4 安全性
 HTTP/1.x在传输数据时，所有传输的内容都是明文，客户端和服务器端都无法验证对方的身份，这在一定程度上无法保证数据的安全性。
 
 ### 2. HTTP/2
 #### 2.1 二进制分帧
+HTTP/2 采用二进制格式传输数据，而非HTTP/1.x 里的文本形式的报文。HTTP/2 将请求和响应数据分割为更小的帧，并且它们采用二进制编码：
+![](可读性，)
+
+虽然看上去协议的格式和HTTP/1.x不同，实际上HTTP/2并没有改变HTTP/1.x的语义，只是将原本HTTP/1.x的header和body部分用frame进行了封装。
 
 #### 2.2 多路复用
 多路复用就是所有HTTP请求的都是通过一个TCP连接并发完成的。在HTTP/1.x中，如果想**并发**多个请求，必须使用多个TCP链接，且浏览器为了控制资源，还会对同一个域名下的TCP连接数有限制。
@@ -41,6 +55,7 @@ HTTP/1.x在传输数据时，所有传输的内容都是明文，客户端和服
 
 #### 2.3 头部压缩
 
+
 #### 2.4 服务端推送
 服务端可以在发送页面HTML时主动推送其它资源，而不用等到浏览器解析到相应位置，发起请求再响应。例如服务端可以主动把JavaScript脚本和CSS文件推送给客户端，而不需要客户端解析HTML时再发送这些请求。
 
@@ -49,5 +64,7 @@ HTTP/1.x在传输数据时，所有传输的内容都是明文，客户端和服
 ___
 ### 参考
 1. [简单认识HTTP2](https://juejin.im/post/5e3ba8495188254917539d7e)
-2. [HTTP/2 相比 1.0 有哪些重大改进？](https://www.zhihu.com/question/34074946)
-3. [让互联网更快，Server Push 特性及开启方式详解](https://www.upyun.com/tech/article/294/1.html?utm_source=zhihu&utm_medium=referral&utm_campaign=26559480&utm_term=http2)
+2. [HTTP/2相比HTTP/1.x有哪些重大改进？](https://www.zhihu.com/question/34074946)
+3. [让互联网更快，Server Push特性及开启方式详解](https://www.upyun.com/tech/article/294/1.html?utm_source=zhihu&utm_medium=referral&utm_campaign=26559480&utm_term=http2)
+4. [文本协议与二进制协议](http://aronyao.cn/2018/08/07/text-and-binary-protocol/)
+5. [6分钟了解HTTP发展史](https://mp.weixin.qq.com/s/UMoaXVTi7grsTiyR8bngww)
