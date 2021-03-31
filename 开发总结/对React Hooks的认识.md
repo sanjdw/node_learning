@@ -24,3 +24,4 @@ Class组件的思维方式是维护生命周期，而hook则是处理依赖关�
 
 ### 参考
 1. [React Hooks 入门教程](https://www.ruanyifeng.com/blog/2019/09/react-hooks.html)
+2. [](https://gamehu.github.io/2020/02/25/React%20Hooks(%E4%B8%80)/)

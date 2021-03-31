@@ -36,7 +36,7 @@ Print-Wrapper露出后，点击【确认打票】：
 
 3. 连接websocket，失败则重试
     ```js
-    await  this.printSocket.connect()
+    await this.printSocket.connect()
     ```
     connect【连接】的逻辑放在PrintSocket内部，socket为打印、扫码枪扫描（加打印）、工作证加密等共用
     三次重试后仍失败则reject Promsie阻止后续，并上报连接失败
